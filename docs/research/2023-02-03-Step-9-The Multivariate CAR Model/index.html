@@ -242,7 +242,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 p(\boldsymbol\phi_i|\boldsymbol\phi_{j\ne i}, \Gamma_i) = N\left(\sum_{i \sim j} \mathbf{B}_{ij}\boldsymbol\phi_j, \Gamma_i\right), \quad i,j = 1,\dots,n.
 \]</span></p>
 <p>where <span class="math inline">\(\Gamma_i\)</span> and <span class="math inline">\(\mathbf{B}_{ij}\)</span> are <span class="math inline">\(p \times p\)</span> matrices.</p>
-<p>Recall the role of <span class="math inline">\(\Gamma_i\)</span> and <span class="math inline">\(\mathbf{B}_{ij}\)</span> are analogous to the roles of <span class="math inline">\(\tau_i^2\)</span> and <span class="math inline">\(b_{ij}\)</span>, respectively, in the univariate CAR models. The matrix <span class="math inline">\(\Gamma_i\)</span> is the with-in unit covariance matrix which describes the dependence of the variables in the vector <span class="math inline">\(\boldsymbol\phi_i\)</span>. The matrix <span class="math inline">\(\mathbf{B}_{ij}\)</span> is the matrix that allows us to weight the neighboring observations of location <span class="math inline">\(i\)</span> that are conditioned on in the full conditional. A convenient special case is to set <span class="math inline">\(\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p\)</span> where <span class="math inline">\(b_{ij} = w_{ij}/w_{i+}\)</span>. Recall, for a neighborhood matrix <span class="math inline">\(\mathbf{W} = \{w_ij\}\)</span>, <span class="math display">\[
+<p>Recall the role of <span class="math inline">\(\Gamma_i\)</span> and <span class="math inline">\(\mathbf{B}_{ij}\)</span> are analogous to the roles of <span class="math inline">\(\tau_i^2\)</span> and <span class="math inline">\(b_{ij}\)</span>, respectively, in the univariate CAR models. The matrix <span class="math inline">\(\Gamma_i\)</span> is the within unit covariance matrix which describes the dependence of the variables in the vector <span class="math inline">\(\boldsymbol\phi_i\)</span>. The matrix <span class="math inline">\(\mathbf{B}_{ij}\)</span> is the matrix that allows us to weight the neighboring observations of location <span class="math inline">\(i\)</span> that are conditioned on in the full conditional. A convenient special case is to set <span class="math inline">\(\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p\)</span> where <span class="math inline">\(b_{ij} = w_{ij}/w_{i+}\)</span>. Recall, for a neighborhood matrix <span class="math inline">\(\mathbf{W} = \{w_ij\}\)</span>, <span class="math display">\[
 w_{ij} =
 \begin{cases}
 1 \quad \text{if} \quad j \in \mathcal{N}(i),\\
@@ -250,8 +250,111 @@ w_{ij} =
 \end{cases}
 \]</span> and <span class="math inline">\(w_{i+} = \sum_{j=1}^pw_{ij}\)</span>, i.e.&nbsp;the number of neighbors of location <span class="math inline">\(i\)</span>, <span class="math inline">\(|\mathcal{N}(i)|\)</span>.</p>
 <p>Specifying the conditional distributions in this way implies the unique joint distribution, via Brook’s Lemma, to be <span class="math display">\[
-p(\boldsymbol\phi \;| \;\{\Gamma_i\}) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\Gamma^{-1}(\mathbf{I} - \tilde{\mathbf{B}})\phi\right\}
+p(\boldsymbol\phi \;| \;\{\Gamma_i\}) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}})\phi\right\}
 \]</span> where <span class="math inline">\(\Gamma\)</span> is block-diagonal with block <span class="math inline">\(\Gamma_i\)</span>, and <span class="math inline">\(\tilde{\mathbf{B}}\)</span> is <span class="math inline">\(np \times np\)</span> with the <span class="math inline">\((i,j)\)</span>-th block <span class="math inline">\(\mathbf{B}_{ij}\)</span>.</p>
+<p>Of course, a requirement for the multivariate normal distribution is symmetry of <span class="math inline">\(\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}})\)</span>. Setting <span class="math inline">\(\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p\)</span> where <span class="math inline">\(b_{ij} = w_{ij}/w_{i+}\)</span> leads to the symmetry condition <span class="math inline">\(b_{ij}\Gamma_j = b_{ji}\Gamma_i\)</span>. Further, a common simplifying assumption would be consider the within unit covariance equal. That is, set <span class="math inline">\(\Gamma_i = w_{i+}^{-1}\Sigma\)</span> where <span class="math inline">\(\Sigma\)</span> is the <span class="math inline">\(p \times p\)</span> within unit covariance matrix for <span class="math inline">\(\boldsymbol\phi_i\)</span> and common across spatial locations <span class="math inline">\(i=1,\dots,n\)</span>.</p>
+<p>Under these assumptions we can write <span class="math inline">\(\Gamma = (\mathbf{D}^{-1}\otimes\Sigma)\)</span> where <span class="math inline">\(\mathbf{D}\)</span> is an <span class="math inline">\(n \times n\)</span> diagonal matrix with <span class="math inline">\(\mathbf{D}_{ii} = w_{i+}\)</span>. And also <span class="math inline">\(\tilde{\mathbf{B}} = \mathbf{B}\otimes\mathbf{I}_n\)</span> where <span class="math inline">\(\mathbf{B}_{ij} = w_{ij}/w_{i+}\)</span>, not the block matrix specification given earlier.</p>
+<p>With this in mind, we can write the precision of the above joint distribution in an alternate form, $$ <span class="math display">\[\begin{align*}
+
+\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}}) &amp;= (\mathbf{D}^{-1} \otimes \Sigma)^{-1}(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p)\\
+&amp;= (\mathbf{D} \otimes \Sigma^{-1})(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p) &amp; \text{Kronecker Prod - Inverse}\\
+&amp;= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D} \otimes \Sigma^{-1})( \mathbf{B}\otimes \mathbf{I}_n) &amp; \text{(Matrix Mult - distributive wrt matrix addition)}\\
+&amp;= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D}\mathbf{B}) \otimes (\Sigma^{-1}\mathbf{I}_n) &amp; \text{(Kronecker Prod - mixed-product property)}\\
+&amp;= (\mathbf{D} - \mathbf{D}\mathbf{B})\otimes\Sigma^{-1} &amp; \text{(Kronecker Prod - distributive wrt matrix addition)}\\
+&amp;= (\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1} &amp; \text{need to verify?}
+\end{align*}\]</span> $$</p>
+<p>Let’s turn to a simple example. Consider a spatial domain partitioned into <span class="math inline">\(n=4\)</span> areal units and a multivariate response with <span class="math inline">\(p=2\)</span>.</p>
+<p>First, the spatial domain.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y), <span class="at">linewidth =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">fill=</span><span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(x, y, <span class="at">label=</span>label), <span class="at">size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Next, the adjacency matrix <span class="math inline">\(\mathbf{W}\)</span>.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">1</span>))</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>W</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]    0    1    1    0
+[2,]    1    0    0    1
+[3,]    1    0    0    1
+[4,]    0    1    1    0</code></pre>
+</div>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> W<span class="sc">/</span><span class="fu">rowSums</span>(W)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>B</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]  0.0  0.5  0.5  0.0
+[2,]  0.5  0.0  0.0  0.5
+[3,]  0.5  0.0  0.0  0.5
+[4,]  0.0  0.5  0.5  0.0</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Btilde <span class="ot">&lt;-</span> <span class="fu">kronecker</span>(B, <span class="fu">diag</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">solve</span>(D)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4]
+[1,]  0.5  0.0  0.0  0.0
+[2,]  0.0  0.5  0.0  0.0
+[3,]  0.0  0.0  0.5  0.0
+[4,]  0.0  0.0  0.0  0.5</code></pre>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>capSigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="fl">0.7</span>,</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                     <span class="fl">0.7</span>,<span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol=</span>p)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>capLambda <span class="ot">&lt;-</span> <span class="fu">kronecker</span>(<span class="fu">solve</span>(D), capSigma)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>A1 <span class="ot">&lt;-</span> <span class="fu">solve</span>(capLambda)<span class="sc">%*%</span>(<span class="fu">diag</span>(p<span class="sc">*</span>n) <span class="sc">-</span> Btilde)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>A2 <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D <span class="sc">-</span> W), <span class="fu">solve</span>(capSigma))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(A1 <span class="sc">==</span> A2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
 
 
 </section>
