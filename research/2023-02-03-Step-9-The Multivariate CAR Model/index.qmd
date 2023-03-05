@@ -76,6 +76,8 @@ $$
 
 Let's turn to a simple example. Consider a spatial domain partitioned into $n=4$ areal units and a multivariate response with $p=2$.
 
+This is a test push from new clone.
+
 First, the spatial domain.
 
 ```{r}
