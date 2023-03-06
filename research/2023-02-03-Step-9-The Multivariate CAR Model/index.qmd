@@ -157,6 +157,9 @@ spat_domain$phi2 <- spat_phi[,2]
 Since we specified this example with both strong spatial and strong within-location correlation, plotting the data for $\phi_{i1}$ and $\phi_{i2}$, we should expect to observe the same spatial correlation patterns for the first and second elements of $\boldsymbol\phi_i$. 
 
 ```{r}
+#| label: fig-lattice-example
+#| fig-align: "center"
+
 ggplot(spat_domain) +
   geom_tile(aes(x, y, fill=phi1)) +
   scale_y_reverse() +
@@ -173,83 +176,3 @@ ggplot(spat_domain) +
 ```
 
 Good news! It looks like we were successful in simulating from the MCAR model! For the next post, we will examine the case where $\rho$ is not shared among elements of $\boldsymbol\phi_i$
-
-Even so, a model which assumes a shared $\rho$ parameter across elements of $\boldsymbol\phi_i$ may be too restrictive by assuming that the "strength of spatial dependence" is the same for each variable in the multivariate response. Further models have been developed that allow for different $\rho_k$ for variables $k=1,\dots,p$. 
-
-This approach requires a re-arrangement of $\boldsymbol\phi$. Where previously $\boldsymbol\phi$ stacked $n$ vectors of length $p$ on top of each other, now consider $\boldsymbol\phi'$ to stack $p$ vectors of length $n$. That is we collect the $n$ instances of the $p$-th element of $\boldsymbol\phi_i$, $i=1,\dots,n$. This operation is essentially transforming the vectorization of the $n \times p$ matrix representation of $\boldsymbol\phi$ into the vectorization of its transpose and is accomplished via a *commutation* matrix.
-
-Some things to think about. Viewing $\boldsymbol\phi$ as a vectoratization of a matrix $\Phi$. Then we can commute $\boldsymbol\phi = \text{vec}(\Phi)$ by applying the commutation matrix $\mathbf{K}^{(p,n)}$ for the result $\mathbf{K}^{(p,n)}\text{vec}(\Phi) = \text{vec}(\Phi^T)$. Given that
-
-$$
-\text{vec}(\Phi) = \boldsymbol\phi \sim N\left(\boldsymbol 0, (\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \Lambda\right)
-$$
-
-then the result of left multiplying by the commutation matrix yields the distribution,
-$$
-\begin{align*}
-\mathbf{K}^{(p,n)}\text{vec}(\Phi) = \text{vec}(\Phi^T) &\sim N\left(\boldsymbol 0, \mathbf{K}^{(p,n)}\left[(\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \Lambda\right]\left(\mathbf{K}^{(p,n)}\right)^T\right)\\
-&\sim N\left(\boldsymbol 0, \mathbf{K}^{(p,n)}\left[(\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \Lambda\right]\mathbf{K}^{(n,p)}\right)\\
-&\sim N\left(\boldsymbol 0, \left[\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1}\right]\right) 
-\end{align*}
-$$
-
-The effect is that the Kronecker product is commuted. When the resulting Kronecker product is expanded, the elements of the common non-spatial covariance matrix $\Lambda$ are multiplied with $(\mathbf{D}-\rho\mathbf{W})$ individually as scalars. It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements. That is, different strengths of spatial correlation for each variate in the multivariate response vector.
-
-This allows us to "break up" elements of $\Sigma$ and associate them with difference values of $\rho_k$.
-
-
-
-Let's turn to a simple example. Consider a spatial domain partitioned into $n=4$ areal units and a multivariate response with $p=2$.
-
-
-First, the spatial domain.
-
-```{r}
-n <- 4
-spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
-spat_domain$label <- 1:n
-
-```
-
-```{r}
-ggplot(spat_domain) +
-  geom_tile(aes(x, y), linewidth = 2, color = "grey50", fill="white") +
-  geom_text(aes(x, y, label=label), size = 15) +
-  coord_fixed() + 
-  theme_void()
-```
-
-Next, the adjacency matrix $\mathbf{W}$.
-
-```{r}
-spat_domain_g <- make_lattice(c(sqrt(n),sqrt(n)), mutual = TRUE)
-W <- as.matrix(as_adjacency_matrix(spat_domain_g, sparse=1))
-W
-```
-
-```{r}
-B <- W/rowSums(W)
-B
-Btilde <- kronecker(B, diag(2))
-```
-
-```{r}
-D <- diag(rowSums(W))
-
-solve(D)
-p <- 2
-capSigma <- matrix(c(1,0.7,
-                     0.7,1), byrow = T, ncol=p)
-
-capLambda <- kronecker(solve(D), capSigma)
-```
-
-```{r}
-A1 <- solve(capLambda)%*%(diag(p*n) - Btilde)
-A2 <- kronecker((D - W), solve(capSigma))
-
-all(A1 == A2)
-```
-
-
-
