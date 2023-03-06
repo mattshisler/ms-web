@@ -3,6 +3,6 @@ title: "Research"
 listing: 
   contents: research
   type: table 
-  sort: "date desc"
+  sort: "title desc"
   categories: true
 ---
