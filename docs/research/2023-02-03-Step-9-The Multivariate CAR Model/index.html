@@ -9,7 +9,7 @@
 <meta name="author" content="Matthew Shisler">
 <meta name="description" content="We explore extensions of the univariate CAR model described in Hierarchical Modeling and Analysis for Spatial data.">
 
-<title>MS - Step 9 - The multivariate CAR model</title>
+<title>MS - Step 9 - The multivariate CAR model with common strength of spatial correlation</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -185,7 +185,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Step 9 - The multivariate CAR model</h1>
+<h1 class="title">Step 9 - The multivariate CAR model with common strength of spatial correlation</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Bayesian</div>
     <div class="quarto-category">MCMC</div>
@@ -226,7 +226,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 </header>
 
-<div class="cell">
+<div class="cell" data-hash="index_cache/html/load-packages_b02ac35d850dd033b8940ef536754e54">
 <details>
 <summary>Code: Load the packages</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
@@ -237,7 +237,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="intro" class="level2">
 <h2 class="anchored" data-anchor-id="intro">Intro</h2>
 <p>Here we will extend the univariate CAR model to the multivariate case.</p>
-<p>Consider a spatial domain <span class="math inline">\(\mathcal{D} \in \mathbb{R}^2\)</span> that is partitioned into <span class="math inline">\(n\)</span> areal units. In the univariate case we specified a spatial random effect <span class="math inline">\(\boldsymbol\phi = (\phi_1,\dots,\phi_n)\)</span> meant to capture the spatial dependence. In the multivariate case, say of dimension <span class="math inline">\(p\)</span>, we specify a <span class="math inline">\(p \times 1\)</span> spatial random vector <span class="math inline">\(\boldsymbol\phi_i = (\phi_{i1}, \phi_{i2},\dots, \phi_{ip})\)</span> at each location <span class="math inline">\(i\)</span>, <span class="math inline">\(i = 1,\dots,n\)</span>. Arrange these vectors as rows in a matrix <span class="math inline">\(\boldsymbol\Phi\)</span> <span class="math display">\[
+<p>Consider a spatial domain <span class="math inline">\(\mathcal{D} \in \mathbb{R}^2\)</span> that is partitioned into <span class="math inline">\(n\)</span> areal units. The structure of the spatial domain is captured in the neighborhood matrix. Recall our definition of a neighborhood matrix <span class="math inline">\(\mathbf{W} = \{w_{ij}\}\)</span>, where <span class="math display">\[
+w_{ij} =
+\begin{cases}
+1 \quad \text{if} \quad j \in \mathcal{N}(i),\\
+0 \quad \text{otherwise}.
+\end{cases}
+\]</span> and by convention <span class="math inline">\(w_{ii}=0\)</span>. Further, define <span class="math inline">\(w_{i+} = \sum_{j=1}^pw_{ij}\)</span>, i.e.&nbsp;the number of neighbors of location <span class="math inline">\(i\)</span>, <span class="math inline">\(|\mathcal{N}(i)|\)</span>.</p>
+<p>In the univariate case we specified a spatial random effect <span class="math inline">\(\boldsymbol\phi = (\phi_1,\dots,\phi_n)\)</span> meant to characterize spatial dependence. In the multivariate case, say of dimension <span class="math inline">\(p\)</span>, we specify a <span class="math inline">\(p \times 1\)</span> spatial random vector <span class="math inline">\(\boldsymbol\phi_i = (\phi_{i1}, \phi_{i2},\dots, \phi_{ip})\)</span> at each location <span class="math inline">\(i\)</span>, <span class="math inline">\(i = 1,\dots,n\)</span>. Arrange these vectors as rows in a matrix <span class="math inline">\(\boldsymbol\Phi\)</span> <span class="math display">\[
 \boldsymbol\Phi =
 \begin{pmatrix}
 \boldsymbol\phi_{1}\\
@@ -251,26 +258,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \phi_{21} &amp; \phi_{22} &amp; \dots &amp; \phi_{2p}\\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots\\
 \phi_{n1} &amp; \phi_{n2} &amp; \dots &amp; \phi_{np}\\
-\end{pmatrix}
+\end{pmatrix}.
 \]</span></p>
-<p>Define <span class="math inline">\(\boldsymbol\phi' = \text{vec}(\boldsymbol\Phi^T)\)</span>, i.e.&nbsp;stacked columns of <span class="math inline">\(\boldsymbol\Phi^T\)</span>. Initially, we will concern ourselves with the joint distribution <span class="math inline">\(\boldsymbol\phi'\)</span> by specifying conditional distributions of <span class="math inline">\(\boldsymbol\phi_i\)</span>. Under the Markov Random Field (MRF) assumption, the conditional distributions of <span class="math inline">\(\boldsymbol\phi_i\)</span> can be specified as <span class="math display">\[
+<p>Define <span class="math inline">\(\boldsymbol\phi' = \text{vec}(\boldsymbol\Phi^T)\)</span>, i.e.&nbsp;stacked columns of <span class="math inline">\(\boldsymbol\Phi^T\)</span>. Here we will use <span class="math inline">\(\boldsymbol\phi' = \text{vec}(\boldsymbol\Phi^T)\)</span> to characterize spatial dependence.</p>
+<p>We concern ourselves with the joint distribution <span class="math inline">\(\boldsymbol\phi'\)</span> by specifying conditional distributions of <span class="math inline">\(\boldsymbol\phi_i\)</span>. Under the Markov Random Field (MRF) assumption, the conditional distributions of <span class="math inline">\(\boldsymbol\phi_i\)</span> can be specified as <span class="math display">\[
 p(\boldsymbol\phi_i|\boldsymbol\phi_{j\ne i}, \boldsymbol\Gamma_i) = N\left(\sum_{i \sim j} \mathbf{B}_{ij}\boldsymbol\phi_j, \boldsymbol\Gamma_i\right), \quad i,j = 1,\dots,n.
 \]</span></p>
-<p>where <span class="math inline">\(\Gamma_i\)</span> and <span class="math inline">\(\mathbf{B}_{ij}\)</span> are <span class="math inline">\(p \times p\)</span> matrices. Here we use <span class="math inline">\(i \tilde j\)</span> to say that <span class="math inline">\(j\)</span> is in the neighborhood of <span class="math inline">\(i\)</span>, i.e.&nbsp;<span class="math inline">\(j \in \mathcal{N}(i)\)</span>.</p>
-<p>The role of <span class="math inline">\(\boldsymbol\Gamma_i\)</span> and <span class="math inline">\(\mathbf{B}_{ij}\)</span> are analogous to the roles of <span class="math inline">\(\tau_i^2\)</span> and <span class="math inline">\(b_{ij}\)</span>, respectively, in the univariate CAR models. The matrix <span class="math inline">\(\boldsymbol\Gamma_i\)</span> is the within-location covariance matrix which describes the dependence of the variables in the vector <span class="math inline">\(\boldsymbol\phi_i\)</span>. The matrix <span class="math inline">\(\mathbf{B}_{ij}\)</span> is a matrix that allows us to weight observations from locations in the neighborhood of location <span class="math inline">\(i\)</span>. A convenient special case is to set <span class="math inline">\(\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p\)</span> where <span class="math inline">\(b_{ij} = w_{ij}/w_{i+}\)</span>, i.e.&nbsp;the neighboring oversations are equally weighted.</p>
-<p>Recall, for a neighborhood matrix <span class="math inline">\(\mathbf{W} = \{w_{ij}\}\)</span>, where <span class="math display">\[
-w_{ij} =
-\begin{cases}
-1 \quad \text{if} \quad j \in \mathcal{N}(i),\\
-0 \quad \text{otherwise}.
-\end{cases}
-\]</span> and <span class="math inline">\(w_{i+} = \sum_{j=1}^pw_{ij}\)</span>, i.e.&nbsp;the number of neighbors of location <span class="math inline">\(i\)</span>, <span class="math inline">\(|\mathcal{N}(i)|\)</span>.</p>
+<p>where <span class="math inline">\(\boldsymbol\Gamma_i\)</span> and <span class="math inline">\(\mathbf{B}_{ij}\)</span> are <span class="math inline">\(p \times p\)</span> matrices. Here we use <span class="math inline">\(i \sim j\)</span> to say that <span class="math inline">\(j\)</span> is in the neighborhood of <span class="math inline">\(i\)</span>, i.e.&nbsp;<span class="math inline">\(j \in \mathcal{N}(i)\)</span>.</p>
+<p>The role of <span class="math inline">\(\boldsymbol\Gamma_i\)</span> and <span class="math inline">\(\mathbf{B}_{ij}\)</span> are analogous to the roles of <span class="math inline">\(\tau_i^2\)</span> and <span class="math inline">\(b_{ij}\)</span>, respectively, in the univariate CAR models. The matrix <span class="math inline">\(\boldsymbol\Gamma_i\)</span> is the within-location covariance matrix which describes the dependence of the variables in the vector <span class="math inline">\(\boldsymbol\phi_i\)</span>. The matrix <span class="math inline">\(\mathbf{B}_{ij}\)</span> is a matrix that allows us to weight observations from locations in the neighborhood of location <span class="math inline">\(i\)</span>. A convenient special case is to set <span class="math inline">\(\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p\)</span> where <span class="math inline">\(b_{ij} = w_{ij}/w_{i+}\)</span>, i.e.&nbsp;the neighboring observations are equally weighted.</p>
 <p>Specifying the conditional distributions in this way implies the unique joint distribution, via Brook’s Lemma, to be <span class="math display">\[
 p(\boldsymbol\phi' \;| \;\{\boldsymbol\Gamma_i\}) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\boldsymbol\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}})\phi\right\}
 \]</span> where <span class="math inline">\(\boldsymbol\Gamma\)</span> is block-diagonal with block <span class="math inline">\(\boldsymbol\Gamma_i\)</span>, and <span class="math inline">\(\tilde{\mathbf{B}}\)</span> is <span class="math inline">\(np \times np\)</span> with the <span class="math inline">\((i,j)\)</span>-th block <span class="math inline">\(\mathbf{B}_{ij}\)</span>.</p>
-<p>Of course, the conditions for a proper multivariate normal distribution is symmetry and positive definiteness of <span class="math inline">\(\boldsymbol\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}})\)</span>.</p>
+<p>Of course, the conditions for a proper multivariate normal distribution are symmetry and positive definiteness of <span class="math inline">\(\boldsymbol\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}})\)</span>.</p>
 <p>Setting <span class="math inline">\(\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p\)</span> where <span class="math inline">\(b_{ij} = w_{ij}/w_{i+}\)</span> leads to the symmetry condition <span class="math inline">\(b_{ij}\boldsymbol\Gamma_j = b_{ji}\boldsymbol\Gamma_i\)</span>.</p>
-<p>Further, a common simplifying assumption would be consider the within unit covariance equal. That is, set <span class="math inline">\(\boldsymbol\Gamma_i = w_{i+}^{-1}\boldsymbol\Lambda\)</span> where <span class="math inline">\(\boldsymbol\Lambda\)</span> is the <span class="math inline">\(p \times p\)</span> within-location covariance matrix for <span class="math inline">\(\boldsymbol\phi_i\)</span> and common across spatial locations <span class="math inline">\(i=1,\dots,n\)</span>.</p>
+<p>Further, a common simplifying assumption would be to consider equal within-location covariance. That is, set <span class="math inline">\(\boldsymbol\Gamma_i = w_{i+}^{-1}\boldsymbol\Lambda\)</span> where <span class="math inline">\(\boldsymbol\Lambda\)</span> is the <span class="math inline">\(p \times p\)</span> within-location covariance matrix for <span class="math inline">\(\boldsymbol\phi_i\)</span> common across spatial locations <span class="math inline">\(i=1,\dots,n\)</span>.</p>
 <p>Under these assumptions we can write <span class="math inline">\(\boldsymbol\Gamma = (\mathbf{D}^{-1}\otimes\boldsymbol\Lambda)\)</span> where <span class="math inline">\(\mathbf{D}\)</span> is an <span class="math inline">\(n \times n\)</span> diagonal matrix with <span class="math inline">\(\mathbf{D}_{ii} = w_{i+}\)</span>. And also <span class="math inline">\(\tilde{\mathbf{B}} = \mathbf{B}\otimes\mathbf{I}_p\)</span> where <span class="math inline">\(\mathbf{B}\)</span> is a <span class="math inline">\(n \times n\)</span> matrix and elements of <span class="math inline">\(\mathbf{B}\)</span> are <span class="math inline">\(\mathbf{B} = \{b_{ij}\} = \{w_{ij}/w_{i+}\}\)</span>, not to be confused with the block matrix specification <span class="math inline">\(\mathbf{B}_{ij}\)</span> given previously.</p>
 <p>With this in mind, we can write the precision of the above joint distribution in an alternate form,</p>
 <p><span class="math display">\[\begin{align*}
@@ -286,15 +287,76 @@ p(\boldsymbol\phi' \;| \;\{\boldsymbol\Gamma_i\}) \propto \exp\left\{-\frac{1}{2
 <p>Now there is no need to construct a large block-diagonal <span class="math inline">\(\boldsymbol\Gamma\)</span> matrix. Also, the neighborhood matrix <span class="math inline">\(\mathbf{W}\)</span> and <span class="math inline">\(\mathbf{D}\)</span>, the diagonal matrix of its row sums, are fixed and known quantities easily computed outside of any MCMC sampling loop. The joint distribution is then</p>
 <p><span class="math display">\[
 p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \mathbf{W})\otimes \boldsymbol\Lambda^{-1}\right)\phi\right\}
-\]</span></p>
-<p>Defining <span class="math inline">\(\Sigma^{-1} = (\mathbf{D} - \mathbf{W}) \otimes \boldsymbol\Lambda^{-1}\)</span>, the joint distribution of <span class="math inline">\(\boldsymbol\phi'\)</span> is <span class="math display">\[
-\boldsymbol\phi' \sim N(\boldsymbol 0, \boldsymbol\Sigma)
+\]</span> or <span class="math display">\[
+\boldsymbol\phi'|\boldsymbol\Lambda \sim N\left(\boldsymbol 0, (\mathbf{D} - \mathbf{W})^{-1} \otimes \boldsymbol\Lambda\right).
 \]</span></p>
 <p>However, we again encounter the issue that <span class="math inline">\((\mathbf{D} - \mathbf{W}) \otimes \boldsymbol\Lambda^{-1}\)</span> is singular, since <span class="math inline">\((\mathbf{D} - \mathbf{W})\)</span> is singular. This motivates the introduction of a scalar “spatial strength” parameter, <span class="math inline">\(\rho\)</span>, also analogous to the univariate case. There are in fact more general conditions for recovering positive definiteness, but these are not explored here. More details can be found in. . .</p>
 <p>Introducing <span class="math inline">\(\rho\)</span> results in a proper joint distribution with form</p>
 <p><span class="math display">\[
 p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \rho\mathbf{W})\otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi\right\}
-\]</span> provided that $||&lt;1.</p>
+\]</span> provided that <span class="math inline">\(|\rho|&lt;1\)</span>.</p>
+<p>Let’s simulate a simple scenario. Let the spatial domain be paritioned into a <span class="math inline">\(25 \times 25\)</span> regular lattice with <span class="math inline">\(n = 625\)</span> spatial locations. The regular lattice partition will induce a neighborhood matrix <span class="math inline">\(\mathbf{W}\)</span> and diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> for the row sums of <span class="math inline">\(\mathbf{W}\)</span>.</p>
+<p>Let <span class="math inline">\(p = 2\)</span> so that we have a <span class="math inline">\(p \times p\)</span> vector <span class="math inline">\(\boldsymbol\phi_i\)</span> at each location <span class="math inline">\(i = 1,\dots,n\)</span>. Next, specify the common within-location covariance matrix <span class="math display">\[
+\boldsymbol\Lambda =
+\begin{pmatrix}
+1 &amp; 0.9\\
+0.9 &amp; 1
+\end{pmatrix}
+\]</span> This way <span class="math inline">\(\text{Var}(\phi_{i1}) = 1\)</span>, <span class="math inline">\(\text{Var}(\phi_{i2}) = 1\)</span>, and <span class="math inline">\(\text{Corr}(\phi_{i1}, \phi_{i2}) = 0.9\)</span>. Lastly, set <span class="math inline">\(\rho = 0.99\)</span> to induce strong spatial correlation. Here is a naive way to sample from the joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_4ff217efe4a8a4e2628b843803833e83">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">0</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.9</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.9</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>inv_Sigma <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho<span class="sc">*</span>W), <span class="fu">solve</span>(Lambda))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># spat_phi &lt;- matrix(backsolve(chol(inv_Sigma), matrix(rnorm(n*p), nrow = n*p)), byrow = T, ncol = p)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>spat_phi <span class="ot">&lt;-</span> <span class="fu">matrix</span>(Rfast<span class="sc">::</span><span class="fu">rmvnorm</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">0</span>,n<span class="sc">*</span>p), <span class="fu">solve</span>(inv_Sigma)), <span class="at">byrow =</span> T, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi1 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">1</span>]</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi2 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Since we specified this example with both strong spatial and strong within-location correlation, plotting the data for <span class="math inline">\(\phi_{i1}\)</span> and <span class="math inline">\(\phi_{i2}\)</span>, we should expect to observe the same spatial correlation patterns for the first and second elements of <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-3_41b78fb6af1311f7ef18f4b98f0aa465">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>phi1)) <span class="sc">+</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.3</span>,<span class="fl">3.3</span>)) <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>phi2)) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.3</span>,<span class="fl">3.3</span>)) <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-3-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Good news! It looks like we were successful in simulating from the MCAR model! For the next post, we will examine the case where <span class="math inline">\(\rho\)</span> is not shared among elements of <span class="math inline">\(\boldsymbol\phi_i\)</span></p>
 <p>Even so, a model which assumes a shared <span class="math inline">\(\rho\)</span> parameter across elements of <span class="math inline">\(\boldsymbol\phi_i\)</span> may be too restrictive by assuming that the “strength of spatial dependence” is the same for each variable in the multivariate response. Further models have been developed that allow for different <span class="math inline">\(\rho_k\)</span> for variables <span class="math inline">\(k=1,\dots,p\)</span>.</p>
 <p>This approach requires a re-arrangement of <span class="math inline">\(\boldsymbol\phi\)</span>. Where previously <span class="math inline">\(\boldsymbol\phi\)</span> stacked <span class="math inline">\(n\)</span> vectors of length <span class="math inline">\(p\)</span> on top of each other, now consider <span class="math inline">\(\boldsymbol\phi'\)</span> to stack <span class="math inline">\(p\)</span> vectors of length <span class="math inline">\(n\)</span>. That is we collect the <span class="math inline">\(n\)</span> instances of the <span class="math inline">\(p\)</span>-th element of <span class="math inline">\(\boldsymbol\phi_i\)</span>, <span class="math inline">\(i=1,\dots,n\)</span>. This operation is essentially transforming the vectorization of the <span class="math inline">\(n \times p\)</span> matrix representation of <span class="math inline">\(\boldsymbol\phi\)</span> into the vectorization of its transpose and is accomplished via a <em>commutation</em> matrix.</p>
 <p>Some things to think about. Viewing <span class="math inline">\(\boldsymbol\phi\)</span> as a vectoratization of a matrix <span class="math inline">\(\Phi\)</span>. Then we can commute <span class="math inline">\(\boldsymbol\phi = \text{vec}(\Phi)\)</span> by applying the commutation matrix <span class="math inline">\(\mathbf{K}^{(p,n)}\)</span> for the result <span class="math inline">\(\mathbf{K}^{(p,n)}\text{vec}(\Phi) = \text{vec}(\Phi^T)\)</span>. Given that</p>
@@ -312,34 +374,34 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 <p>This allows us to “break up” elements of <span class="math inline">\(\Sigma\)</span> and associate them with difference values of <span class="math inline">\(\rho_k\)</span>.</p>
 <p>Let’s turn to a simple example. Consider a spatial domain partitioned into <span class="math inline">\(n=4\)</span> areal units and a multivariate response with <span class="math inline">\(p=2\)</span>.</p>
 <p>First, the spatial domain.</p>
-<div class="cell">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-4_31aa882f488ded0d92187c7f34fe220b">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-5_3118916beebf45c203e604821a5418cd">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y), <span class="at">linewidth =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">fill=</span><span class="st">"white"</span>) <span class="sc">+</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(x, y, <span class="at">label=</span>label), <span class="at">size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y), <span class="at">linewidth =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"grey50"</span>, <span class="at">fill=</span><span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(x, y, <span class="at">label=</span>label), <span class="at">size =</span> <span class="dv">15</span>) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>Next, the adjacency matrix <span class="math inline">\(\mathbf{W}\)</span>.</p>
-<div class="cell">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-6_72ebf1a8f2e6ad66116775a1cdc3d6ab">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">1</span>))</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>W</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">1</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>W</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3] [,4]
@@ -349,11 +411,11 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 [4,]    0    1    1    0</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-7_303768a6884c9710617549b6b14d1997">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> W<span class="sc">/</span><span class="fu">rowSums</span>(W)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>B</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>B <span class="ot">&lt;-</span> W<span class="sc">/</span><span class="fu">rowSums</span>(W)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>B</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3] [,4]
@@ -364,15 +426,15 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Btilde <span class="ot">&lt;-</span> <span class="fu">kronecker</span>(B, <span class="fu">diag</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Btilde <span class="ot">&lt;-</span> <span class="fu">kronecker</span>(B, <span class="fu">diag</span>(<span class="dv">2</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-8_641f3605e9ba47f357de1156b92a4d0d">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">solve</span>(D)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">solve</span>(D)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>     [,1] [,2] [,3] [,4]
@@ -383,20 +445,20 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>capSigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="fl">0.7</span>,</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>                     <span class="fl">0.7</span>,<span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol=</span>p)</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>capLambda <span class="ot">&lt;-</span> <span class="fu">kronecker</span>(<span class="fu">solve</span>(D), capSigma)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>capSigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="fl">0.7</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                     <span class="fl">0.7</span>,<span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol=</span>p)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>capLambda <span class="ot">&lt;-</span> <span class="fu">kronecker</span>(<span class="fu">solve</span>(D), capSigma)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-9_bf3acb5e5391840dbc80e289022cf7ae">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>A1 <span class="ot">&lt;-</span> <span class="fu">solve</span>(capLambda)<span class="sc">%*%</span>(<span class="fu">diag</span>(p<span class="sc">*</span>n) <span class="sc">-</span> Btilde)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>A2 <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D <span class="sc">-</span> W), <span class="fu">solve</span>(capSigma))</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(A1 <span class="sc">==</span> A2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>A1 <span class="ot">&lt;-</span> <span class="fu">solve</span>(capLambda)<span class="sc">%*%</span>(<span class="fu">diag</span>(p<span class="sc">*</span>n) <span class="sc">-</span> Btilde)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>A2 <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D <span class="sc">-</span> W), <span class="fu">solve</span>(capSigma))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">all</span>(A1 <span class="sc">==</span> A2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] TRUE</code></pre>
