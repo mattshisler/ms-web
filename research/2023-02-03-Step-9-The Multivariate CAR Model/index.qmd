@@ -72,28 +72,58 @@ With this in mind, we can write the precision of the above joint distribution in
 &= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D} \otimes \Sigma^{-1})( \mathbf{B}\otimes \mathbf{I}_p) & \text{(Matrix Mult - distributive wrt matrix addition)}\\
 &= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D}\mathbf{B}) \otimes (\Sigma^{-1}\mathbf{I}_p) & \text{(Kronecker Prod - mixed-product property)}\\
 &= (\mathbf{D} - \mathbf{D}\mathbf{B})\otimes\Sigma^{-1} & \text{(Kronecker Prod - distributive wrt matrix addition)}\\
-&= (\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1} & \text{need to verify?}
+&= (\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1}
 \end{align*}
 
-Now there is no need to construct a large block-diagonal $\Gamma$ matrix. Also, the neighborhood matrix $\mathbf{W}$ and the diagonal matrix of its row sums $\mathbf{D}$ are fixed and known quantities easily computed outside of any MCMC sampling loop. The joint distribution is
+where the last step follows from the fact that $\mathbf{B} = \mathbf{D}^{-1}\mathbf{W}$.
+
+Now there is no need to construct a large block-diagonal $\Gamma$ matrix. Also, the neighborhood matrix $\mathbf{W}$ and the diagonal matrix of its row sums $\mathbf{D}$ are fixed and known quantities easily computed outside of any MCMC sampling loop. The joint distribution is then
 
 $$
 p(\boldsymbol\phi \;| \Sigma) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \mathbf{W})\otimes \Sigma^{-1}\right)\phi\right\}
 $$
-However, we again encounter the issue that $(\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1}$ is singular, since $(\mathbf{D} - \mathbf{W})$ is singular. This motivates the introduction of another parameter, $\rho$ also analogous to the univariate case. There are in fact more general conditions for recovering positive definiteness, but these are not explored here. More details can be found in. . .
+However, we again encounter the issue that $(\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1}$ is singular, since $(\mathbf{D} - \mathbf{W})$ is singular. This motivates the introduction of a scalar parameter, $\rho$, also analogous to the univariate case. There are in fact more general conditions for recovering positive definiteness, but these are not explored here. More details can be found in. . .
 
-The result is a proper joint distribution with form
+Introducing $\rho$ results is a proper joint distribution with form
 
 $$
 p(\boldsymbol\phi \;| \Sigma) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \rho\mathbf{W})\otimes \Sigma^{-1}\right)\boldsymbol\phi\right\}
 $$
 Even so, a model which assumes a shared $\rho$ parameter across elements of $\boldsymbol\phi_i$ may be too restrictive by assuming that the "strength of spatial dependence" is the same for each element. Further models have been developed that allow for different $\rho_k$ for elements $k=1,\dots,p$. 
 
-This approach requires a re-arrangement of $\boldsymbol\phi$. Where previously $\boldsymbol\phi$ stacked $n$ vectors of length $p$ on top of each other, now consider $\boldsymbol\phi'$ to stack $p$ vectors of length $n$. That is we collect the $n$ instances of the $p$-th element of $\boldsymbol\phi_i$ $i=1,\dots,n$.  
+This approach requires a re-arrangement of $\boldsymbol\phi$. Where previously $\boldsymbol\phi$ stacked $n$ vectors of length $p$ on top of each other, now consider $\boldsymbol\phi'$ to stack $p$ vectors of length $n$. That is we collect the $n$ instances of the $p$-th element of $\boldsymbol\phi_i$, $i=1,\dots,n$. This operation is essentially transforming the vectorization of the $n \times p$ matrix representation of $\boldsymbol\phi$ into the vectorization of its transpose and is accomplished via a *commutation* matrix.
+
+$$
+\begin{pmatrix}
+\phi'_1\\
+\phi'_2\\
+\vdots\\
+\phi'_p
+\end{pmatrix}
+$$
 
 
 
-One approach, proposed by Gelfand and Vounatsou (2003), is to 
+One approach, proposed by Gelfand and Vounatsou (2003), is to. . .
+
+Some things to think about. Viewing $\boldsymbol\phi$ as a vectoratization of a matrix $\Phi$. Then we can commute $\boldsymbol\phi = \text{vec}(\Phi)$ by applying the commutation matrix $\mathbf{K}^{(p,n)}$ for the result $\mathbf{K}^{(p,n)}\text{vec}(\Phi) = \text{vec}(\Phi^T)$. Given that
+
+$$
+\text{vec}(\Phi) = \boldsymbol\phi \sim N\left(\boldsymbol 0, (\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \Lambda\right)
+$$
+
+then the result of left multiplying by the commutation matrix yields the distribution,
+$$
+\begin{align*}
+\mathbf{K}^{(p,n)}\text{vec}(\Phi) = \text{vec}(\Phi^T) &\sim N\left(\boldsymbol 0, \mathbf{K}^{(p,n)}\left[(\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \Lambda\right]\left(\mathbf{K}^{(p,n)}\right)^T\right)\\
+&\sim N\left(\boldsymbol 0, \mathbf{K}^{(p,n)}\left[(\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \Lambda\right]\mathbf{K}^{(n,p)}\right)\\
+&\sim N\left(\boldsymbol 0, \left[\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1}\right]\right) 
+\end{align*}
+$$
+
+The effect is that the Kronecker product is commuted. When the resulting Kronecker product is expanded, the elements of the common non-spatial covariance matrix $\Lambda$ are multiplied with $(\mathbf{D}-\rho\mathbf{W})$ individually as scalars. It is in this form that we can introduce different $\rhp_k$ for each of the $p$ elements. That is, different strengths of spatial correlation for each variate in the multivariate response vector.
+
+This allows us to "break up" elements of $\Sigma$ and associate them with difference values of $\rho_k$.
 
 
 
