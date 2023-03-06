@@ -28,7 +28,7 @@ library(viridis)
 
 ## Intro
 
-This is a test.
+This is another test.
 
 Here we will extend the univariate CAR model to the multivariate case. 
 
