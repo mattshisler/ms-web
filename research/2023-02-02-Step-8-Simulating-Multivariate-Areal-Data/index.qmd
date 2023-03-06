@@ -4,7 +4,8 @@ description: "We show how to simulate multivariate areal data with spatial depen
 author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
-    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+    affiliation-url: https://statistics.sciences.ncsu.edu/
+date: "2/10/2023"
 categories: [Bayesian, MCMC, Spatial, CAR] # self-defined categories
 draft: false 
 format:

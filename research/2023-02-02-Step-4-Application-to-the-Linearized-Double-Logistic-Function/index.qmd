@@ -4,7 +4,8 @@ description: "All previous steps have been building to the application of Gibbs 
 author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
-    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+    affiliation-url: https://statistics.sciences.ncsu.edu/
+date: "2/6/2023" 
 categories: [Bayesian, MCMC, Hierarchical Model] # self-defined categories
 draft: false 
 format:
