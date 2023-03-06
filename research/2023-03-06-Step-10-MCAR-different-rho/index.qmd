@@ -1,0 +1,100 @@
+---
+title: "Step 10 - The multivariate CAR model with DIFFERENT strengths of spatial correlation"
+description: "Extension of Step 9, now exploring different strengths of spatial correlation"
+author:
+  - name: Matthew Shisler
+    affiliation: North Carloina State University - Department of Statistics
+    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+categories: [Bayesian, MCMC, Spatial, CAR] # self-defined categories
+draft: false 
+format:
+  html: 
+    code-fold: true
+execute: 
+  cache: false
+  freeze: false
+---
+
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+
+library(tidyverse)
+library(igraph)
+library(viridis)
+```
+
+## Intro
+
+We explored the multivariate CAR model is the previous post finishing with a simulation of data from the proper version of the model where the scalar parameter controlling the strength of spatial correlation, $\rho$ was common across elements of the multivariate response vector. This assumption may not always be reasonable. Here we will summarize one approach to introducing $p-1$ additional scalar parameters for a total of $p$ "strength of spatial correlation" parameters, one for each element of the multivariate response.
+
+Consider a spatial domain $\mathcal{D} \in \mathbb{R}^2$ that is partitioned into $n$ areal units. The structure of the spatial domain is captured in the neighborhood matrix. Recall our definition of a neighborhood matrix $\mathbf{W} = \{w_{ij}\}$, where
+$$
+w_{ij} = 
+\begin{cases}
+1 \quad \text{if} \quad j \in \mathcal{N}(i),\\
+0 \quad \text{otherwise}.
+\end{cases}
+$$
+and by convention $w_{ii}=0$. Further, define $w_{i+} = \sum_{j=1}^pw_{ij}$, i.e. the number of neighbors of location $i$, $|\mathcal{N}(i)|$.
+
+In the univariate case we specified a spatial random effect $\boldsymbol\phi = (\phi_1,\dots,\phi_n)$ meant to characterize spatial dependence. In the multivariate case, say of dimension $p$, we specify a $p \times 1$ spatial random vector $\boldsymbol\phi_i = (\phi_{i1}, \phi_{i2},\dots, \phi_{ip})$ at each location $i$, $i = 1,\dots,n$. Arrange these vectors as rows in a matrix $\boldsymbol\Phi$
+$$
+\boldsymbol\Phi = 
+\begin{pmatrix}
+\boldsymbol\phi_{1}\\
+\boldsymbol\phi_2\\
+\vdots\\
+\boldsymbol\phi_n
+\end{pmatrix}
+=
+\begin{pmatrix}
+\phi_{11} & \phi_{12} & \dots & \phi_{1p}\\
+\phi_{21} & \phi_{22} & \dots & \phi_{2p}\\
+\vdots & \vdots & \ddots & \vdots\\
+\phi_{n1} & \phi_{n2} & \dots & \phi_{np}\\
+\end{pmatrix}.
+$$
+
+Define $\boldsymbol\phi' = \text{vec}(\boldsymbol\Phi^T)$, i.e. stacked columns of $\boldsymbol\Phi^T$. Here we will use $\boldsymbol\phi' = \text{vec}(\boldsymbol\Phi^T)$ to characterize spatial dependence. From the previous post, the proper joint distribution of $\boldsymbol\phi'$ was
+
+$$
+\boldsymbol\phi'|\boldsymbol\Lambda \sim N\left(\boldsymbol 0, (\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\right).
+$$
+where $\mathbf{W}$ is the neighborhood matrix and $\mathbf{D}$, the diagonal matrix of its row sums, $\rho$ is the scalar strength of spatial correlation parameter, and $\boldsymbol\Lambda$ is the within-location covariance.
+
+Our goal is to re-specify this model to allow for different $\rho_k$, $k = 1,\dots,p$. One approach requires a re-arrangement of $\boldsymbol\phi$. Where previously $\boldsymbol\phi$ stacked $n$ vectors of length $p$ on top of each other, now consider $\boldsymbol\phi'$ to stack $p$ vectors of length $n$. That is we collect the $n$ instances of the $p$-th element of $\boldsymbol\phi_i$, $i=1,\dots,n$. This operation is essentially transforming the vectorization of the $n \times p$ matrix $\boldsymbol\Phi$ from the vectorization of its transpose and is accomplished via a *commutation* matrix.
+
+We can commute $\boldsymbol\phi' = \text{vec}(\Phi^T)$ by applying the commutation matrix $\mathbf{K}^{(p,n)}$ for the result $\mathbf{K}^{(p,n)}\text{vec}(\Phi^T) = \text{vec}(\Phi)$. Given that
+
+$$
+\text{vec}(\boldsymbol\Phi^T) = \boldsymbol\phi' \sim N\left(\boldsymbol 0, (\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\right)
+$$
+
+then the result of left multiplying by the commutation matrix yields a multivariate distribution with mean $\boldsymbol 0$ and covariance matrix
+$$
+\begin{align*}
+\text{Cov}(\mathbf{K}^{(p,n)}\boldsymbol\phi')&= \mathbf{K}^{(p,n)}\text{Cov}(\boldsymbol\phi')\left(\mathbf{K}^{(p,n)}\right)^T\\
+&= \mathbf{K}^{(p,n)}\left[(\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\right]\left(\mathbf{K}^{(p,n)}\right)^T \\
+&=\mathbf{K}^{(p,n)}\left[(\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\right]\mathbf{K}^{(n,p)}\\
+&=\boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1}
+\end{align*}
+$$
+The effect is that the Kronecker product in the covariance is commuted. Then when resulting Kronecker product is expanded, the scalar elements of the common non-spatial covariance matrix $\Lambda$ are multiplied with blocks $(\mathbf{D}-\rho\mathbf{W})$. It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements. 
+
+This allows us to "break up" elements of $\Sigma$ and associate them with difference values of $\rho_k$.
+$$
+\boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1} =
+\begin{pmatrix}
+\lambda_{11} (\mathbf{D}-\rho\mathbf{W})^{-1} & \lambda_{12}(\mathbf{D}-\rho\mathbf{W})^{-1} & \dots & \lambda_{1p}(\mathbf{D}-\rho\mathbf{W})^{-1} \\
+\lambda_{21} (\mathbf{D}-\rho\mathbf{W})^{-1} & \lambda_{22}(\mathbf{D}-\rho\mathbf{W})^{-1} & \dots & \lambda_{2p}(\mathbf{D}-\rho\mathbf{W})^{-1} \\
+\vdots & \vdots & \ddots & \vdots\\
+\lambda_{p1} (\mathbf{D}-\rho\mathbf{W})^{-1} & \lambda_{p2}(\mathbf{D}-\rho\mathbf{W})^{-1} & \dots & \lambda_{pp}(\mathbf{D}-\rho\mathbf{W})^{-1} \\
+\end{pmatrix}
+$$
+
+where $\lambda_{ij}$ are the scalar elements of $\boldsymbol\Lambda$.
+
+
