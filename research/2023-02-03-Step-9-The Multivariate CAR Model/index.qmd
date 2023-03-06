@@ -32,17 +32,17 @@ This is another test. This is a third test.
 
 Here we will extend the univariate CAR model to the multivariate case. 
 
-Consider a spatial domain $\mathcal{D} \in \mathbb{R}^2$ that is partitioned into $n$ areal units. In the univariate case we specified a spatial random effect $\boldsymbol\phi = (\phi_1,\dots,\phi_n)$ meant to capture the spatial dependence. In the multivariate case we specify a spatial random vector $\boldsymbol\phi^T = (\boldsymbol\phi_1, \boldsymbol\phi_2,\dots,\boldsymbol\phi_3)$ where each $\boldsymbol\phi_i = (\phi_{i1}, \phi_{i2},\dots, \phi_{ip})$ is $p \times 1$.
+Consider a spatial domain $\mathcal{D} \in \mathbb{R}^2$ that is partitioned into $n$ areal units. In the univariate case we specified a spatial random effect $\boldsymbol\phi = (\phi_1,\dots,\phi_n)$ meant to capture the spatial dependence. In the multivariate case, say of dimension $p$, we specify a spatial random vector $\boldsymbol\phi^T = (\boldsymbol\phi_1, \boldsymbol\phi_2,\dots,\boldsymbol\phi_3)$ which is $np \times 1$ and each $\boldsymbol\phi_i = (\phi_{i1}, \phi_{i2},\dots, \phi_{ip})$ is $p \times 1$.
 
-The joint distribution of $\boldsymbol\phi_i$ is derived from the full conditional distributions.
-Under the Markov Random Field (MRF) assumption, the conditional distributions can be specified as
+The joint distribution of $\boldsymbol\phi$ is derived from the full conditional distributions of $\boldsymbol\phi_i$.
+Under the Markov Random Field (MRF) assumption, the conditional distributions of $\boldsymbol\phi_i$ can be specified as
 $$
 p(\boldsymbol\phi_i|\boldsymbol\phi_{j\ne i}, \Gamma_i) = N\left(\sum_{i \sim j} \mathbf{B}_{ij}\boldsymbol\phi_j, \Gamma_i\right), \quad i,j = 1,\dots,n.
 $$
 
-where $\Gamma_i$ and $\mathbf{B}_{ij}$ are $p \times p$ matrices.
+where $\Gamma_i$ and $\mathbf{B}_{ij}$ are $p \times p$ matrices. Here we $i \tilde j$ to say that $j$ is in the neighborhood of $i$, i.e. $j \in \mathcal{N}(i)$.
 
-Recall the role of $\Gamma_i$ and $\mathbf{B}_{ij}$ are analogous to the roles of $\tau_i^2$ and $b_{ij}$, respectively, in the univariate CAR models. The matrix $\Gamma_i$ is the within unit covariance matrix which describes the dependence of the variables in the vector $\boldsymbol\phi_i$. The matrix $\mathbf{B}_{ij}$ is the matrix that allows us to weight the neighboring observations of location $i$ that are conditioned on in the full conditional. A convenient special case is to set $\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p$ where $b_{ij} = w_{ij}/w_{i+}$. Recall, for a neighborhood matrix $\mathbf{W} = \{w_ij\}$,
+The role of $\Gamma_i$ and $\mathbf{B}_{ij}$ are analogous to the roles of $\tau_i^2$ and $b_{ij}$, respectively, in the univariate CAR models. The matrix $\Gamma_i$ is the within unit covariance matrix which describes the dependence of the variables in the vector $\boldsymbol\phi_i$. The matrix $\mathbf{B}_{ij}$ is the matrix that allows us to weight the neighboring observations of location $i$ that are conditioned on. A convenient special case is to set $\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p$ where $b_{ij} = w_{ij}/w_{i+}$. Recall, for a neighborhood matrix $\mathbf{W} = \{w_{ij}\}$,
 $$
 w_{ij} = 
 \begin{cases}
@@ -61,20 +61,41 @@ where $\Gamma$ is block-diagonal with block $\Gamma_i$, and $\tilde{\mathbf{B}}$
 
 Of course, a requirement for the multivariate normal distribution is symmetry of $\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}})$. Setting $\mathbf{B}_{ij} = b_{ij}\mathbf{I}_p$ where $b_{ij} = w_{ij}/w_{i+}$ leads to the symmetry condition $b_{ij}\Gamma_j = b_{ji}\Gamma_i$. Further, a common simplifying assumption would be consider the within unit covariance equal. That is, set $\Gamma_i = w_{i+}^{-1}\Sigma$ where $\Sigma$ is the $p \times p$ within unit covariance matrix for $\boldsymbol\phi_i$ and common across spatial locations $i=1,\dots,n$.
 
-Under these assumptions we can write $\Gamma = (\mathbf{D}^{-1}\otimes\Sigma)$ where $\mathbf{D}$ is an $n \times n$ diagonal matrix with $\mathbf{D}_{ii} = w_{i+}$. And also $\tilde{\mathbf{B}} = \mathbf{B}\otimes\mathbf{I}_n$ where $\mathbf{B}_{ij} = w_{ij}/w_{i+}$, not the block matrix specification given earlier. 
+Under these assumptions we can write $\Gamma = (\mathbf{D}^{-1}\otimes\Sigma)$ where $\mathbf{D}$ is an $n \times n$ diagonal matrix with $\mathbf{D}_{ii} = w_{i+}$. And also $\tilde{\mathbf{B}} = \mathbf{B}\otimes\mathbf{I}_p$ where $\mathbf{B}$ is a $n \times n$ matrix and elements of $\mathbf{B}$ are $\mathbf{B} = \{b_{ij}\} = \{w_{ij}/w_{i+}\}$, not to be confused with the block matrix specification $\mathbf{B}_{ij}$ given previously. 
 
 With this in mind, we can write the precision of the above joint distribution in an alternate form,
-$$
+
 \begin{align*}
 
-\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}}) &= (\mathbf{D}^{-1} \otimes \Sigma)^{-1}(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_n)\\
-&= (\mathbf{D} \otimes \Sigma^{-1})(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_n) & \text{Kronecker Prod - Inverse}\\
-&= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D} \otimes \Sigma^{-1})( \mathbf{B}\otimes \mathbf{I}_n) & \text{(Matrix Mult - distributive wrt matrix addition)}\\
-&= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D}\mathbf{B}) \otimes (\Sigma^{-1}\mathbf{I}_n) & \text{(Kronecker Prod - mixed-product property)}\\
+\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}}) &= (\mathbf{D}^{-1} \otimes \Sigma)^{-1}(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p)\\
+&= (\mathbf{D} \otimes \Sigma^{-1})(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p) & \text{Kronecker Prod - Inverse}\\
+&= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D} \otimes \Sigma^{-1})( \mathbf{B}\otimes \mathbf{I}_p) & \text{(Matrix Mult - distributive wrt matrix addition)}\\
+&= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D}\mathbf{B}) \otimes (\Sigma^{-1}\mathbf{I}_p) & \text{(Kronecker Prod - mixed-product property)}\\
 &= (\mathbf{D} - \mathbf{D}\mathbf{B})\otimes\Sigma^{-1} & \text{(Kronecker Prod - distributive wrt matrix addition)}\\
 &= (\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1} & \text{need to verify?}
 \end{align*}
+
+Now there is no need to construct a large block-diagonal $\Gamma$ matrix. Also, the neighborhood matrix $\mathbf{W}$ and the diagonal matrix of its row sums $\mathbf{D}$ are fixed and known quantities easily computed outside of any MCMC sampling loop. The joint distribution is
+
 $$
+p(\boldsymbol\phi \;| \Sigma) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \mathbf{W})\otimes \Sigma^{-1}\right)\phi\right\}
+$$
+However, we again encounter the issue that $(\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1}$ is singular, since $(\mathbf{D} - \mathbf{W})$ is singular. This motivates the introduction of another parameter, $\rho$ also analogous to the univariate case. There are in fact more general conditions for recovering positive definiteness, but these are not explored here. More details can be found in. . .
+
+The result is a proper joint distribution with form
+
+$$
+p(\boldsymbol\phi \;| \Sigma) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \rho\mathbf{W})\otimes \Sigma^{-1}\right)\boldsymbol\phi\right\}
+$$
+Even so, a model which assumes a shared $\rho$ parameter across elements of $\boldsymbol\phi_i$ may be too restrictive by assuming that the "strength of spatial dependence" is the same for each element. Further models have been developed that allow for different $\rho_k$ for elements $k=1,\dots,p$. 
+
+This approach requires a re-arrangement of $\boldsymbol\phi$. Where previously $\boldsymbol\phi$ stacked $n$ vectors of length $p$ on top of each other, now consider $\boldsymbol\phi'$ to stack $p$ vectors of length $n$. That is we collect the $n$ instances of the $p$-th element of $\boldsymbol\phi_i$ $i=1,\dots,n$.  
+
+
+
+One approach, proposed by Gelfand and Vounatsou (2003), is to 
+
+
 
 Let's turn to a simple example. Consider a spatial domain partitioned into $n=4$ areal units and a multivariate response with $p=2$.
 
