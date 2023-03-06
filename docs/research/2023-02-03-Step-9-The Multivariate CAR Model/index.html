@@ -236,6 +236,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <section id="intro" class="level2">
 <h2 class="anchored" data-anchor-id="intro">Intro</h2>
+<p>This is a test.</p>
 <p>Here we will extend the univariate CAR model to the multivariate case.</p>
 <p>Consider a spatial domain <span class="math inline">\(\mathcal{D} \in \mathbb{R}^2\)</span> that is partitioned into <span class="math inline">\(n\)</span> areal units. In the univariate case we specified a spatial random effect <span class="math inline">\(\boldsymbol\phi = (\phi_1,\dots,\phi_n)\)</span> meant to capture the spatial dependence. In the multivariate case we specify a spatial random vector <span class="math inline">\(\boldsymbol\phi^T = (\boldsymbol\phi_1, \boldsymbol\phi_2,\dots,\boldsymbol\phi_3)\)</span> where each <span class="math inline">\(\boldsymbol\phi_i = (\phi_{i1}, \phi_{i2},\dots, \phi_{ip})\)</span> is <span class="math inline">\(p \times 1\)</span>.</p>
 <p>The joint distribution of <span class="math inline">\(\boldsymbol\phi_i\)</span> is derived from the full conditional distributions. Under the Markov Random Field (MRF) assumption, the conditional distributions can be specified as <span class="math display">\[
@@ -264,7 +265,6 @@ p(\boldsymbol\phi \;| \;\{\Gamma_i\}) \propto \exp\left\{-\frac{1}{2}\boldsymbol
 &amp;= (\mathbf{D} - \mathbf{W}) \otimes \Sigma^{-1} &amp; \text{need to verify?}
 \end{align*}\]</span> $$</p>
 <p>Let’s turn to a simple example. Consider a spatial domain partitioned into <span class="math inline">\(n=4\)</span> areal units and a multivariate response with <span class="math inline">\(p=2\)</span>.</p>
-<p>This is a test push from new clone.</p>
 <p>First, the spatial domain.</p>
 <div class="cell">
 <details>
