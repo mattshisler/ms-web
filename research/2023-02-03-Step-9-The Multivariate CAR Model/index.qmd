@@ -67,8 +67,8 @@ With this in mind, we can write the precision of the above joint distribution in
 $$
 \begin{align*}
 
-\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}}) &= (\mathbf{D}^{-1} \otimes \Sigma)^{-1}(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p)\\
-&= (\mathbf{D} \otimes \Sigma^{-1})(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p) & \text{Kronecker Prod - Inverse}\\
+\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}}) &= (\mathbf{D}^{-1} \otimes \Sigma)^{-1}(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_n)\\
+&= (\mathbf{D} \otimes \Sigma^{-1})(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_n) & \text{Kronecker Prod - Inverse}\\
 &= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D} \otimes \Sigma^{-1})( \mathbf{B}\otimes \mathbf{I}_n) & \text{(Matrix Mult - distributive wrt matrix addition)}\\
 &= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D}\mathbf{B}) \otimes (\Sigma^{-1}\mathbf{I}_n) & \text{(Kronecker Prod - mixed-product property)}\\
 &= (\mathbf{D} - \mathbf{D}\mathbf{B})\otimes\Sigma^{-1} & \text{(Kronecker Prod - distributive wrt matrix addition)}\\

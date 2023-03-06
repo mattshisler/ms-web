@@ -257,8 +257,8 @@ p(\boldsymbol\phi \;| \;\{\Gamma_i\}) \propto \exp\left\{-\frac{1}{2}\boldsymbol
 <p>Under these assumptions we can write <span class="math inline">\(\Gamma = (\mathbf{D}^{-1}\otimes\Sigma)\)</span> where <span class="math inline">\(\mathbf{D}\)</span> is an <span class="math inline">\(n \times n\)</span> diagonal matrix with <span class="math inline">\(\mathbf{D}_{ii} = w_{i+}\)</span>. And also <span class="math inline">\(\tilde{\mathbf{B}} = \mathbf{B}\otimes\mathbf{I}_n\)</span> where <span class="math inline">\(\mathbf{B}_{ij} = w_{ij}/w_{i+}\)</span>, not the block matrix specification given earlier.</p>
 <p>With this in mind, we can write the precision of the above joint distribution in an alternate form, $$ <span class="math display">\[\begin{align*}
 
-\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}}) &amp;= (\mathbf{D}^{-1} \otimes \Sigma)^{-1}(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p)\\
-&amp;= (\mathbf{D} \otimes \Sigma^{-1})(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_p) &amp; \text{Kronecker Prod - Inverse}\\
+\Gamma^{-1}(\mathbf{I}_{np} - \tilde{\mathbf{B}}) &amp;= (\mathbf{D}^{-1} \otimes \Sigma)^{-1}(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_n)\\
+&amp;= (\mathbf{D} \otimes \Sigma^{-1})(\mathbf{I}_{np} - \mathbf{B}\otimes \mathbf{I}_n) &amp; \text{Kronecker Prod - Inverse}\\
 &amp;= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D} \otimes \Sigma^{-1})( \mathbf{B}\otimes \mathbf{I}_n) &amp; \text{(Matrix Mult - distributive wrt matrix addition)}\\
 &amp;= (\mathbf{D} \otimes \Sigma^{-1}) - (\mathbf{D}\mathbf{B}) \otimes (\Sigma^{-1}\mathbf{I}_n) &amp; \text{(Kronecker Prod - mixed-product property)}\\
 &amp;= (\mathbf{D} - \mathbf{D}\mathbf{B})\otimes\Sigma^{-1} &amp; \text{(Kronecker Prod - distributive wrt matrix addition)}\\
