@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -309,31 +309,39 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 1 &amp; 0.9\\
 0.9 &amp; 1
 \end{pmatrix}
-\]</span> This way <span class="math inline">\(\text{Var}(\phi_{i1}) = 1\)</span>, <span class="math inline">\(\text{Var}(\phi_{i2}) = 1\)</span>, and <span class="math inline">\(\text{Corr}(\phi_{i1}, \phi_{i2}) = 0.9\)</span>. Lastly, set <span class="math inline">\(\rho = 0.99\)</span> to induce strong spatial correlation. Here is a naive way to sample from the joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
+\]</span> This way <span class="math inline">\(\text{Var}(\phi_{i1}) = 1\)</span>, <span class="math inline">\(\text{Var}(\phi_{i2}) = 1\)</span>, and <span class="math inline">\(\text{Corr}(\phi_{i1}, \phi_{i2}) = 0.9\)</span>. Lastly, set <span class="math inline">\(\rho = 0.99\)</span> to induce strong spatial correlation. Here is a naive way to sample from the joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span>. It is naive because it does not take advantage of the sparsity of the precision matrix. We leave computational advantages to a later investigation.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span><span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">0</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.9</span>,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.9</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>inv_Sigma <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho<span class="sc">*</span>W), <span class="fu">solve</span>(Lambda))</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="co"># spat_phi &lt;- matrix(backsolve(chol(inv_Sigma), matrix(rnorm(n*p), nrow = n*p)), byrow = T, ncol = p)</span></span>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">831</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># specify spatial domain</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">4</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">0</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># specify parameters</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.9</span>,</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.9</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
 <span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>spat_phi <span class="ot">&lt;-</span> <span class="fu">matrix</span>(Rfast<span class="sc">::</span><span class="fu">rmvnorm</span>(<span class="dv">1</span>, <span class="fu">rep</span>(<span class="dv">0</span>,n<span class="sc">*</span>p), <span class="fu">solve</span>(inv_Sigma)), <span class="at">byrow =</span> T, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi1 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">1</span>]</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi2 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># construct precision matrix for join dist of phi</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>inv_Sigma <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho<span class="sc">*</span>W), <span class="fu">solve</span>(Lambda))</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># sample from joint dist of phi (technique borrowed for precision matrices)</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>spat_phi <span class="ot">&lt;-</span> <span class="fu">backsolve</span>(<span class="fu">chol</span>(inv_Sigma), <span class="fu">rnorm</span>(n<span class="sc">*</span>p))</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># inverse vectorize phi  </span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>spat_phi <span class="ot">&lt;-</span> <span class="fu">matrix</span>(spat_phi, <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co"># assign values to spatial data set</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi1 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">1</span>]</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi2 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>Since we specified this example with both strong spatial and strong within-location correlation, plotting the data for <span class="math inline">\(\phi_{i1}\)</span> and <span class="math inline">\(\phi_{i2}\)</span>, we should expect to observe the same spatial correlation patterns for the first and second elements of <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
@@ -342,31 +350,37 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>phi1)) <span class="sc">+</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.3</span>,<span class="fl">3.3</span>)) <span class="sc">+</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>phi2)) <span class="sc">+</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.3</span>,<span class="fl">3.3</span>)) <span class="sc">+</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="fu">bquote</span>(phi[i1])) <span class="sc">+</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.3</span>,<span class="fl">3.3</span>)) <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
-<div id="fig-lattice-example-1" class="quarto-figure quarto-figure-center anchored">
+<div id="fig-phi1" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-lattice-example-1.png" class="img-fluid figure-img" width="672"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;1: <strong>?(caption)</strong></figcaption><p></p>
+<p><img src="index_files/figure-html/fig-phi1-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;1: Plot of…</figcaption><p></p>
 </figure>
 </div>
 </div>
+</div>
+<div class="cell" data-layout-align="center">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>phi2)) <span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="fu">bquote</span>(phi[i2])) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.3</span>,<span class="fl">3.3</span>)) <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
-<div id="fig-lattice-example-2" class="quarto-figure quarto-figure-center anchored">
+<div id="fig-phi2" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
-<p><img src="index_files/figure-html/fig-lattice-example-2.png" class="img-fluid figure-img" width="672"></p>
-<p></p><figcaption class="figure-caption">Figure&nbsp;2: <strong>?(caption)</strong></figcaption><p></p>
+<p><img src="index_files/figure-html/fig-phi2-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">Figure&nbsp;2: Plot of …</figcaption><p></p>
 </figure>
 </div>
 </div>

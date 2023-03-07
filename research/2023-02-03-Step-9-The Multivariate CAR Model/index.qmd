@@ -128,10 +128,13 @@ $$
 0.9 & 1 
 \end{pmatrix}
 $$
-This way $\text{Var}(\phi_{i1}) = 1$, $\text{Var}(\phi_{i2}) = 1$, and $\text{Corr}(\phi_{i1}, \phi_{i2}) = 0.9$. Lastly, set $\rho = 0.99$ to induce strong spatial correlation. Here is a naive way to sample from the joint distribution for $\boldsymbol\phi'$.
+This way $\text{Var}(\phi_{i1}) = 1$, $\text{Var}(\phi_{i2}) = 1$, and $\text{Corr}(\phi_{i1}, \phi_{i2}) = 0.9$. Lastly, set $\rho = 0.99$ to induce strong spatial correlation. Here is a naive way to sample from the joint distribution for $\boldsymbol\phi'$. It is naive because it does not take advantage of the sparsity of the precision matrix. We leave computational advantages to a later investigation.
 
 ```{r}
-n <- 30^2
+set.seed(831)
+
+# specify spatial domain
+n <- 4^2
 spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
 spat_domain$label <- 1:n
 
@@ -139,17 +142,22 @@ spat_domain_g <- make_lattice(c(sqrt(n),sqrt(n)), mutual = TRUE)
 W <- as_adjacency_matrix(spat_domain_g, sparse=0)
 D <- diag(rowSums(W))
 
+# specify parameters
 p <- 2
 Lambda <- matrix(c(1, 0.9,
                    0.9, 1), byrow = T, ncol = p)
 rho <- 0.99
 
+# construct precision matrix for join dist of phi
 inv_Sigma <- kronecker((D-rho*W), solve(Lambda))
 
-# spat_phi <- matrix(backsolve(chol(inv_Sigma), matrix(rnorm(n*p), nrow = n*p)), byrow = T, ncol = p)
+# sample from joint dist of phi (technique borrowed for precision matrices)
+spat_phi <- backsolve(chol(inv_Sigma), rnorm(n*p))
 
-spat_phi <- matrix(Rfast::rmvnorm(1, rep(0,n*p), solve(inv_Sigma)), byrow = T, ncol = 2)
+# inverse vectorize phi  
+spat_phi <- matrix(spat_phi, byrow = T, ncol = p)
 
+# assign values to spatial data set
 spat_domain$phi1 <- spat_phi[,1]
 spat_domain$phi2 <- spat_phi[,2]
 
@@ -158,18 +166,29 @@ spat_domain$phi2 <- spat_phi[,2]
 Since we specified this example with both strong spatial and strong within-location correlation, plotting the data for $\phi_{i1}$ and $\phi_{i2}$, we should expect to observe the same spatial correlation patterns for the first and second elements of $\boldsymbol\phi_i$. 
 
 ```{r}
-#| label: fig-lattice-example
+#| label: fig-phi1
 #| fig-align: "center"
+#| fig-cap: "Plot of..."
 
 ggplot(spat_domain) +
   geom_tile(aes(x, y, fill=phi1)) +
+  labs(fill = bquote(phi[i1])) +
   scale_y_reverse() +
   scale_fill_gradientn(colors = viridis(10), limits = c(-3.3,3.3)) +
   coord_fixed() + 
   theme_void()
 
+```
+
+```{r}
+#| label: fig-phi2
+#| fig-align: "center"
+#| fig-cap: "Plot of ..."
+
+
 ggplot(spat_domain) +
   geom_tile(aes(x, y, fill=phi2)) +
+  labs(fill = bquote(phi[i2])) +
   scale_y_reverse() +
   scale_fill_gradientn(colors = viridis(10), limits = c(-3.3,3.3)) +
   coord_fixed() + 

@@ -1,5 +1,19 @@
 [
   {
+    "listing": "/learn.html",
+    "items": [
+      "/learn/2023-02-03-Basics of Timeseries AR1 Models/index.html",
+      "/learn/2023-02-03-Markov-Chain-Sim/index.html"
+    ]
+  },
+  {
+    "listing": "/notes.html",
+    "items": [
+      "/notes/2023-02-09-ST779-Computer-Assignment-1/index.html",
+      "/notes/YYYY-MM-DD-Template/index.html"
+    ]
+  },
+  {
     "listing": "/research.html",
     "items": [
       "/research/2023-03-06-Step-10-MCAR-different-rho/index.html",
@@ -13,20 +27,6 @@
       "/research/2023-02-02-Step-2-Single Parent Design Matrix/index.html",
       "/research/2023-02-02-Step-1-Hierarchical-Linear-Regression/index.html",
       "/research/2023-02-02-Step-0-Linear-Regression-Gibbs-Sampling/index.html"
-    ]
-  },
-  {
-    "listing": "/notes.html",
-    "items": [
-      "/notes/YYYY-MM-DD-Template/index.html",
-      "/notes/2023-02-09-ST779-Computer-Assignment-1/index.html"
-    ]
-  },
-  {
-    "listing": "/learn.html",
-    "items": [
-      "/learn/2023-02-03-Basics of Timeseries AR1 Models/index.html",
-      "/learn/2023-02-03-Markov-Chain-Sim/index.html"
     ]
   }
 ]

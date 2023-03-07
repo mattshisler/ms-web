@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -236,7 +236,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(t1,<span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.10 0.17 0.16 0.22 0.07 0.06 0.21 0.02</code></pre>
+<pre><code>[1] 0.18 0.17 0.04 0.11 0.20 0.12 0.02 0.15</code></pre>
 </div>
 </div>
 </section>
@@ -248,24 +248,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> P<span class="sc">/</span><span class="fu">rowSums</span>(P)</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>P</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>           [,1]       [,2]       [,3]        [,4]        [,5]       [,6]
-[1,] 0.10528223 0.18623433 0.13960077 0.109477116 0.166572201 0.05331189
-[2,] 0.17352096 0.15931320 0.08705801 0.231102692 0.180770100 0.14549387
-[3,] 0.05656663 0.19019462 0.02349779 0.025857865 0.234353064 0.22383264
-[4,] 0.11492505 0.20304718 0.18727707 0.167202951 0.139012229 0.02669000
-[5,] 0.27622012 0.01125107 0.12095344 0.148670039 0.230099883 0.02916269
-[6,] 0.20228400 0.21019473 0.05649059 0.065537307 0.159018841 0.06737113
-[7,] 0.07932144 0.23287881 0.23862951 0.046569608 0.006772509 0.12824253
-[8,] 0.04898131 0.11560142 0.25273587 0.004908239 0.220326436 0.01413103
-           [,7]        [,8]
-[1,] 0.19414249 0.045378984
-[2,] 0.02154475 0.001196413
-[3,] 0.04517696 0.200520428
-[4,] 0.05740716 0.104438362
-[5,] 0.10759505 0.076047707
-[6,] 0.08969579 0.149407608
-[7,] 0.15760849 0.109977096
-[8,] 0.33076289 0.012552817</code></pre>
+<pre><code>           [,1]        [,2]       [,3]       [,4]      [,5]       [,6]
+[1,] 0.07180655 0.005171586 0.10082654 0.11888415 0.1178228 0.23974034
+[2,] 0.15517964 0.160880470 0.15889614 0.13170016 0.1622785 0.07961118
+[3,] 0.11138294 0.153017458 0.21909172 0.13578009 0.1368015 0.14294312
+[4,] 0.08755504 0.193299033 0.18859752 0.18376003 0.0218035 0.01856570
+[5,] 0.10348248 0.192424756 0.14111360 0.12346514 0.1700540 0.05288685
+[6,] 0.21470609 0.122579926 0.01169922 0.09110108 0.2005852 0.04942224
+[7,] 0.15590818 0.243984736 0.01614382 0.17003107 0.1791665 0.08778004
+[8,] 0.19284870 0.180058892 0.05430796 0.12775059 0.1504953 0.11786793
+           [,7]       [,8]
+[1,] 0.12404253 0.22170550
+[2,] 0.08479658 0.06665735
+[3,] 0.05244364 0.04853952
+[4,] 0.12466638 0.18175280
+[5,] 0.03957494 0.17699826
+[6,] 0.10326903 0.20663720
+[7,] 0.01234869 0.13463692
+[8,] 0.15506564 0.02160501</code></pre>
 </div>
 </div>
 </section>
@@ -286,7 +286,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(visits1<span class="sc">/</span><span class="fu">sum</span>(visits1),<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.138 0.151 0.134 0.114 0.172 0.089 0.116 0.087</code></pre>
+<pre><code>[1] 0.137 0.153 0.113 0.136 0.136 0.103 0.090 0.132</code></pre>
 </div>
 </div>
 </section>
@@ -312,13 +312,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(visits2<span class="sc">/</span><span class="fu">rowSums</span>(visits2),<span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      [,1]  [,2]  [,3]  [,4]  [,5]  [,6]  [,7]  [,8]
-[1,] 0.144 0.154 0.125 0.115 0.177 0.088 0.114 0.082
-[2,] 0.144 0.155 0.133 0.108 0.178 0.083 0.116 0.082
-[3,] 0.143 0.159 0.131 0.108 0.166 0.087 0.123 0.084
-[4,] 0.136 0.160 0.128 0.110 0.174 0.088 0.120 0.085
-[5,] 0.144 0.158 0.134 0.107 0.167 0.090 0.115 0.085
-[6,] 0.141 0.156 0.131 0.108 0.176 0.090 0.114 0.082
-[7,] 0.140 0.148 0.136 0.115 0.173 0.088 0.114 0.086</code></pre>
+[1,] 0.131 0.154 0.120 0.137 0.145 0.102 0.090 0.121
+[2,] 0.133 0.154 0.122 0.132 0.139 0.101 0.089 0.130
+[3,] 0.133 0.154 0.115 0.134 0.140 0.100 0.090 0.134
+[4,] 0.132 0.158 0.119 0.138 0.140 0.094 0.091 0.128
+[5,] 0.134 0.155 0.125 0.138 0.138 0.097 0.085 0.128
+[6,] 0.135 0.159 0.115 0.134 0.142 0.101 0.090 0.126
+[7,] 0.136 0.157 0.115 0.133 0.138 0.094 0.092 0.133</code></pre>
 </div>
 </div>
 </section>
@@ -339,24 +339,24 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>P <span class="sc">%^%</span> <span class="dv">100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          [,1]      [,2]     [,3]      [,4]      [,5]       [,6]      [,7]
-[1,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-[2,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-[3,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-[4,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-[5,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-[6,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-[7,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-[8,] 0.1407254 0.1560631 0.131763 0.1104386 0.1709272 0.08970732 0.1156623
-           [,8]
-[1,] 0.08471307
-[2,] 0.08471307
-[3,] 0.08471307
-[4,] 0.08471307
-[5,] 0.08471307
-[6,] 0.08471307
-[7,] 0.08471307
-[8,] 0.08471307</code></pre>
+<pre><code>          [,1]     [,2]      [,3]      [,4]     [,5]       [,6]       [,7]
+[1,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+[2,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+[3,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+[4,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+[5,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+[6,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+[7,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+[8,] 0.1333911 0.154109 0.1188004 0.1352688 0.139185 0.09923764 0.08976851
+          [,8]
+[1,] 0.1302397
+[2,] 0.1302397
+[3,] 0.1302397
+[4,] 0.1302397
+[5,] 0.1302397
+[6,] 0.1302397
+[7,] 0.1302397
+[8,] 0.1302397</code></pre>
 </div>
 </div>
 </section>
@@ -369,8 +369,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">as.numeric</span>(lvec[<span class="dv">1</span>,]<span class="sc">/</span><span class="fu">sum</span>(lvec[<span class="dv">1</span>,]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.14072539 0.15606305 0.13176300 0.11043865 0.17092719 0.08970732 0.11566233
-[8] 0.08471307</code></pre>
+<pre><code>[1] 0.13339106 0.15410896 0.11880037 0.13526876 0.13918502 0.09923764 0.08976851
+[8] 0.13023969</code></pre>
 </div>
 </div>
 </section>
