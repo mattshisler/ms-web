@@ -1,0 +1,34 @@
+---
+title: "Step 11 - MCMC for MCAR - A basic example (WIP)"
+description: "Previously we introduced the MCAR model and simulated data from it. Now we will focus on fitting a Bayesian MCAR model to multivariate areal data using MCMC. It will be a naive pedagogical approach."
+author:
+  - name: Matthew Shisler
+    affiliation: North Carloina State University - Department of Statistics
+    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+date: "3/7/2023"
+categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
+draft: false 
+format:
+  html: 
+    code-fold: true
+execute: 
+  cache: false
+  freeze: false
+---
+
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+
+library(tidyverse)
+library(igraph)
+library(viridis)
+```
+
+## Intro
+
+
+
+
