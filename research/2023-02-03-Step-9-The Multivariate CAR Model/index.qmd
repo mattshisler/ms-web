@@ -118,6 +118,8 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 $$
 provided that $|\rho|<1$.
 
+This model is denoted as $\text{MCAR}(\rho,\Lambda)$.
+
 Let's simulate a simple scenario. Let the spatial domain be partitioned into a $40 \times 40$ regular lattice with $n = 1600$ spatial locations. The regular lattice partition will induce a neighborhood matrix $\mathbf{W}$ and diagonal matrix $\mathbf{D}$ for the row sums of $\mathbf{W}$. 
 
 Let $p = 2$ so that we have a $p \times p$ vector $\boldsymbol\phi_i$ at each location $i = 1,\dots,n$. Next, specify the common within-location covariance matrix 
