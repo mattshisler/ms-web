@@ -99,8 +99,10 @@ $$
 
 where $\lambda_{ij}$ are the scalar elements of $\boldsymbol\Lambda$.
 
-It is actually more convenient to work with the precision matrix, $\left[\boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1}\right]^{-1} = \boldsymbol\Lambda^{-1} \otimes(\mathbf{D}-\rho\mathbf{W})$
-
+It is actually more convenient to work with the precision matrix, 
+$$
+\left[\boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1}\right]^{-1} = \boldsymbol\Lambda^{-1} \otimes(\mathbf{D}-\rho\mathbf{W})
+$$
 For illustration, set $p = 2$. Then the precision matrix has form
 
 $$
@@ -111,7 +113,7 @@ $$
 \end{pmatrix}
 $$
 
-where $\lambda^{(-1)}_{ij}$ are the scalar elements of $\boldsymbol\Lambda^{-1}$.
+where $\lambda^{(-1)}_{ij}$ are the scalar entries of $\boldsymbol\Lambda^{-1}$.
 
 
 

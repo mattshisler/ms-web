@@ -302,7 +302,7 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 <p><span class="math display">\[
 p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \rho\mathbf{W})\otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi\right\}
 \]</span> provided that <span class="math inline">\(|\rho|&lt;1\)</span>.</p>
-<p>Let’s simulate a simple scenario. Let the spatial domain be paritioned into a <span class="math inline">\(25 \times 25\)</span> regular lattice with <span class="math inline">\(n = 625\)</span> spatial locations. The regular lattice partition will induce a neighborhood matrix <span class="math inline">\(\mathbf{W}\)</span> and diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> for the row sums of <span class="math inline">\(\mathbf{W}\)</span>.</p>
+<p>Let’s simulate a simple scenario. Let the spatial domain be partitioned into a <span class="math inline">\(40 \times 40\)</span> regular lattice with <span class="math inline">\(n = 1600\)</span> spatial locations. The regular lattice partition will induce a neighborhood matrix <span class="math inline">\(\mathbf{W}\)</span> and diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> for the row sums of <span class="math inline">\(\mathbf{W}\)</span>.</p>
 <p>Let <span class="math inline">\(p = 2\)</span> so that we have a <span class="math inline">\(p \times p\)</span> vector <span class="math inline">\(\boldsymbol\phi_i\)</span> at each location <span class="math inline">\(i = 1,\dots,n\)</span>. Next, specify the common within-location covariance matrix <span class="math display">\[
 \boldsymbol\Lambda =
 \begin{pmatrix}
@@ -310,13 +310,13 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 0.9 &amp; 1
 \end{pmatrix}
 \]</span> This way <span class="math inline">\(\text{Var}(\phi_{i1}) = 1\)</span>, <span class="math inline">\(\text{Var}(\phi_{i2}) = 1\)</span>, and <span class="math inline">\(\text{Corr}(\phi_{i1}, \phi_{i2}) = 0.9\)</span>. Lastly, set <span class="math inline">\(\rho = 0.99\)</span> to induce strong spatial correlation. Here is a naive way to sample from the joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span>. It is naive because it does not take advantage of the sparsity of the precision matrix. We leave computational advantages to a later investigation.</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_61e8e03e5fbf4f9131164c595bc4cfd4">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-2_e53d2b5bff592e2ada158923d3d4671e">
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">831</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># specify spatial domain</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">30</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">40</span><span class="sc">^</span><span class="dv">2</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
