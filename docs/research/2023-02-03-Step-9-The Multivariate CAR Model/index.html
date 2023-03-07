@@ -302,7 +302,7 @@ p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\bolds
 <p><span class="math display">\[
 p(\boldsymbol\phi' \;| \boldsymbol\Lambda) \propto \exp\left\{-\frac{1}{2}\boldsymbol\phi^T\left((\mathbf{D} - \rho\mathbf{W})\otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi\right\}
 \]</span> provided that <span class="math inline">\(|\rho|&lt;1\)</span>.</p>
-<p>This model is denoted as <span class="math inline">\(\text{MCAR}(\rho,\Lambda)\)</span>.</p>
+<p>This model is denoted as <span class="math inline">\(\text{MCAR}(\rho,\boldsymbol\Lambda)\)</span>.</p>
 <p>Let’s simulate a simple scenario. Let the spatial domain be partitioned into a <span class="math inline">\(40 \times 40\)</span> regular lattice with <span class="math inline">\(n = 1600\)</span> spatial locations. The regular lattice partition will induce a neighborhood matrix <span class="math inline">\(\mathbf{W}\)</span> and diagonal matrix <span class="math inline">\(\mathbf{D}\)</span> for the row sums of <span class="math inline">\(\mathbf{W}\)</span>.</p>
 <p>Let <span class="math inline">\(p = 2\)</span> so that we have a <span class="math inline">\(p \times 1\)</span> vector <span class="math inline">\(\boldsymbol\phi_i\)</span> at each location <span class="math inline">\(i = 1,\dots,n\)</span>. Next, specify the common within-location covariance matrix <span class="math display">\[
 \boldsymbol\Lambda =
