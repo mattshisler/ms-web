@@ -5,7 +5,7 @@ author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
     affiliation-url: https://statistics.sciences.ncsu.edu/ 
-date: "2/11/2023"
+date: "3/05/2023"
 categories: [Bayesian, MCMC, Spatial, CAR] # self-defined categories
 draft: false 
 format:
@@ -134,7 +134,7 @@ This way $\text{Var}(\phi_{i1}) = 1$, $\text{Var}(\phi_{i2}) = 1$, and $\text{Co
 set.seed(831)
 
 # specify spatial domain
-n <- 4^2
+n <- 30^2
 spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
 spat_domain$label <- 1:n
 

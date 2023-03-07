@@ -1,5 +1,5 @@
 ---
-title: "Step 10 - The multivariate CAR model with DIFFERENT strengths of spatial correlation"
+title: "Step 10 - The multivariate CAR model with DIFFERENT strengths of spatial correlation (WIP)"
 description: "Extension of Step 9, now exploring different strengths of spatial correlation"
 author:
   - name: Matthew Shisler

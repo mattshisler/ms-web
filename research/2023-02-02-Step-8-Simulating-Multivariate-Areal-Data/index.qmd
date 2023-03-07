@@ -1,5 +1,5 @@
 ---
-title: "Step 8 - Simulating Multivariate Areal Data"
+title: "Step 8 - Simulating Multivariate Areal Data (scrapped, ref step 9)"
 description: "We show how to simulate multivariate areal data with spatial dependence using the CAR model."
 author:
   - name: Matthew Shisler
