@@ -66,15 +66,17 @@ $$
 $$
 where $\mathbf{W}$ is the neighborhood matrix and $\mathbf{D}$, the diagonal matrix of its row sums, $\rho$ is the scalar strength of spatial correlation parameter, and $\boldsymbol\Lambda$ is the within-location covariance.
 
-Our goal is to re-specify this model to allow for different $\rho_k$, $k = 1,\dots,p$. One approach requires a re-arrangement of $\boldsymbol\phi$. Where previously $\boldsymbol\phi$ stacked $n$ vectors of length $p$ on top of each other, now consider $\boldsymbol\phi'$ to stack $p$ vectors of length $n$. That is we collect the $n$ instances of the $p$-th element of $\boldsymbol\phi_i$, $i=1,\dots,n$. This operation is essentially transforming the vectorization of the $n \times p$ matrix $\boldsymbol\Phi$ from the vectorization of its transpose and is accomplished via a *commutation* matrix.
+Our goal is to re-specify this model to allow for different $\rho_k$, $k = 1,\dots,p$. One approach requires a re-arrangement of $\boldsymbol\phi'$. Where previously $\boldsymbol\phi'$ stacked $n$ vectors of length $p$ on top of each other, now consider $\boldsymbol\phi$ (no prime) to stack $p$ vectors of length $n$. That is we collect the $n$ instances of the $p$-th element of $\boldsymbol\phi_i$, $i=1,\dots,n$. Both are $np \times 1$ vectors$ with the entries permuted.
 
-We can commute $\boldsymbol\phi' = \text{vec}(\Phi^T)$ by applying the commutation matrix $\mathbf{K}^{(p,n)}$ for the result $\mathbf{K}^{(p,n)}\text{vec}(\Phi^T) = \text{vec}(\Phi)$. Given that
+This operation is essentially transforming the vectorization of the $n \times p$ matrix $\boldsymbol\Phi$ from the vectorization of its transpose and is accomplished via a *commutation* matrix.
+
+We can transform $\boldsymbol\phi' = \text{vec}(\Phi^T)$ by applying the commutation matrix $\mathbf{K}^{(p,n)}$ for the result $\mathbf{K}^{(p,n)}\text{vec}(\Phi^T) = \text{vec}(\Phi)$. Given that
 
 $$
 \text{vec}(\boldsymbol\Phi^T) = \boldsymbol\phi' \sim N\left(\boldsymbol 0, (\mathbf{D}-\rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\right)
 $$
 
-then the result of left multiplying by the commutation matrix yields a multivariate distribution with mean $\boldsymbol 0$ and covariance matrix
+then the result of left multiplying by the commutation matrix yields a multivariate distribution with $\text{E}[\boldsymbol\phi] = \boldsymbol 0$ and covariance matrix
 $$
 \begin{align*}
 \text{Cov}(\mathbf{K}^{(p,n)}\boldsymbol\phi')&= \mathbf{K}^{(p,n)}\text{Cov}(\boldsymbol\phi')\left(\mathbf{K}^{(p,n)}\right)^T\\
@@ -83,9 +85,8 @@ $$
 &=\boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1}
 \end{align*}
 $$
-The effect is that the Kronecker product in the covariance is commuted. Then when resulting Kronecker product is expanded, the scalar elements of the common non-spatial covariance matrix $\Lambda$ are multiplied with blocks $(\mathbf{D}-\rho\mathbf{W})$. It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements. 
+The effect is that the Kronecker product in the covariance is commuted, hence the name *commutation* matrix for $\mathbf{K}^{(p,n)}$. Then when the resulting Kronecker product is expanded, the scalar elements of the common non-spatial covariance matrix $\Lambda$ are multiplied with identical blocks $(\mathbf{D}-\rho\mathbf{W})$. It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements. 
 
-This allows us to "break up" elements of $\Sigma$ and associate them with difference values of $\rho_k$.
 $$
 \boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1} =
 \begin{pmatrix}
