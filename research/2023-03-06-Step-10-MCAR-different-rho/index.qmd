@@ -117,6 +117,20 @@ where $\lambda^{(-1)}_{ij}$ are the scalar entries of $\boldsymbol\Lambda^{-1}$.
 
 It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements. One strategy is to consider the a singular value decomposition of $\mathbf{D}-\rho\mathbf{W}$. . .
 
+Another representation of this precision is
+$$
+\boldsymbol\Lambda^{-1} \otimes(\mathbf{D}-\rho\mathbf{W}) =
+\begin{pmatrix}
+\mathbf{U}^T_1 & \mathbf{0} \\
+\mathbf{0} & \mathbf{U}^T_2
+\end{pmatrix}
+(\boldsymbol\Lambda \otimes \mathbf{I}_n)
+\begin{pmatrix}
+\mathbf{U}_1 & \mathbf{0} \\
+\mathbf{0} & \mathbf{U}_2
+\end{pmatrix}
+$$
+
 WIP
 
 
