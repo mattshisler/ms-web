@@ -85,7 +85,7 @@ $$
 &=\boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1}
 \end{align*}
 $$
-The effect is that the Kronecker product in the covariance is commuted, hence the name *commutation* matrix for $\mathbf{K}^{(p,n)}$. Then when the resulting Kronecker product is expanded, the scalar elements of the common non-spatial covariance matrix $\Lambda$ are multiplied with identical blocks $(\mathbf{D}-\rho\mathbf{W})$. It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements. 
+The effect is that the Kronecker product in the covariance is commuted, hence the name *commutation* matrix for $\mathbf{K}^{(p,n)}$. Then when the resulting Kronecker product is expanded, the scalar elements of the common non-spatial covariance matrix $\boldsymbol\Lambda$ are multiplied with identical blocks $(\mathbf{D}-\rho\mathbf{W})$,
 
 $$
 \boldsymbol\Lambda \otimes(\mathbf{D}-\rho\mathbf{W})^{-1} =
@@ -115,7 +115,7 @@ $$
 
 where $\lambda^{(-1)}_{ij}$ are the scalar entries of $\boldsymbol\Lambda^{-1}$.
 
-
+It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements.
 
 
 
