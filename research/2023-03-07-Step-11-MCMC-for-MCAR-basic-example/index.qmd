@@ -29,6 +29,56 @@ library(viridis)
 
 ## Intro
 
-This is a test commit. test render.
+In this post we will code an MCMC sampler for a Bayesian hierarchical model with an MCAR prior specified in the second stage. For simplicity, we will consider the case common spatial strength parameter $\rho$.
+
+Let $\mathcal{D}$ be a spatial domain partitioned into $n$ areal units indexed by $i$. Following the notation of Step 3 (link), let $\boldsymbol\delta_i$ be a multivariate ($p \times 1$) response vector with expected value
+$$
+\text{E}(\boldsymbol\delta_i)  = \boldsymbol{\mathcal{Z}}_i \boldsymbol\beta + \boldsymbol\phi_i
+$$
+and covariance
+$$
+
+$$
+
+$$
+\boldsymbol\delta_i = \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i + \boldsymbol\epsilon_i
+$$
+where $\boldsymbol\epsilon_i \sim \text{N}\left(\boldsymbol 0, \boldsymbol\Omega\right)$.
+
+$$
+\begin{align*}
+\boldsymbol\delta_i &\sim \text{Normal}_{p}\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \,  \boldsymbol\Omega\right)\\
+\boldsymbol\phi_i|\boldsymbol\phi_{j\ne i},\boldsymbol\Lambda &\sim \text{Normal}_p\left(\rho\sum_{i \sim j}\mathbf{B}_{ij}\boldsymbol\phi_j, \, w^{-1}_{i+}\boldsymbol\Lambda\right)\\
+\boldsymbol\beta &\sim \text{Normal}_{qp}(\boldsymbol\mu, \, \boldsymbol\Gamma)\\
+\omega_{kk} &\sim \text{InvGamm}(a_k, \, b_k)\\
+\boldsymbol\Lambda &\sim \text{InvWish}()\\
+\rho &\sim \text{Unif}(0, \,1)
+\end{align*}
+$$
+
+In another way,
+
+$$
+\begin{align*}
+\boldsymbol\delta_i &\sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \;  \boldsymbol\Omega\right)\\
+\boldsymbol\phi' &\sim \text{Normal}_{np}\left(\boldsymbol 0, (\mathbf{D-\rho\mathbf{W}})^{-1} \otimes \boldsymbol\Lambda\right)\\
+\boldsymbol\beta &\sim \text{Normal}_{qp}(\boldsymbol\mu, \boldsymbol\Gamma)\\
+\omega_{kk} &\sim \text{InvGamm}(a_k, b_k)\\
+\boldsymbol\Lambda &\sim \text{InvWish}()\\
+\rho &\sim \text{Unif}(0,1)
+\end{align*}
+$$
+
+
+
+
+
+
+
+
+
+
+
+
 
 

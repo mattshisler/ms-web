@@ -115,7 +115,9 @@ $$
 
 where $\lambda^{(-1)}_{ij}$ are the scalar entries of $\boldsymbol\Lambda^{-1}$.
 
-It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements.
+It is in this form that we can introduce different $\rho_k$ for each of the $p$ elements. One strategy is to consider the a singular value decomposition of $\mathbf{D}-\rho\mathbf{W}$. . .
+
+WIP
 
 
 
