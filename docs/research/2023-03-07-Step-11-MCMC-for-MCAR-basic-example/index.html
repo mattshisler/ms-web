@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2023-03-07">
 <meta name="description" content="Previously we introduced the MCAR model and simulated data from it. Now we will focus on fitting a Bayesian MCAR model to multivariate areal data using MCMC. It will be a naive pedagogical approach.">
 
-<title>MS - Step 11 - MCMC for MCAR - A basic example (WIP)</title>
+<title>MS - Step 11 - A Bayesian HM for multivariate Guassian data and MCAR prior - derivation of full conditionals and comments on computing</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -186,7 +186,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Step 11 - MCMC for MCAR - A basic example (WIP)</h1>
+<h1 class="title">Step 11 - A Bayesian HM for multivariate Guassian data and MCAR prior - derivation of full conditionals and comments on computing</h1>
   <div class="quarto-categories">
     <div class="quarto-category">Bayesian</div>
     <div class="quarto-category">MCMC</div>
@@ -330,20 +330,17 @@ p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 \boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
 \end{pmatrix}.
 \]</span> Then if we proceed in deriving the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>, we will have</p>
-<p>$$ <span class="math display">\[\begin{align*}
+<p><span class="math display">\[
+\begin{align*}
 p(\boldsymbol\phi' \,|\, \text{rest}) &amp;\propto p(\boldsymbol\delta', \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
 &amp;\propto p(\{\boldsymbol\delta' \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\phi')\\
-
 &amp;\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\delta'-(\mathbf{A} + \boldsymbol\phi')\right]^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\left[\boldsymbol\delta_i-(\mathbf{A} + \boldsymbol\phi')\right]\right\}\\
 &amp;\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-
-
 &amp;\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}\\
 &amp;\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-
-
 &amp;\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1} + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\right)\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}
-\end{align*}\]</span> $$ Thus,</p>
+\end{align*}
+\]</span> Thus,</p>
 <p><span class="math display">\[
 \begin{align*}
 \boldsymbol\phi'\,|\,\text{rest} &amp;\sim \text{Normal}_{np}(\mathbf{V}_{\phi'}^{-1}\mathbf{M}_{\phi'}, \mathbf{V}_{\phi'}^{-1})\\

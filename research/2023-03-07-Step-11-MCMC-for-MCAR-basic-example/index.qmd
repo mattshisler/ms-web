@@ -1,5 +1,5 @@
 ---
-title: "Step 11 - MCMC for MCAR - A basic example (WIP)"
+title: "Step 11 - A Bayesian HM for multivariate Guassian data and MCAR prior - derivation of full conditionals and comments on computing"
 description: "Previously we introduced the MCAR model and simulated data from it. Now we will focus on fitting a Bayesian MCAR model to multivariate areal data using MCMC. It will be a naive pedagogical approach."
 author:
   - name: Matthew Shisler
@@ -147,15 +147,10 @@ $$
 \begin{align*}
 p(\boldsymbol\phi' \,|\, \text{rest}) &\propto p(\boldsymbol\delta', \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
 &\propto p(\{\boldsymbol\delta' \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\phi')\\
-
 &\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\delta'-(\mathbf{A} + \boldsymbol\phi')\right]^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\left[\boldsymbol\delta_i-(\mathbf{A} + \boldsymbol\phi')\right]\right\}\\
 &\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-
-
 &\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}\\
 &\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-
-
 &\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1} + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\right)\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}
 \end{align*}
 $$
