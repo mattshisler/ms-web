@@ -61,8 +61,8 @@ In another way,
 $$
 \begin{align*}
 \boldsymbol\delta_i &\sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \;  \boldsymbol\Omega\right)\\
+\boldsymbol\beta &\sim \text{Normal}_{qp}\left(\boldsymbol\mu, \boldsymbol\Gamma\right)\\
 \boldsymbol\phi' &\sim \text{Normal}_{np}\left(\boldsymbol 0, (\mathbf{D-\rho\mathbf{W}})^{-1} \otimes \boldsymbol\Lambda\right)\\
-\boldsymbol\beta &\sim \text{Normal}_{qp}(\boldsymbol\mu, \boldsymbol\Gamma)\\
 \omega_{kk} &\sim \text{InvGamm}(a_k, b_k)\\
 \boldsymbol\Lambda &\sim \text{InvWish}()\\
 \rho &\sim \text{Unif}(0,1)
@@ -79,17 +79,76 @@ p(\boldsymbol\beta \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \bolds
 &\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi, \boldsymbol\Omega)p(\boldsymbol\beta)\\
 &= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\beta)\\
 &\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
-&\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
+&\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
 &\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta\right]\right\}\\
-&\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\boldsymbol\Gamma^{-1}\boldsymbol\beta - 2\boldsymbol\mu^T\boldsymbol\Gamma^{-1}\boldsymbol\beta\right]\right\}\\
+&\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\boldsymbol\Gamma^{-1}\boldsymbol\beta - 2\boldsymbol\mu^T\boldsymbol\Gamma^{-1}\boldsymbol\beta\right]\right\}\\
+&\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i + \boldsymbol\Gamma^{-1}\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i + \boldsymbol\mu^T\boldsymbol\Gamma^{-1}\right)\boldsymbol\beta\right]\right\}
+\end{align*}
+$$
+Thus,
+$$
+\begin{align*}
+\boldsymbol\beta\,|\,\text{rest} &\sim \text{Normal}_{qp}(\mathbf{V}_\beta^{-1}\mathbf{M}_\beta, \mathbf{V}_\beta^{-1})\\
+\mathbf{V}_\beta &= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Omega}^{-1}\\
+\mathbf{M}_\beta &= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Omega}^{-1}\boldsymbol\mu\\\\
 \end{align*}
 $$
 
+Next we must determine the full conditional distributions for the spatial random vector. There are two approaches here, we could either derive full conditionals for $\boldsymbol\phi_i$ and draw samples in $n$ sub-blocks of parameters, or we could derive the full conditional for $\boldsymbol\phi'$ and update all $\boldsymbol\phi_i$ in a block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let's try to tackle that.
+
+The trickiness of updating $\boldsymbol\phi'$ as a single block is due to our model specification for $\boldsymbol\delta_i$. 
+
+Let,
+$$
+\boldsymbol\Delta = 
+\begin{pmatrix}
+\delta_{11} & \dots & \delta_{1p}\\
+\delta_{21} & \dots & \delta_{2p}\\
+\vdots & \vdots & \vdots\\
+\delta_{n1} & \dots & \delta_{np}\\
+\end{pmatrix} =
+\begin{pmatrix}
+\boldsymbol\delta_1^T\\
+\boldsymbol\delta_2^T\\
+\vdots\\
+\boldsymbol\delta_n^T\\
+\end{pmatrix}
 $$
 
+Then define $\boldsymbol\delta' = \text{vec}(\boldsymbol\Delta^T)$. Since $\boldsymbol\delta_i$ are conditionally independent, the joint distribution for $\boldsymbol\delta'$ is
+
 $$
+\boldsymbol\delta' \sim \text{Normal}_{np} 
+\left(
+\begin{pmatrix}
+\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
+\boldsymbol{\mathcal{Z}}_2\boldsymbol\beta\\
+\vdots \\
+\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
+\end{pmatrix} + \boldsymbol\phi', \;
+\mathbf{I}_n \otimes \boldsymbol\Omega
+\right)
+$$
+The purpose of constructing the joint distribution in this way was to ensure the mean is in terms of $\boldsymbol\phi'$. But now the fixed effects terms are awkward. . ., but does it really matter?
 
+What if we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in one "extracts" a sub-collection of elements from a vector. We know there exists a $p \times np$ matrix \mathbf{U}_i which will "extract" the $p \times 1$ $\boldsymbol\phi_i$ vector from the $np \times 1$ $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
 
+$$
+\begin{align*}
+\boldsymbol\phi_i &= 
+\mathbf{U}_i\boldsymbol\phi'\\
+&= \begin{pmatrix}
+\boldsymbol{0}_p & \dots & \boldsymbol{0}_p & \mathbf{I}_p & \boldsymbol{0}_p & \dots & \boldsymbol{0}_p
+\end{pmatrix}
+\boldsymbol\phi'
+\end{align*}
+$$
+where $\boldsymbol 0_p$ is a $p \times p$ matrix of $0$'s. Now we can write
+
+$$
+\boldsymbol\delta_i \sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi', \;  \boldsymbol\Omega\right)
+$$
+which will facilitate the derivation of the full conditional for $\boldsymbol\phi'$.
 
 
 

@@ -265,8 +265,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><span class="math display">\[
 \begin{align*}
 \boldsymbol\delta_i &amp;\sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \;  \boldsymbol\Omega\right)\\
+\boldsymbol\beta &amp;\sim \text{Normal}_{qp}\left(\boldsymbol\mu, \boldsymbol\Gamma\right)\\
 \boldsymbol\phi' &amp;\sim \text{Normal}_{np}\left(\boldsymbol 0, (\mathbf{D-\rho\mathbf{W}})^{-1} \otimes \boldsymbol\Lambda\right)\\
-\boldsymbol\beta &amp;\sim \text{Normal}_{qp}(\boldsymbol\mu, \boldsymbol\Gamma)\\
 \omega_{kk} &amp;\sim \text{InvGamm}(a_k, b_k)\\
 \boldsymbol\Lambda &amp;\sim \text{InvWish}()\\
 \rho &amp;\sim \text{Unif}(0,1)
@@ -279,13 +279,62 @@ p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 &amp;\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi, \boldsymbol\Omega)p(\boldsymbol\beta)\\
 &amp;= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\beta)\\
 &amp;\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
-&amp;\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
+&amp;\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
 &amp;\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta\right]\right\}\\
-&amp;\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\boldsymbol\Gamma^{-1}\boldsymbol\beta - 2\boldsymbol\mu^T\boldsymbol\Gamma^{-1}\boldsymbol\beta\right]\right\}\\
+&amp;\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\boldsymbol\Gamma^{-1}\boldsymbol\beta - 2\boldsymbol\mu^T\boldsymbol\Gamma^{-1}\boldsymbol\beta\right]\right\}\\
+&amp;\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i + \boldsymbol\Gamma^{-1}\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i + \boldsymbol\mu^T\boldsymbol\Gamma^{-1}\right)\boldsymbol\beta\right]\right\}
+\end{align*}
+\]</span> Thus, <span class="math display">\[
+\begin{align*}
+\boldsymbol\beta\,|\,\text{rest} &amp;\sim \text{Normal}_{qp}(\mathbf{V}_\beta^{-1}\mathbf{M}_\beta, \mathbf{V}_\beta^{-1})\\
+\mathbf{V}_\beta &amp;= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Omega}^{-1}\\
+\mathbf{M}_\beta &amp;= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Omega}^{-1}\boldsymbol\mu\\\\
 \end{align*}
 \]</span></p>
-<p>$$</p>
-<p>$$</p>
+<p>Next we must determine the full conditional distributions for the spatial random vector. There are two approaches here, we could either derive full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span> and draw samples in <span class="math inline">\(n\)</span> sub-blocks of parameters, or we could derive the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span> and update all <span class="math inline">\(\boldsymbol\phi_i\)</span> in a block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let’s try to tackle that.</p>
+<p>The trickiness of updating <span class="math inline">\(\boldsymbol\phi'\)</span> as a single block is due to our model specification for <span class="math inline">\(\boldsymbol\delta_i\)</span>.</p>
+<p>Let, <span class="math display">\[
+\boldsymbol\Delta =
+\begin{pmatrix}
+\delta_{11} &amp; \dots &amp; \delta_{1p}\\
+\delta_{21} &amp; \dots &amp; \delta_{2p}\\
+\vdots &amp; \vdots &amp; \vdots\\
+\delta_{n1} &amp; \dots &amp; \delta_{np}\\
+\end{pmatrix} =
+\begin{pmatrix}
+\boldsymbol\delta_1^T\\
+\boldsymbol\delta_2^T\\
+\vdots\\
+\boldsymbol\delta_n^T\\
+\end{pmatrix}
+\]</span></p>
+<p>Then define <span class="math inline">\(\boldsymbol\delta' = \text{vec}(\boldsymbol\Delta^T)\)</span>. Since <span class="math inline">\(\boldsymbol\delta_i\)</span> are conditionally independent, the joint distribution for <span class="math inline">\(\boldsymbol\delta'\)</span> is</p>
+<p><span class="math display">\[
+\boldsymbol\delta' \sim \text{Normal}_{np}
+\left(
+\begin{pmatrix}
+\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
+\boldsymbol{\mathcal{Z}}_2\boldsymbol\beta\\
+\vdots \\
+\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
+\end{pmatrix} + \boldsymbol\phi', \;
+\mathbf{I}_n \otimes \boldsymbol\Omega
+\right)
+\]</span> The purpose of constructing the joint distribution in this way was to ensure the mean is in terms of <span class="math inline">\(\boldsymbol\phi'\)</span>. But now the fixed effects terms are awkward. . ., but does it really matter?</p>
+<p>What if we instead wrote <span class="math inline">\(\boldsymbol\phi_i\)</span> in terms of <span class="math inline">\(\boldsymbol\phi'\)</span> when describing the distribution of <span class="math inline">\(\boldsymbol\delta_i\)</span>? Consider the way in one “extracts” a sub-collection of elements from a vector. We know there exists a <span class="math inline">\(p \times np\)</span> matrix _i which will “extract” the <span class="math inline">\(p \times 1\)</span> <span class="math inline">\(\boldsymbol\phi_i\)</span> vector from the <span class="math inline">\(np \times 1\)</span> <span class="math inline">\(\boldsymbol\phi'\)</span> vector. This <span class="math inline">\(\mathbf{U}_i\)</span> matrix will have all elements equal to <span class="math inline">\(0\)</span> except for <span class="math inline">\(p\)</span> columns forming a <span class="math inline">\(p \times p\)</span> identity matrix. The position of this <span class="math inline">\(p \times p\)</span> identity matrix in <span class="math inline">\(\mathbf{U}_i\)</span> determines which <span class="math inline">\(\boldsymbol\phi_i\)</span> to “extract” from <span class="math inline">\(\boldsymbol\phi'\)</span>. In order to extract <span class="math inline">\(\boldsymbol\phi_i\)</span>, then the <span class="math inline">\(p \times p\)</span> identity matrix must begin at column <span class="math inline">\((i-1)p + 1\)</span> in <span class="math inline">\(\mathbf{U}_i\)</span></p>
+<p><span class="math display">\[
+\begin{align*}
+\boldsymbol\phi_i &amp;=
+\mathbf{U}_i\boldsymbol\phi'\\
+&amp;= \begin{pmatrix}
+\boldsymbol{0}_p &amp; \dots &amp; \boldsymbol{0}_p &amp; \mathbf{I}_p &amp; \boldsymbol{0}_p &amp; \dots &amp; \boldsymbol{0}_p
+\end{pmatrix}
+\boldsymbol\phi'
+\end{align*}
+\]</span> where <span class="math inline">\(\boldsymbol 0_p\)</span> is a <span class="math inline">\(p \times p\)</span> matrix of <span class="math inline">\(0\)</span>’s. Now we can write</p>
+<p><span class="math display">\[
+\boldsymbol\delta_i \sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi', \;  \boldsymbol\Omega\right)
+\]</span> which will facilitate the derivation of the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
 
 
 </section>

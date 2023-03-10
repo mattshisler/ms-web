@@ -278,7 +278,7 @@ z_{iq}
 \boldsymbol\delta_i|\text{ rest} &amp;\sim \text{Normal}_p(\mathbf{V}_i^{-1}\mathbf{M}_i, \mathbf{V}_i^{-1})\\
 \mathbf{V}_i &amp;= \frac{1}{\sigma^2} \widetilde{\mathbf{X}}_i^T\widetilde{\mathbf{X}}_i + \mathbf{\Omega}^{-1}\\
 \mathbf{M}_i &amp;= \frac{1}{\sigma^2} \widetilde{\mathbf{X}}_i^T\mathbf{Y}_i + \mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\\\\
-\boldsymbol\beta|\text{ rest} &amp;\sim \text{Normal}_p(\mathbf{V}_\beta^{-1}\mathbf{M}_\beta, \mathbf{V}_\beta^{-1})\\
+\boldsymbol\beta|\text{ rest} &amp;\sim \text{Normal}_{qp}(\mathbf{V}_\beta^{-1}\mathbf{M}_\beta, \mathbf{V}_\beta^{-1})\\
 \mathbf{V}_\beta &amp;= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Lambda}^{-1}\\
 \mathbf{M}_\beta &amp;= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol\delta_i + \mathbf{\Lambda}^{-1}\boldsymbol\mu\\\\
 \omega_{kk}|\text{ rest} &amp;\sim \text{InvGamma}(A_\omega,B_\omega)\\
