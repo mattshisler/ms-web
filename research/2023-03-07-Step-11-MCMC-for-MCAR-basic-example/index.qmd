@@ -31,19 +31,21 @@ library(viridis)
 
 In this post we will code an MCMC sampler for a Bayesian hierarchical model with an MCAR prior specified in the second stage. For simplicity, we will consider the case common spatial strength parameter $\rho$.
 
-Let $\mathcal{D}$ be a spatial domain partitioned into $n$ areal units indexed by $i$. Following the notation of Step 3 (link), let $\boldsymbol\delta_i$ be a multivariate ($p \times 1$) response vector with expected value
+Let $\mathcal{D}$ be a spatial domain partitioned into $n$ areal units indexed by $i$. Following the notation of Step 3 (link), let $\boldsymbol\delta_i$ be a multivariate ($p \times 1$) response vector with conditional expectation
 $$
-\text{E}(\boldsymbol\delta_i)  = \boldsymbol{\mathcal{Z}}_i \boldsymbol\beta + \boldsymbol\phi_i
+\text{E}(\boldsymbol\delta_i \,|\,\boldsymbol\phi_i)  = \boldsymbol{\mathcal{Z}}_i \boldsymbol\beta + \boldsymbol\phi_i
 $$
 and covariance
 $$
-
+\text{Cov}(\boldsymbol\delta_i \,|\, \boldsymbol\phi_i) = \text{Cov}(\boldsymbol\epsilon_i) = \boldsymbol\Omega
 $$
 
 $$
 \boldsymbol\delta_i = \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i + \boldsymbol\epsilon_i
 $$
-where $\boldsymbol\epsilon_i \sim \text{N}\left(\boldsymbol 0, \boldsymbol\Omega\right)$.
+where $\boldsymbol\epsilon_i \sim \text{N}\left(\boldsymbol 0, \boldsymbol\Omega\right)$ is a random noise vector.
+
+We can specify the model with conditional priors on $\boldsymbol\phi{i}$
 
 $$
 \begin{align*}
@@ -56,7 +58,7 @@ $$
 \end{align*}
 $$
 
-In another way,
+Or we can write the model in another way, with the joint distribution for $\boldsymbol\phi'$, the vector formed by stacking $\boldsymbol\phi_i$, $i = 1,\dots,n$.
 
 $$
 \begin{align*}
@@ -69,7 +71,7 @@ $$
 \end{align*}
 $$
 
-In this specification we take elements of $\boldsymbol\delta_i$ to be independent which in general need not be the case.
+In this specification we take elements of $\boldsymbol\delta_i$ to be conditionally independent (i.e. $\boldsymbol\Omega$ is a diagonal matrix) which in general need not be the case.
 
 
 Start with the full conditional for $\boldsymbol\beta$.
@@ -224,7 +226,7 @@ $$
 \end{bmatrix}.
 \end{equation}
 $$
-Notice, $\boldsymbol{\mathcal{Z}}_i = \mathbf{z}^T_i \otimes \mathbf{I}_p$. Then the following convenient identities relate sums to Kronecker products, (make this more general?)
+Notice, $\boldsymbol{\mathcal{Z}}_i = \mathbf{z}^T_i \otimes \mathbf{I}_p$. Then the following relate the sums to Kronecker products, (make this more general?)
 
 $$
 \begin{equation}
@@ -255,8 +257,7 @@ $$
 \sum_{i=1}^N\mathbf{U}_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta) =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{I}_n) = (\mathbf{I}_n^T \otimes \, \boldsymbol\Omega^{-1})(\boldsymbol\delta'-\mathbf{A}).
 \end{equation}
 $$
-
-So this was basically a massive waste of time.
+This shows that the two approaches to deriving the full conditional for $\boldsymbol\phi'$ yield the same results.
 
 
 
