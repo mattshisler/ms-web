@@ -206,6 +206,57 @@ $$
 \end{align*}
 $$
 
+These two full conditionals for $\boldsymbol\phi'$ are equivalent. To see this we need to apply an identity previously described in Step 3 during the discussion of the full conditional for $\boldsymbol\beta$. In Step 3, we considered an organization of the covariates $\mathbf{z}_i$, into a matrix $\mathbf{Z} = (\mathbf{z}_1^T, \dots,\mathbf{z}_N^T)^T$
+$$
+\begin{equation}
+\tag{3}
+\mathbf{Z} = 
+\begin{bmatrix}
+1 & z_{12} & \dots & z_{1q}\\
+\vdots & & \vdots &\\
+1 & z_{N2} & \dots & z_{Nq}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{z}_1^T\\
+\vdots\\
+\mathbf{z}_N^T\\
+\end{bmatrix}.
+\end{equation}
+$$
+Notice, $\boldsymbol{\mathcal{Z}}_i = \mathbf{z}^T_i \otimes \mathbf{I}_p$. Then the following convenient identities relate sums to Kronecker products, (make this more general?)
+
+$$
+\begin{equation}
+\tag{4}
+\sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i = \mathbf{Z}^T\mathbf{Z} \otimes \boldsymbol\Omega^{-1}
+\end{equation}
+$$
+
+$$
+\begin{equation}
+\tag{5}
+\sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol\delta_i =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{Z}) = (\mathbf{Z}^T \otimes \, \boldsymbol\Omega^{-1})\text{vec}(\boldsymbol\Delta).
+\end{equation}
+$$
+In the case of the full conditional for $\boldsymbol\phi'$, we have $\mathbf{U}_i = \mathbf{u}^T_i \otimes I_n$ where $\mathbf{u}_i$ is an elementary vector with $1$ in position $i$ and $0$ elsewhere. Stacking rows of $\mathbf{u}_i^T$ into a matrix constructs the identity matrix $\mathbf{I}_n$. So, substituting $\mathbf{U}_i$ for $\boldsymbol{\mathcal{Z}}_i$ and $\mathbf{I}_n$ for $\mathbf{Z}$ yields
+
+$$
+\begin{equation}
+\tag{4}
+\sum_{i=1}^N\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i = \mathbf{I}_n^T\mathbf{I}_n \otimes \boldsymbol\Omega^{-1} = \mathbf{I}_n \otimes \boldsymbol\Omega^{-1}
+\end{equation}
+$$
+
+Also, substituting $\mathbf{U}_i$ for $\boldsymbol{\mathcal{Z}}_i$ and $\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta$ for $\boldsymbol\delta_i$ yields
+$$
+\begin{equation}
+\tag{5}
+\sum_{i=1}^N\mathbf{U}_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta) =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{I}_n) = (\mathbf{I}_n^T \otimes \, \boldsymbol\Omega^{-1})(\boldsymbol\delta'-\mathbf{A}).
+\end{equation}
+$$
+
+So this was basically a massive waste of time.
 
 
 

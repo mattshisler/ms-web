@@ -381,6 +381,48 @@ p(\boldsymbol\phi' \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 \mathbf{M}_{\phi'} &amp;= \sum_{i=1}^n\mathbf{U}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)
 \end{align*}
 \]</span></p>
+<p>These two full conditionals for <span class="math inline">\(\boldsymbol\phi'\)</span> are equivalent. To see this we need to apply an identity previously described in Step 3 during the discussion of the full conditional for <span class="math inline">\(\boldsymbol\beta\)</span>. In Step 3, we considered an organization of the covariates <span class="math inline">\(\mathbf{z}_i\)</span>, into a matrix <span class="math inline">\(\mathbf{Z} = (\mathbf{z}_1^T, \dots,\mathbf{z}_N^T)^T\)</span> <span class="math display">\[
+\begin{equation}
+\tag{3}
+\mathbf{Z} =
+\begin{bmatrix}
+1 &amp; z_{12} &amp; \dots &amp; z_{1q}\\
+\vdots &amp; &amp; \vdots &amp;\\
+1 &amp; z_{N2} &amp; \dots &amp; z_{Nq}
+\end{bmatrix}
+=
+\begin{bmatrix}
+\mathbf{z}_1^T\\
+\vdots\\
+\mathbf{z}_N^T\\
+\end{bmatrix}.
+\end{equation}
+\]</span> Notice, <span class="math inline">\(\boldsymbol{\mathcal{Z}}_i = \mathbf{z}^T_i \otimes \mathbf{I}_p\)</span>. Then the following convenient identities relate sums to Kronecker products, (make this more general?)</p>
+<p><span class="math display">\[
+\begin{equation}
+\tag{4}
+\sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i = \mathbf{Z}^T\mathbf{Z} \otimes \boldsymbol\Omega^{-1}
+\end{equation}
+\]</span></p>
+<p><span class="math display">\[
+\begin{equation}
+\tag{5}
+\sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol\delta_i =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{Z}) = (\mathbf{Z}^T \otimes \, \boldsymbol\Omega^{-1})\text{vec}(\boldsymbol\Delta).
+\end{equation}
+\]</span> In the case of the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>, we have <span class="math inline">\(\mathbf{U}_i = \mathbf{u}^T_i \otimes I_n\)</span> where <span class="math inline">\(\mathbf{u}_i\)</span> is an elementary vector with <span class="math inline">\(1\)</span> in position <span class="math inline">\(i\)</span> and <span class="math inline">\(0\)</span> elsewhere. Stacking rows of <span class="math inline">\(\mathbf{u}_i^T\)</span> into a matrix constructs the identity matrix <span class="math inline">\(\mathbf{I}_n\)</span>. So, substituting <span class="math inline">\(\mathbf{U}_i\)</span> for <span class="math inline">\(\boldsymbol{\mathcal{Z}}_i\)</span> and <span class="math inline">\(\mathbf{I}_n\)</span> for <span class="math inline">\(\mathbf{Z}\)</span> yields</p>
+<p><span class="math display">\[
+\begin{equation}
+\tag{4}
+\sum_{i=1}^N\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i = \mathbf{I}_n^T\mathbf{I}_n \otimes \boldsymbol\Omega^{-1} = \mathbf{I}_n \otimes \boldsymbol\Omega^{-1}
+\end{equation}
+\]</span></p>
+<p>Also, substituting <span class="math inline">\(\mathbf{U}_i\)</span> for <span class="math inline">\(\boldsymbol{\mathcal{Z}}_i\)</span> and <span class="math inline">\(\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\)</span> for <span class="math inline">\(\boldsymbol\delta_i\)</span> yields <span class="math display">\[
+\begin{equation}
+\tag{5}
+\sum_{i=1}^N\mathbf{U}_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta) =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{I}_n) = (\mathbf{I}_n^T \otimes \, \boldsymbol\Omega^{-1})(\boldsymbol\delta'-\mathbf{A}).
+\end{equation}
+\]</span></p>
+<p>So this was basically a massive waste of time.</p>
 
 
 </section>
