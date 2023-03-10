@@ -141,11 +141,8 @@ $$
 \boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
 \end{pmatrix}.
 $$
-Then if we proceed in deriving the full conditonal for $\boldsymbol\phi'$, we will have
+Then if we proceed in deriving the full conditional for $\boldsymbol\phi'$, we will have
 
-$$
-
-$$
 
 What if we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in which one "extracts" a sub-vector of elements from a vector. We know there exists a $p \times np$ matrix \mathbf{U}_i which will "extract" the $p \times 1$ $\boldsymbol\phi_i$ vector from the $np \times 1$ $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
 
@@ -171,16 +168,10 @@ $$
 p(\boldsymbol\phi' \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
 &\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\phi')\\
 &= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi',\boldsymbol\Omega)\right]p(\boldsymbol\phi')\\
-
 &\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi')\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi')\right]\right\}\\
 &\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-
 &\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi' - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi'\right]\right\}\\
-
-
 &\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-
-
 &\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\right)\boldsymbol\phi' - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi'\right]\right\}
 \end{align*}
 $$
