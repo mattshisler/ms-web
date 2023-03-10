@@ -89,14 +89,16 @@ Thus,
 $$
 \begin{align*}
 \boldsymbol\beta\,|\,\text{rest} &\sim \text{Normal}_{qp}(\mathbf{V}_\beta^{-1}\mathbf{M}_\beta, \mathbf{V}_\beta^{-1})\\
-\mathbf{V}_\beta &= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Omega}^{-1}\\
-\mathbf{M}_\beta &= \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Omega}^{-1}\boldsymbol\mu\\\\
+\mathbf{V}_\beta &= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Omega}^{-1}\\
+\mathbf{M}_\beta &= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Omega}^{-1}\boldsymbol\mu
 \end{align*}
 $$
 
-Next we must determine the full conditional distributions for the spatial random vector. There are two approaches here, we could either derive full conditionals for $\boldsymbol\phi_i$ and draw samples in $n$ sub-blocks of parameters, or we could derive the full conditional for $\boldsymbol\phi'$ and update all $\boldsymbol\phi_i$ in a block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let's try to tackle that.
+Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for $\boldsymbol\phi_i$ and draw samples in $n$ sub-blocks of parameters, or we could derive the full conditional for $\boldsymbol\phi'$ and update all $\boldsymbol\phi_i$ in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let's try to tackle that.
 
-The trickiness of updating $\boldsymbol\phi'$ as a single block is due to our model specification for $\boldsymbol\delta_i$. 
+The trickiness of updating $\boldsymbol\phi'$ as a single block is due to our model specification for $\boldsymbol\delta_i$. The likelihood for $\boldsymbol\delta_i$ is not compatible with the prior on $\boldsymbol\phi'$ because the spatial term in the former is specified in terms of $p \times 1$ vectors while in the latter spatial term is a $np \times 1$ vector.
+
+We could either construct the joint distribution of the $\boldsymbol\delta_i$ vectors or we could try to write $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ and substitute into the corresponding $\boldsymbol\delta_i$ distributions. 
 
 Let,
 $$
@@ -129,9 +131,23 @@ $$
 \mathbf{I}_n \otimes \boldsymbol\Omega
 \right)
 $$
-The purpose of constructing the joint distribution in this way was to ensure the mean is in terms of $\boldsymbol\phi'$. But now the fixed effects terms are awkward. . ., but does it really matter?
+Again, the purpose of constructing the joint distribution in this way was to ensure the mean is in terms of $\boldsymbol\phi'$. But now the fixed effects term is a bit awkward. Let's avoid that temporarily by letting
+$$
+\mathbf{A} = 
+\begin{pmatrix}
+\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
+\boldsymbol{\mathcal{Z}}_2\boldsymbol\beta\\
+\vdots \\
+\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
+\end{pmatrix}.
+$$
+Then if we proceed in deriving the full conditonal for $\boldsymbol\phi'$, we will have
 
-What if we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in one "extracts" a sub-collection of elements from a vector. We know there exists a $p \times np$ matrix \mathbf{U}_i which will "extract" the $p \times 1$ $\boldsymbol\phi_i$ vector from the $np \times 1$ $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
+$$
+
+$$
+
+What if we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in which one "extracts" a sub-vector of elements from a vector. We know there exists a $p \times np$ matrix \mathbf{U}_i which will "extract" the $p \times 1$ $\boldsymbol\phi_i$ vector from the $np \times 1$ $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
 
 $$
 \begin{align*}
@@ -150,8 +166,32 @@ $$
 $$
 which will facilitate the derivation of the full conditional for $\boldsymbol\phi'$.
 
+$$
+\begin{align*}
+p(\boldsymbol\phi' \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\phi')\\
+&= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi',\boldsymbol\Omega)\right]p(\boldsymbol\phi')\\
+
+&\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi')\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi')\right]\right\}\\
+&\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
+
+&\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi' - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi'\right]\right\}\\
 
 
+&\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
+
+
+&\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\right)\boldsymbol\phi' - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi'\right]\right\}
+\end{align*}
+$$
+Thus,
+$$
+\begin{align*}
+\boldsymbol\phi'\,|\,\text{rest} &\sim \text{Normal}_{np}(\mathbf{V}_{\phi'}^{-1}\mathbf{M}_{\phi'}, \mathbf{V}_{\phi'}^{-1})\\
+\mathbf{V}_{\phi'} &= \sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\\
+\mathbf{M}_{\phi'} &= \sum_{i=1}^n\mathbf{U}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)
+\end{align*}
+$$
 
 
 
