@@ -424,6 +424,26 @@ p(\boldsymbol\phi' \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 \sum_{i=1}^N\mathbf{U}_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta) =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{I}_n) = (\mathbf{I}_n^T \otimes \, \boldsymbol\Omega^{-1})(\boldsymbol\delta'-\mathbf{A}).
 \end{equation}
 \]</span> This shows that the two approaches to deriving the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span> yield the same results.</p>
+<p>Returning to <span class="math inline">\(\mathbf{A}\)</span>, which is necessary to compute in the block full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>. We recognize that</p>
+<p><span class="math display">\[
+\begin{align*}
+\mathbf{A} &amp;=
+\begin{pmatrix}
+\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
+\vdots \\
+\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
+\end{pmatrix}\\
+&amp;=
+\begin{pmatrix}
+\mathbf{B}\mathbf{z_1}\\
+\vdots \\
+\mathbf{B}\mathbf{z_n}\\
+\end{pmatrix}\\
+&amp;= \text{vec}(\mathbf{B}\mathbf{Z^T})
+\end{align*}
+\]</span> So we can substitute, <span class="math display">\[
+(\boldsymbol\delta_i - \mathbf{A}) = \text{vec}(\boldsymbol\Delta-\mathbf{B}\mathbf{Z}^T)
+\]</span> in the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
 
 
 </section>

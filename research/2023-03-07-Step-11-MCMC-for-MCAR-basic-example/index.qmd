@@ -259,6 +259,27 @@ $$
 $$
 This shows that the two approaches to deriving the full conditional for $\boldsymbol\phi'$ yield the same results.
 
+Returning to $\mathbf{A}$, which is necessary to compute in the block full conditional for $\boldsymbol\phi'$. We recognize that
 
-
-
+$$
+\begin{align*}
+\mathbf{A} &= 
+\begin{pmatrix}
+\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
+\vdots \\
+\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
+\end{pmatrix}\\
+&= 
+\begin{pmatrix}
+\mathbf{B}\mathbf{z_1}\\
+\vdots \\
+\mathbf{B}\mathbf{z_n}\\
+\end{pmatrix}\\
+&= \text{vec}(\mathbf{B}\mathbf{Z^T})
+\end{align*}
+$$
+So we can substitute,
+$$
+(\boldsymbol\delta_i - \mathbf{A}) = \text{vec}(\boldsymbol\Delta-\mathbf{B}\mathbf{Z}^T)
+$$
+in the full conditional for $\boldsymbol\phi'$.
