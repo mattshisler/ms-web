@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -272,6 +272,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \rho &amp;\sim \text{Unif}(0,1)
 \end{align*}
 \]</span></p>
+<p>In this specification we take elements of <span class="math inline">\(\boldsymbol\delta_i\)</span> to be independent which in general need not be the case.</p>
+<p>Start with the full conditional for <span class="math inline">\(\boldsymbol\beta\)</span>. <span class="math display">\[
+\begin{align*}
+p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&amp;\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi, \boldsymbol\Omega)p(\boldsymbol\beta)\\
+&amp;= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\beta)\\
+&amp;\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
+&amp;\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
+&amp;\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta\right]\right\}\\
+&amp;\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\boldsymbol\Gamma^{-1}\boldsymbol\beta - 2\boldsymbol\mu^T\boldsymbol\Gamma^{-1}\boldsymbol\beta\right]\right\}\\
+\end{align*}
+\]</span></p>
+<p>$$</p>
+<p>$$</p>
 
 
 </section>

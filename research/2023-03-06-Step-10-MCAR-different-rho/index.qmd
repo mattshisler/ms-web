@@ -124,13 +124,13 @@ $$
 \mathbf{U}^T_1 & \mathbf{0} \\
 \mathbf{0} & \mathbf{U}^T_2
 \end{pmatrix}
-(\boldsymbol\Lambda \otimes \mathbf{I}_n)
+(\boldsymbol\Lambda^{-1} \otimes \mathbf{I}_n)
 \begin{pmatrix}
 \mathbf{U}_1 & \mathbf{0} \\
 \mathbf{0} & \mathbf{U}_2
 \end{pmatrix}
 $$
-
+where $\mathbf{U}_1^T\mathbf{U}_1 = \mathbf{D}-\rho_1\mathbf{W}$ and $\mathbf{U}_2^T\mathbf{U}_2 = \mathbf{D}-\rho_2\mathbf{W}$
 WIP
 
 

@@ -118,7 +118,7 @@ Let $\otimes$ represent the Kronecker product. The following identity holds,
 
 With $\mathbf{Z}$ known we can compute $\mathbf{Z}^T\mathbf{Z}$ outside of the Gibbs loop. 
 
-Also in the full conditional for $\boldsymbol\beta$ we have the expression $ \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol\delta_i$. Unfortunately, with $\boldsymbol\delta_i$ and $\boldsymbol\Omega^{-1}$ being parameters to update, this expression must be fully evaluated at each MCMC iteration. Let $\boldsymbol\Delta = (\boldsymbol\delta_1,\dots,\boldsymbol\delta_N)$ be the $p \times N$ matrix of arranged parameter vectors, $\boldsymbol\delta_i$, and $\mathbf{Z}$ be defined as before in $(3)$. A useful identity in computing the quantity of interest is
+Also in the full conditional for $\boldsymbol\beta$ we have the expression $\sum_{i=1}^N \boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol\delta_i$. Unfortunately, with $\boldsymbol\delta_i$ and $\boldsymbol\Omega^{-1}$ being parameters to update, this expression must be fully evaluated at each MCMC iteration. Let $\boldsymbol\Delta = (\boldsymbol\delta_1,\dots,\boldsymbol\delta_N)$ be the $p \times N$ matrix of arranged parameter vectors, $\boldsymbol\delta_i$, and $\mathbf{Z}$ be defined as before in $(3)$. A useful identity in computing the quantity of interest is
 \begin{equation}
 \tag{5}
 \sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol\delta_i =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{Z}) = (\mathbf{Z}^T \otimes \, \boldsymbol\Omega^{-1})\text{vec}(\boldsymbol\Delta).

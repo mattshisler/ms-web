@@ -69,9 +69,25 @@ $$
 \end{align*}
 $$
 
+In this specification we take elements of $\boldsymbol\delta_i$ to be independent which in general need not be the case.
 
 
+Start with the full conditional for $\boldsymbol\beta$.
+$$
+\begin{align*}
+p(\boldsymbol\beta \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi, \boldsymbol\Omega)p(\boldsymbol\beta)\\
+&= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\beta)\\
+&\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
+&\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
+&\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta\right]\right\}\\
+&\quad \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\boldsymbol\Gamma^{-1}\boldsymbol\beta - 2\boldsymbol\mu^T\boldsymbol\Gamma^{-1}\boldsymbol\beta\right]\right\}\\
+\end{align*}
+$$
 
+$$
+
+$$
 
 
 
