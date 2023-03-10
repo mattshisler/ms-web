@@ -143,8 +143,35 @@ $$
 $$
 Then if we proceed in deriving the full conditional for $\boldsymbol\phi'$, we will have
 
+$$
+\begin{align*}
+p(\boldsymbol\phi' \,|\, \text{rest}) &\propto p(\boldsymbol\delta', \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&\propto p(\{\boldsymbol\delta' \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\phi')\\
 
-What if we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in which one "extracts" a sub-vector of elements from a vector. We know there exists a $p \times np$ matrix \mathbf{U}_i which will "extract" the $p \times 1$ $\boldsymbol\phi_i$ vector from the $np \times 1$ $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
+&\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\delta'-(\mathbf{A} + \boldsymbol\phi')\right]^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\left[\boldsymbol\delta_i-(\mathbf{A} + \boldsymbol\phi')\right]\right\}\\
+&\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
+
+
+&\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}\\
+&\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
+
+
+&\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1} + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\right)\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}
+\end{align*}
+$$
+Thus,
+
+$$
+\begin{align*}
+\boldsymbol\phi'\,|\,\text{rest} &\sim \text{Normal}_{np}(\mathbf{V}_{\phi'}^{-1}\mathbf{M}_{\phi'}, \mathbf{V}_{\phi'}^{-1})\\
+\mathbf{V}_{\phi'} &= \left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1} + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\\
+\mathbf{M}_{\phi'} &= \left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}(\boldsymbol\delta'-\mathbf{A})
+\end{align*}
+$$
+
+This full conditional looks to be pretty clean, though we will need to consider efficient ways to compute $\mathbf{A}$. Before moving on, let's explore an alternative derivation for the full conditional of $\boldsymbol\phi'$.
+
+If we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in which one "extracts" a sub-vector of elements from a vector. We know there exists a $p \times np$ matrix \mathbf{U}_i which will "extract" the $p \times 1$ $\boldsymbol\phi_i$ vector from the $np \times 1$ $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
 
 $$
 \begin{align*}
