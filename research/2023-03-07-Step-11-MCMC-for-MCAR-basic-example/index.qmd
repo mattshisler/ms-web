@@ -168,7 +168,7 @@ $$
 
 This full conditional looks to be pretty clean, though we will need to consider efficient ways to compute $\mathbf{A}$. Before moving on, let's explore an alternative derivation for the full conditional of $\boldsymbol\phi'$.
 
-If we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in which one "extracts" a sub-vector of elements from a vector. We know there exists a $p \times np$ matrix \mathbf{U}_i which will "extract" the $p \times 1$ $\boldsymbol\phi_i$ vector from the $np \times 1$ $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
+If we instead wrote $\boldsymbol\phi_i$ in terms of $\boldsymbol\phi'$ when describing the distribution of $\boldsymbol\delta_i$? Consider the way in which one "extracts" a sub-vector of elements from a vector. We know there exists a $p \times np$ matrix $\mathbf{U}_i$ which will "extract" the $p \times 1$ dimension $\boldsymbol\phi_i$ vector from the $np \times 1$ dimenion $\boldsymbol\phi'$ vector. This $\mathbf{U}_i$ matrix will have all elements equal to $0$ except for $p$ columns forming a $p \times p$ identity matrix. The position of this $p \times p$ identity matrix in $\mathbf{U}_i$ determines which $\boldsymbol\phi_i$ to "extract" from $\boldsymbol\phi'$. In order to extract $\boldsymbol\phi_i$, then the $p \times p$ identity matrix must begin at column $(i-1)p + 1$ in $\mathbf{U}_i$
 
 $$
 \begin{align*}
@@ -280,6 +280,26 @@ $$
 $$
 So we can substitute,
 $$
-(\boldsymbol\delta_i - \mathbf{A}) = \text{vec}(\boldsymbol\Delta-\mathbf{B}\mathbf{Z}^T)
+(\boldsymbol\delta' - \mathbf{A}) = \text{vec}(\boldsymbol\Delta-\mathbf{B}\mathbf{Z}^T)
 $$
 in the full conditional for $\boldsymbol\phi'$.
+
+Next, we will consider the full conditional for $\boldsymbol\Omega$ under two cases. Either $\boldsymbol\Omega$ is diagonal, i.e. $\boldsymbol\delta_i$ is independent conditional on $\boldsymbol\phi_i$, or $\boldsymbol\Omega$ is symmetric positive-definite matrix, i.e. no assumed structure.
+
+Under independence we can update each element of the diagonal of $\boldsymbol\Omega$ individually
+$$
+\begin{align*}
+p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&\propto p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
+&\propto \big|(\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \Lambda\big|^{-1/2} \exp\left\{-\frac{1}{2}\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})^{-1}\otimes\boldsymbol\Lambda\right)^{-1}\boldsymbol\phi'\right\}\\
+&\quad \; \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
+&\propto \big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T\right)\right\}\\
+&\quad \; \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}
+\end{align*}
+$$
+
+
+
+
+
+
