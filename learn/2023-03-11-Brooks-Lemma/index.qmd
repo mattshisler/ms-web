@@ -5,7 +5,8 @@ author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
     affiliation-url: https://statistics.sciences.ncsu.edu/ 
-categories: [Spatial, Markov Random Field] # self-defined categories
+date: "3/12/2023"
+categories: [Stochastic Processes] # self-defined categories
 draft: false 
 format:
   html: 
@@ -22,12 +23,14 @@ format:
 Here we will explore Brook's Lemma and some of its implications and consequences.
 Brook's lemma is particularly useful in the context of spatial statistics.
 
-Consider a discrete Markov Chain $\{X_t, t \in T \}$ with finite state space $S=\{s_1,s_2,\dots,s_k\}
+Consider a discrete Markov Chain $\{X_t, t \in T \}$ with finite state space.
 
-First, recall the principle property of a Markov Chain, the *Markov Property*. The transition probabilities for $X_t$ depend only on the previous state $X_{t-1}$.
+recall the principle property of a Markov Chain, the *Markov Property*. The transition probabilities for $X_t$ depend only on the previous state $X_{t-1}$. One way to describe the Markov property in the context of a time-ordered evolving process is to say that, conditioned on the present, the past and future are independent. 
 $$
 \Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
 $$
+where $s_t$ is the state at stage $t$.
+
 In this setting, we can factor the joint probability mass/density function, denoted $p(\,\cdot\,)$, of $t$ random variables, using the definition of conditional probability and the Markov Property. Given an initial state $X_0$, 
 
 $$
