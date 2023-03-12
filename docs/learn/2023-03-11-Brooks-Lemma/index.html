@@ -6,8 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Matthew Shisler">
+<meta name="description" content="An explanation of Brook’s Lemma.">
 
-<title>MS - Learn</title>
+<title>MS - Brook’s Lemma</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -23,24 +25,22 @@ ul.task-list li input[type="checkbox"] {
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-listing/list.min.js"></script>
-<script src="site_libs/quarto-listing/quarto-listing.js"></script>
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -60,39 +60,10 @@ ul.task-list li input[type="checkbox"] {
     "search-submit-button-title": "Submit"
   }
 }</script>
-<script>
-
-  window.document.addEventListener("DOMContentLoaded", function (_event) {
-    const listingTargetEl = window.document.querySelector('#listing-listing .list');
-    if (!listingTargetEl) {
-      // No listing discovered, do not attach.
-      return; 
-    }
-
-    const options = {
-      valueNames: ['listing-date','listing-title','listing-author',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
-      
-      searchColumns: ["listing-date","listing-title","listing-author"],
-    };
-
-    window['quarto-listings'] = window['quarto-listings'] || {};
-    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
-
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  });
-
-  window.addEventListener('hashchange',() => {
-    if (window['quarto-listing-loaded']) {
-      window['quarto-listing-loaded']();
-    }
-  })
-  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
 <body class="nav-fixed">
@@ -102,7 +73,7 @@ ul.task-list li input[type="checkbox"] {
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">MS</span>
     </a>
   </div>
@@ -112,19 +83,19 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./index.html">
+    <a class="nav-link" href="../../index.html">
  <span class="menu-text">About</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./research.html">
+    <a class="nav-link" href="../../research.html">
  <span class="menu-text">Research</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./learn.html" aria-current="page">
+    <a class="nav-link" href="../../learn.html">
  <span class="menu-text">Learn</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./notes.html">
+    <a class="nav-link" href="../../notes.html">
  <span class="menu-text">Notes</span></a>
   </li>  
 </ul>
@@ -139,20 +110,44 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(3)</span></div><div class="category" data-category="Bayesian">Bayesian <span class="quarto-category-count">(1)</span></div><div class="category" data-category="MCMC">MCMC <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Markov Random Field">Markov Random Field <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Research">Research <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Spatial">Spatial <span class="quarto-category-count">(1)</span></div><div class="category" data-category="Stochastic Processes">Stochastic Processes <span class="quarto-category-count">(1)</span></div></div></div>
+    </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Learn</h1>
+<h1 class="title">Brook’s Lemma</h1>
+  <div class="quarto-categories">
+    <div class="quarto-category">Spatial</div>
+    <div class="quarto-category">Markov Random Field</div>
+  </div>
+  </div>
+
+<div>
+  <div class="description">
+    An explanation of Brook’s Lemma.
+  </div>
 </div>
 
-
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    Matthew Shisler 
+  </div>
+    <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            <a href="https://statistics.sciences.ncsu.edu/">
+            North Carloina State University - Department of Statistics
+            </a>
+          </p>
+      </div>
+    </div>
 
 <div class="quarto-title-meta">
 
-    
+      
   
     
   </div>
@@ -160,90 +155,31 @@ ul.task-list li input[type="checkbox"] {
 
 </header>
 
+<div class="cell">
 
-
-
-
-<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
-<div class="listing-actions-group">
-   <div class="input-group input-group-sm quarto-listing-sort">
-     <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
-     <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
-       <option value="" disabled="" selected="" hidden="">Order By</option>
-       <option value="index" data-direction="asc">Default</option>
-         <option value="listing-date-sort" data-direction="asc">
-          Date - Oldest
-        </option>
-         <option value="listing-date-sort" data-direction="desc">
-          Date - Newest
-        </option>
-         <option value="listing-title-sort" data-direction="asc">
-          Title
-        </option>
-         <option value="listing-author" data-direction="asc">
-          Author
-        </option>
-     </select>
-  </div>
-    <div class="input-group input-group-sm quarto-listing-filter">
-      <span class="input-group-text"><i class="bi bi-search"></i></span>
-      <input type="text" class="search form-control" placeholder="Filter">
-    </div>
 </div>
+<p>Here we will explore Brook’s Lemma and some of its implications and consequences. Brook’s lemma is particularly useful in the context of spatial statistics.</p>
+<p>Consider a discrete Markov Chain <span class="math inline">\(\{X_t, t \in T \}\)</span> with finite state space $S={s_1,s_2,,s_k}</p>
+<p>First, recall the principle property of a Markov Chain, the <em>Markov Property</em>. The transition probabilities for <span class="math inline">\(X_t\)</span> depend only on the previous state <span class="math inline">\(X_{t-1}\)</span>. <span class="math display">\[
+\Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
+\]</span> In this setting, we can factor the joint probability mass/density function, denoted <span class="math inline">\(p(\,\cdot\,)\)</span>, of <span class="math inline">\(t\)</span> random variables, using the definition of conditional probability and the Markov Property. Given an initial state <span class="math inline">\(X_0\)</span>,</p>
+<p><span class="math display">\[
+\begin{align*}
+p(X_t,X_{t-1},\dots,X_1|X_0) &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0) \cdot p(X_{t-1},\dots,X_1|X_0)\\
+               &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0)\cdot p(X_{t-2},\dots,X_1|X_0)\\
+               &amp;\quad \vdots\\
+               &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0) \dots p(X_1|X_0)\\
+               &amp;= p(X_{t}|X_{t-1})\cdot p(X_{t-1}|X_{t-2})\dots p(X_1|X_0)\\
+               &amp;= \prod_{j=1}^t p(X_j|X_{j-1})
+\end{align*}
+\]</span> Above, in the first several equalities we apply the definition of conditional probability to write a <span class="math inline">\(k\)</span>-variate joint probability as the product of a univariate conditional probability and <span class="math inline">\(k-1\)</span>-variate (joint) marginal probability. In the penultimate line, we apply the Markov Property to conclude that each conditional probability depends only on the immediately preceding variate. The last line puts the expression into product notation.</p>
+<p>This approach works in the case of a “natural ordering” or “favored direction” of the Markov Chain, e.g.&nbsp;commonly an ordering is implied by idea that the stochastic process is evolving over time. The process starts at an initial state <span class="math inline">\(X_0\)</span>, then <span class="math inline">\(X_1\)</span> follows <span class="math inline">\(X_0\)</span>, <span class="math inline">\(X_2\)</span> follows <span class="math inline">\(X_1\)</span>, …, <span class="math inline">\(X_t\)</span> follows <span class="math inline">\(X_{t-1}\)</span>, and so on. Under the Markov property it is not useful to discuss a conditional probability of the form <span class="math inline">\(P(X_{t-1}|X_t)\)</span> (past event conditioned on future event) because by time <span class="math inline">\(t\)</span> the past event at time <span class="math inline">\(t-1\)</span> will have already been “realized” in the stochastic process.</p>
+<p>Note: conditional probabilities of the form <span class="math inline">\(P(X_{t-1}|X_t)\)</span> might be interesting from the perspective of an observer who perceives the state of the system at time <span class="math inline">\(t\)</span> and wishes to characterize the probability of the preceding state.</p>
+<p>But this “natural ordering” is not present in all stochastic processes. One example of a process without any natural ordering arises in the field of spatial statistics.</p>
 
-<table class="quarto-listing-table table">
-<thead>
-<tr>
-<th>
-<a class="sort" data-sort="listing-date-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Date</a>
-</th>
-<th>
-<a class="sort" data-sort="listing-title-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Title</a>
-</th>
-<th>
-<a class="sort" data-sort="listing-author" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Author</a>
-</th>
-</tr>
-</thead>
-<tbody class="list">
-<tr data-index="0" data-categories="Research,Bayesian,MCMC" data-listing-file-modified-sort="1678060415646" data-listing-reading-time-sort="0.98" data-listing-title-sort="Basics of Timeseries AR1 Models" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-</td>
-<td class="listing-title">
-<a href="./learn/2023-02-03-Basics of Timeseries AR1 Models/index.html" class="title">Basics of Timeseries AR1 Models</a>
-</td>
-<td class="listing-author">
-Matthew Shisler
-</td>
-</tr>
-<tr data-index="1" data-categories="Spatial,Markov Random Field" data-listing-file-modified-sort="1678644006648" data-listing-reading-time-sort="2.095" data-listing-title-sort="Brook's Lemma" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-</td>
-<td class="listing-title">
-<a href="./learn/2023-03-11-Brooks-Lemma/index.html" class="title">Brook’s Lemma</a>
-</td>
-<td class="listing-author">
-Matthew Shisler
-</td>
-</tr>
-<tr data-index="2" data-categories="Stochastic Processes" data-listing-date-sort="1675400400000" data-listing-file-modified-sort="1678060415647" data-listing-reading-time-sort="5.23" data-listing-title-sort="ST746 - Markov Chain Sim" data-listing-filename-sort="index.qmd">
-<td class="listing-date">
-Feb 3, 2023
-</td>
-<td class="listing-title">
-<a href="./learn/2023-02-03-Markov-Chain-Sim/index.html" class="title">ST746 - Markov Chain Sim</a>
-</td>
-<td class="listing-author">
-Matthew Shisler
-</td>
-</tr>
-</tbody>
 
-</table>
-<div class="listing-no-matching d-none">
-No matching items
-</div>
-</div></main> <!-- /main -->
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

@@ -297,8 +297,16 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \bol
 &\quad \; \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}
 \end{align*}
 $$
+At this step I need to somehow factor $\boldsymbol\Lambda^{-1}$ from the trace in the first density. There is an identity which would be useful, namely that for square matrices $\mathbf{A}$ and $\mathbf{B}$, $\text{Tr}(\mathbf{A} \otimes \mathbf{B}) = \text{Tr}(\mathbf{A})\text{Tr}(\mathbf{B})$, but I am not sure how to apply that here with the $\boldsymbol\phi'$ terms also present in the trace.
 
+Without an immediate solution, let's attempt to derive the full conditional for $\boldsymbol\Lambda^{-1}$ using the conditional distributions for $\boldsymbol\phi_i$.
 
+$$
+\begin{align*}
+p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&\propto p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
+\end{align*}
+$$
 
 
 
