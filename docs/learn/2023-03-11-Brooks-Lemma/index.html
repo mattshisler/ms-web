@@ -206,7 +206,7 @@ p(x_1,x_2) &amp;= \frac{p(x_1|x_2)}{p(x_{1,0}|x_2)}\frac{p(x_2|x_{1,0})}{p(x_{1,
            &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}\left(x_1^2 - 2b_{12}x_1x_2 + x_2^2\right) - \frac{1}{\tau_1^2}x_2^2 + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
            &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}\left(x_1^2 - 2b_{12}x_1x_2\right) + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
            &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}x_1^2 - 2\frac{b_{12}}{\tau^2_1}x_1x_2 + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
-           &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}x_1^2 - \frac{b_{12}}{\tau^2_1}x_1x_2 - \frac{b_{21}}{\tau^2_2}x_1x_2 +\frac{1}{\tau_2^2}x_2^2\right]\right\} &amp; \quad \text{symmetry condtion, } \frac{b_{12}}{\tau^2_1} =  \frac{b_{21}}{\tau^2_2}\\
+           &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}x_1^2 - \frac{b_{12}}{\tau^2_1}x_1x_2 - \frac{b_{21}}{\tau^2_2}x_1x_2 +\frac{1}{\tau_2^2}x_2^2\right]\right\} &amp; \quad \text{symmetry condition, } \frac{b_{12}}{\tau^2_1} =  \frac{b_{21}}{\tau^2_2}\\
            &amp;= \exp\left\{-\frac{1}{2}\left[
            \begin{pmatrix}
            x_1 &amp; x_2
@@ -237,9 +237,9 @@ p(x_1,x_2) &amp;= \frac{p(x_1|x_2)}{p(x_{1,0}|x_2)}\frac{p(x_2|x_{1,0})}{p(x_{1,
            x_2
            \end{pmatrix}
            \right]\right\}\\
-           &amp;= \exp\left\{\frac{1}{2}\mathbf{x}^T\mathbf{D}(\mathbf{I} - \mathbf{B})\mathbf{x}\right\}
+           &amp;= \exp\left\{\frac{1}{2}\mathbf{x}^T\mathbf{D}^{-1}(\mathbf{I} - \mathbf{B})\mathbf{x}\right\}
 \end{align*}
-\]</span> We can absorb the <span class="math inline">\(p(X_1=x_1|X_2=x_2)\)</span> and <span class="math inline">\(p(X_2|X_1=x_1)\)</span> terms into the proportionality constant of density.</p>
+\]</span> Which suggests that $(X_1, X_2) (, )</p>
 
 
 

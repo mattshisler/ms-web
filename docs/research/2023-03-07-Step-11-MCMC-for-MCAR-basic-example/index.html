@@ -277,8 +277,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>In this specification we take elements of <span class="math inline">\(\boldsymbol\delta_i\)</span> to be conditionally independent (i.e.&nbsp;<span class="math inline">\(\boldsymbol\Omega\)</span> is a diagonal matrix) which in general need not be the case.</p>
 <p>Start with the full conditional for <span class="math inline">\(\boldsymbol\beta\)</span>. <span class="math display">\[
 \begin{align*}
-p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi, \boldsymbol\Omega)p(\boldsymbol\beta)\\
+p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&amp;\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\beta)\\
 &amp;= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\beta)\\
 &amp;\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
 &amp;\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
@@ -460,6 +460,40 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, 
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
 &amp;\propto p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
+&amp;\propto \frac{p(\boldsymbol\phi_1 \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}{p(\boldsymbol\phi_{1,0} \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)} \frac{p(\boldsymbol\phi_2 \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^1,\{\boldsymbol\phi_{i}\}_{i=3}^n)}{p(\boldsymbol\phi_{2,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^1,\{\boldsymbol\phi_{i}\}_{i=3}^n)}
+\dots
+\frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}{p(\boldsymbol\phi_{k,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}
+\dots
+p(\boldsymbol\phi_n|\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})p(\boldsymbol\Lambda)
+\end{align*}
+\]</span> where the last line follows by application of Brook’s Lemma. Choose <span class="math inline">\(\boldsymbol\phi'_0 = \boldsymbol{0}\)</span> for the fixed point in the support of <span class="math inline">\(\boldsymbol\phi'\)</span>. This should simplify things later.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Could I have derived the full conditionals incorrectly for the univariate case? I think I just used the product of the conditionals there and not Brook’s Lemma. . . this might explain why my MCMC had issues with convergence. I should go back and check.</p>
+</div>
+</div>
+<p>We have a particularly tedious product of ratios in the last line of the above derivation. Let’s focus on the first term, then the <span class="math inline">\(k\)</span>th term, to understand the form of the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span>.</p>
+<p>The first term, <span class="math display">\[
+\begin{align*}
+\frac{p(\boldsymbol\phi_1 \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}{p(\boldsymbol{0} \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}
+&amp;=
+\frac{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol{0}-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol{0}-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}\\
+&amp;=
+\frac{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}{\exp\left\{-\frac{1}{2w_{1+}}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}\\
+&amp;=
+\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right) + \frac{1}{2w_{1+}}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}\\
+&amp;=
+\exp\left\{-\frac{1}{2w_{1+}}\left[\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right) -\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right]\right\}\\
+&amp;=
+\exp\left\{-\frac{1}{2w_{1+}}\left[\left(\boldsymbol\phi_1\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1\right) \right]\right\}
 \end{align*}
 \]</span></p>
 

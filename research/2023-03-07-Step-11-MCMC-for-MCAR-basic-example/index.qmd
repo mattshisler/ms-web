@@ -77,8 +77,8 @@ In this specification we take elements of $\boldsymbol\delta_i$ to be conditiona
 Start with the full conditional for $\boldsymbol\beta$.
 $$
 \begin{align*}
-p(\boldsymbol\beta \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi, \boldsymbol\Omega)p(\boldsymbol\beta)\\
+p(\boldsymbol\beta \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\beta)\\
 &= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\beta)\\
 &\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
 &\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
@@ -305,9 +305,36 @@ $$
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
 &\propto p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
+&\propto \frac{p(\boldsymbol\phi_1 \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}{p(\boldsymbol\phi_{1,0} \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)} \frac{p(\boldsymbol\phi_2 \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^1,\{\boldsymbol\phi_{i}\}_{i=3}^n)}{p(\boldsymbol\phi_{2,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^1,\{\boldsymbol\phi_{i}\}_{i=3}^n)}
+\dots
+\frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}{p(\boldsymbol\phi_{k,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}
+\dots
+p(\boldsymbol\phi_n|\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})p(\boldsymbol\Lambda)
 \end{align*}
 $$
+where the last line follows by application of Brook's Lemma. Choose $\boldsymbol\phi'_0 = \boldsymbol{0}$ for the fixed point in the support of $\boldsymbol\phi'$. This should simplify things later.
 
+::: {.callout-note}
+Could I have derived the full conditionals incorrectly for the univariate case? I think I just used the product of the conditionals there and not Brook's Lemma. . . this might explain why my MCMC had issues with convergence. I should go back and check.
+:::
 
+We have a particularly tedious product of ratios in the last line of the above derivation. Let's focus on the first term, then the $k$th term, to understand the form of the full conditional for $\boldsymbol\Lambda$.
+
+The first term,
+$$
+\begin{align*}
+\frac{p(\boldsymbol\phi_1 \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}{p(\boldsymbol{0} \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}
+&= 
+\frac{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol{0}-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol{0}-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}\\
+&=
+\frac{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}{\exp\left\{-\frac{1}{2w_{1+}}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}\\
+&=
+\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right) + \frac{1}{2w_{1+}}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}\\
+&=
+\exp\left\{-\frac{1}{2w_{1+}}\left[\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right) -\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right]\right\}\\
+&=
+\exp\left\{-\frac{1}{2w_{1+}}\left[\left(\boldsymbol\phi_1\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1\right) \right]\right\}
+\end{align*}
+$$
 
 
