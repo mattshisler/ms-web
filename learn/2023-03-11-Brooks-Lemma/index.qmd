@@ -55,6 +55,68 @@ $$
 \Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
 $$
 
+(MORE CONTENT)
+
+An application of Brook's Lemma to Gaussian data.
+
+Consider the simple case of a spatial domain partitioned into two areal units, each neighbors of the other, with univariate outcome $X_i$ at each unit $i=1,2$. 
+
+One option is to specify a conditionally autoregressive model to capture spatial dependencies.
+
+$$
+\begin{align*}
+X_1 \,|\, X_2 &\sim \text{N}(b_{12}X_2, \tau_1^2)\\
+X_2 \,|\, X_1 &\sim \text{N}(b_{21}X_1, \tau_2^2)\\
+\end{align*}
+$$
+
+The joint density of $(X_1, X_2)$ follows by application of Brook's Lemma,
+
+$$
+\begin{align*}
+p(x_1,x_2) &= \frac{p(x_1|x_2)}{p(x_{1,0}|x_2)}\frac{p(x_2|x_{1,0})}{p(x_{1,0}|x_{2,0})}p(x_{1,0},x_{2,0})\\
+           &\propto  \frac{p(x_1|x_2)}{p(x_{1,0}|x_2)}p(x_2|x_{1,0})\\
+           &\propto  \frac{\exp\left\{-\frac{1}{2}(x_1 - b_{12}x_2)^2\right\}}{\exp\left\{-\frac{1}{2}(x_{1,0} - b_{12}x_2)^2\right\}} \exp\left\{-\frac{1}{2}(x_2 - b_{21}x_{1,0})^2\right\}\\
+           &=  \frac{\exp\left\{-\frac{1}{2}(x_1 - b_{12}x_2)^2\right\}}{\exp\left\{-\frac{1}{2}((0) - b_{12}x_2)^2\right\}} \exp\left\{-\frac{1}{2}(x_2 - b_{21}(0))^2\right\} & \quad \text{choose } (x_{1,0},x_{2,0}) = (0,0)\\
+           &=  \frac{\exp\left\{-\frac{1}{2\tau^2_1}(x^2_1 - 2b_{12}x_1x_2 + b_{12}^2x_2^2)\right\}}{\exp\left\{-\frac{1}{2\tau^2_1}b_{12}^2x_2^2\right\}} \exp\left\{-\frac{1}{2\tau^2_2}x_2^2\right\}\\
+           &= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}\left(x_1^2 - 2b_{12}x_1x_2 + x_2^2\right) - \frac{1}{\tau_1^2}x_2^2 + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
+           &= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}\left(x_1^2 - 2b_{12}x_1x_2\right) + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
+           &= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}x_1^2 - 2\frac{b_{12}}{\tau^2_1}x_1x_2 + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
+           &= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}x_1^2 - \frac{b_{12}}{\tau^2_1}x_1x_2 - \frac{b_{21}}{\tau^2_2}x_1x_2 +\frac{1}{\tau_2^2}x_2^2\right]\right\} & \quad \text{symmetry condtion, } \frac{b_{12}}{\tau^2_1} =  \frac{b_{21}}{\tau^2_2}\\
+           &= \exp\left\{-\frac{1}{2}\left[
+           \begin{pmatrix}
+           x_1 & x_2
+           \end{pmatrix}
+           \begin{pmatrix}
+           \tau^{-2}_1 & -\tau^{-2}_1b_{12} \\
+           -\tau^{-2}_2b_{21} & \tau^{-2}_2
+           \end{pmatrix}
+           \begin{pmatrix}
+           x_1\\
+           x_2
+           \end{pmatrix}
+           \right]\right\} & \quad \text{matrix representation}\\
+           &= \exp\left\{-\frac{1}{2}\left[
+           \begin{pmatrix}
+           x_1 & x_2
+           \end{pmatrix}
+            \begin{pmatrix}
+           \tau^{-2}_1 & 0 \\
+           0 & \tau^{-2}_2
+           \end{pmatrix}
+           \begin{pmatrix}
+           1 & -b_{12} \\
+           -b_{21} & 1
+           \end{pmatrix}
+           \begin{pmatrix}
+           x_1\\
+           x_2
+           \end{pmatrix}
+           \right]\right\}\\
+           &= \exp\left\{\frac{1}{2}\mathbf{x}^T\mathbf{D}(\mathbf{I} - \mathbf{B})\mathbf{x}\right\}
+\end{align*}
+$$
+We can absorb the $p(X_1=x_1|X_2=x_2)$ and $p(X_2|X_1=x_1)$ terms into the proportionality constant of density. 
 
 
 

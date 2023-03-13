@@ -185,6 +185,61 @@ p(X_t,X_{t-1},\dots,X_1|X_0) &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0) \cdot p(X_{t-
 <p>But this natural ordering is not present in all stochastic processes. The most basic example might be the case where <span class="math display">\[
 \Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
 \]</span></p>
+<p>(MORE CONTENT)</p>
+<p>An application of Brook’s Lemma to Gaussian data.</p>
+<p>Consider the simple case of a spatial domain partitioned into two areal units, each neighbors of the other, with univariate outcome <span class="math inline">\(X_i\)</span> at each unit <span class="math inline">\(i=1,2\)</span>.</p>
+<p>One option is to specify a conditionally autoregressive model to capture spatial dependencies.</p>
+<p><span class="math display">\[
+\begin{align*}
+X_1 \,|\, X_2 &amp;\sim \text{N}(b_{12}X_2, \tau_1^2)\\
+X_2 \,|\, X_1 &amp;\sim \text{N}(b_{21}X_1, \tau_2^2)\\
+\end{align*}
+\]</span></p>
+<p>The joint density of <span class="math inline">\((X_1, X_2)\)</span> follows by application of Brook’s Lemma,</p>
+<p><span class="math display">\[
+\begin{align*}
+p(x_1,x_2) &amp;= \frac{p(x_1|x_2)}{p(x_{1,0}|x_2)}\frac{p(x_2|x_{1,0})}{p(x_{1,0}|x_{2,0})}p(x_{1,0},x_{2,0})\\
+           &amp;\propto  \frac{p(x_1|x_2)}{p(x_{1,0}|x_2)}p(x_2|x_{1,0})\\
+           &amp;\propto  \frac{\exp\left\{-\frac{1}{2}(x_1 - b_{12}x_2)^2\right\}}{\exp\left\{-\frac{1}{2}(x_{1,0} - b_{12}x_2)^2\right\}} \exp\left\{-\frac{1}{2}(x_2 - b_{21}x_{1,0})^2\right\}\\
+           &amp;=  \frac{\exp\left\{-\frac{1}{2}(x_1 - b_{12}x_2)^2\right\}}{\exp\left\{-\frac{1}{2}((0) - b_{12}x_2)^2\right\}} \exp\left\{-\frac{1}{2}(x_2 - b_{21}(0))^2\right\} &amp; \quad \text{choose } (x_{1,0},x_{2,0}) = (0,0)\\
+           &amp;=  \frac{\exp\left\{-\frac{1}{2\tau^2_1}(x^2_1 - 2b_{12}x_1x_2 + b_{12}^2x_2^2)\right\}}{\exp\left\{-\frac{1}{2\tau^2_1}b_{12}^2x_2^2\right\}} \exp\left\{-\frac{1}{2\tau^2_2}x_2^2\right\}\\
+           &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}\left(x_1^2 - 2b_{12}x_1x_2 + x_2^2\right) - \frac{1}{\tau_1^2}x_2^2 + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
+           &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}\left(x_1^2 - 2b_{12}x_1x_2\right) + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
+           &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}x_1^2 - 2\frac{b_{12}}{\tau^2_1}x_1x_2 + \frac{1}{\tau_2^2}x_2^2\right]\right\}\\
+           &amp;= \exp\left\{-\frac{1}{2}\left[\frac{1}{\tau^2_1}x_1^2 - \frac{b_{12}}{\tau^2_1}x_1x_2 - \frac{b_{21}}{\tau^2_2}x_1x_2 +\frac{1}{\tau_2^2}x_2^2\right]\right\} &amp; \quad \text{symmetry condtion, } \frac{b_{12}}{\tau^2_1} =  \frac{b_{21}}{\tau^2_2}\\
+           &amp;= \exp\left\{-\frac{1}{2}\left[
+           \begin{pmatrix}
+           x_1 &amp; x_2
+           \end{pmatrix}
+           \begin{pmatrix}
+           \tau^{-2}_1 &amp; -\tau^{-2}_1b_{12} \\
+           -\tau^{-2}_2b_{21} &amp; \tau^{-2}_2
+           \end{pmatrix}
+           \begin{pmatrix}
+           x_1\\
+           x_2
+           \end{pmatrix}
+           \right]\right\} &amp; \quad \text{matrix representation}\\
+           &amp;= \exp\left\{-\frac{1}{2}\left[
+           \begin{pmatrix}
+           x_1 &amp; x_2
+           \end{pmatrix}
+            \begin{pmatrix}
+           \tau^{-2}_1 &amp; 0 \\
+           0 &amp; \tau^{-2}_2
+           \end{pmatrix}
+           \begin{pmatrix}
+           1 &amp; -b_{12} \\
+           -b_{21} &amp; 1
+           \end{pmatrix}
+           \begin{pmatrix}
+           x_1\\
+           x_2
+           \end{pmatrix}
+           \right]\right\}\\
+           &amp;= \exp\left\{\frac{1}{2}\mathbf{x}^T\mathbf{D}(\mathbf{I} - \mathbf{B})\mathbf{x}\right\}
+\end{align*}
+\]</span> We can absorb the <span class="math inline">\(p(X_1=x_1|X_2=x_2)\)</span> and <span class="math inline">\(p(X_2|X_1=x_1)\)</span> terms into the proportionality constant of density.</p>
 
 
 
