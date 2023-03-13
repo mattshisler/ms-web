@@ -25,7 +25,7 @@ Brook's lemma is particularly useful in the context of spatial statistics.
 
 Consider a discrete Markov Chain $\{X_t, t \in T \}$ with finite state space.
 
-recall the principle property of a Markov Chain, the *Markov Property*. The transition probabilities for $X_t$ depend only on the previous state $X_{t-1}$. One way to describe the Markov property in the context of a time-ordered evolving process is to say that, conditioned on the present, the past and future are independent. 
+Recall the *Markov Property*. The transition probabilities for $X_t$ depend only on the previous state $X_{t-1}$. One way to describe the Markov property in the context of a time-ordered evolving process is to say that, conditioned on the present, the past and future are independent. 
 $$
 \Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
 $$
@@ -38,22 +38,22 @@ $$
 p(X_t,X_{t-1},\dots,X_1|X_0) &= p(X_{t}|X_{t-1},\dots,X_1,X_0) \cdot p(X_{t-1},\dots,X_1|X_0)\\
                &= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0)\cdot p(X_{t-2},\dots,X_1|X_0)\\
                &\quad \vdots\\
-               &= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0) \dots p(X_1|X_0)\\
-               &= p(X_{t}|X_{t-1})\cdot p(X_{t-1}|X_{t-2})\dots p(X_1|X_0)\\
+               &= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0)\cdot \dots \cdot p(X_1|X_0)\\
+               &= p(X_{t}|X_{t-1})\cdot p(X_{t-1}|X_{t-2})\cdot \dots \cdot p(X_1|X_0)\\
                &= \prod_{j=1}^t p(X_j|X_{j-1})
 \end{align*}
 $$
-Above, in the first several equalities we apply the definition of conditional probability to write a $k$-variate joint probability as the product of a univariate conditional probability and $k-1$-variate (joint) marginal probability. In the penultimate line, we apply the Markov Property to conclude that each conditional probability depends only on the immediately preceding variate. The last line puts the expression into product notation.
+Above, in the first several equalities we apply the definition of conditional probability to write a $k$-variate joint probability density as the product of a univariate conditional and $(k-1)$-variate (joint) marginal probability densities. In the penultimate line, we apply the Markov Property to conclude that each conditional probability depends only on the immediately preceding variate in the Markov chain. The last line puts the expression into product notation.
 
-This approach works in the case of a "natural ordering" or "favored direction" of the Markov Chain, e.g. commonly an ordering is implied by idea that the stochastic process is evolving over time. The process starts at an initial state $X_0$, then $X_1$ follows $X_0$, $X_2$ follows $X_1$, ..., $X_t$ follows $X_{t-1}$, and so on. Under the Markov property it is not useful to discuss a conditional probability of the form $P(X_{t-1}|X_t)$ (past event conditioned on future event) because by time $t$ the past event at time $t-1$ will have already been "realized" in the stochastic process. 
+This approach works in the case of a "natural ordering" or "favored direction" of the Markov Chain. Commonly an ordering is implied by the idea that the stochastic process is evolving over time. The process starts at an initial state $X_0$, then $X_1$ follows $X_0$, $X_2$ follows $X_1$, ..., $X_t$ follows $X_{t-1}$, and so on. Under the Markov property it is not useful to specify a model through conditional probabilities of the form $P(X_{t-1}|X_t)$ (past event conditioned on future event) because by time $t$ the past event at time $t-1$ will have already been "realized" in the stochastic process. That is the state at time $t$ has no influence on the state at time $t-1$ in the system.
 
-Note: conditional probabilities of the form $P(X_{t-1}|X_t)$ might be interesting from the perspective of an observer who perceives the state of the system at time $t$ and wishes to characterize the probability of the preceding state.
-
-
+Note: conditional probabilities of the form $P(X_{t-1}|X_t)$ might be interesting from the perspective of an observer who perceives the state of the system at time $t$ and wishes to characterize the probability of the previous state.
 
 
-
-But this "natural ordering" is not present in all stochastic processes. One example of a process without any natural ordering arises in the field of spatial statistics.
+But this natural ordering is not present in all stochastic processes. The most basic example might be the case where
+$$
+\Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
+$$
 
 
 

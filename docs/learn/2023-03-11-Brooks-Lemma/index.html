@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Matthew Shisler">
+<meta name="dcterms.date" content="2023-03-12">
 <meta name="description" content="An explanation of Brook’s Lemma.">
 
 <title>MS - Brook’s Lemma</title>
@@ -118,8 +119,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title">
 <h1 class="title">Brook’s Lemma</h1>
   <div class="quarto-categories">
-    <div class="quarto-category">Spatial</div>
-    <div class="quarto-category">Markov Random Field</div>
+    <div class="quarto-category">Stochastic Processes</div>
   </div>
   </div>
 
@@ -148,6 +148,12 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title-meta">
 
       
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">March 12, 2023</p>
+    </div>
+  </div>
   
     
   </div>
@@ -159,23 +165,26 @@ ul.task-list li input[type="checkbox"] {
 
 </div>
 <p>Here we will explore Brook’s Lemma and some of its implications and consequences. Brook’s lemma is particularly useful in the context of spatial statistics.</p>
-<p>Consider a discrete Markov Chain <span class="math inline">\(\{X_t, t \in T \}\)</span> with finite state space $S={s_1,s_2,,s_k}</p>
-<p>First, recall the principle property of a Markov Chain, the <em>Markov Property</em>. The transition probabilities for <span class="math inline">\(X_t\)</span> depend only on the previous state <span class="math inline">\(X_{t-1}\)</span>. <span class="math display">\[
+<p>Consider a discrete Markov Chain <span class="math inline">\(\{X_t, t \in T \}\)</span> with finite state space.</p>
+<p>Recall the <em>Markov Property</em>. The transition probabilities for <span class="math inline">\(X_t\)</span> depend only on the previous state <span class="math inline">\(X_{t-1}\)</span>. One way to describe the Markov property in the context of a time-ordered evolving process is to say that, conditioned on the present, the past and future are independent. <span class="math display">\[
 \Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
-\]</span> In this setting, we can factor the joint probability mass/density function, denoted <span class="math inline">\(p(\,\cdot\,)\)</span>, of <span class="math inline">\(t\)</span> random variables, using the definition of conditional probability and the Markov Property. Given an initial state <span class="math inline">\(X_0\)</span>,</p>
+\]</span> where <span class="math inline">\(s_t\)</span> is the state at stage <span class="math inline">\(t\)</span>.</p>
+<p>In this setting, we can factor the joint probability mass/density function, denoted <span class="math inline">\(p(\,\cdot\,)\)</span>, of <span class="math inline">\(t\)</span> random variables, using the definition of conditional probability and the Markov Property. Given an initial state <span class="math inline">\(X_0\)</span>,</p>
 <p><span class="math display">\[
 \begin{align*}
 p(X_t,X_{t-1},\dots,X_1|X_0) &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0) \cdot p(X_{t-1},\dots,X_1|X_0)\\
                &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0)\cdot p(X_{t-2},\dots,X_1|X_0)\\
                &amp;\quad \vdots\\
-               &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0) \dots p(X_1|X_0)\\
-               &amp;= p(X_{t}|X_{t-1})\cdot p(X_{t-1}|X_{t-2})\dots p(X_1|X_0)\\
+               &amp;= p(X_{t}|X_{t-1},\dots,X_1,X_0)\cdot p(X_{t-1}|X_{t-2},\dots,X_1,X_0)\cdot \dots \cdot p(X_1|X_0)\\
+               &amp;= p(X_{t}|X_{t-1})\cdot p(X_{t-1}|X_{t-2})\cdot \dots \cdot p(X_1|X_0)\\
                &amp;= \prod_{j=1}^t p(X_j|X_{j-1})
 \end{align*}
-\]</span> Above, in the first several equalities we apply the definition of conditional probability to write a <span class="math inline">\(k\)</span>-variate joint probability as the product of a univariate conditional probability and <span class="math inline">\(k-1\)</span>-variate (joint) marginal probability. In the penultimate line, we apply the Markov Property to conclude that each conditional probability depends only on the immediately preceding variate. The last line puts the expression into product notation.</p>
-<p>This approach works in the case of a “natural ordering” or “favored direction” of the Markov Chain, e.g.&nbsp;commonly an ordering is implied by idea that the stochastic process is evolving over time. The process starts at an initial state <span class="math inline">\(X_0\)</span>, then <span class="math inline">\(X_1\)</span> follows <span class="math inline">\(X_0\)</span>, <span class="math inline">\(X_2\)</span> follows <span class="math inline">\(X_1\)</span>, …, <span class="math inline">\(X_t\)</span> follows <span class="math inline">\(X_{t-1}\)</span>, and so on. Under the Markov property it is not useful to discuss a conditional probability of the form <span class="math inline">\(P(X_{t-1}|X_t)\)</span> (past event conditioned on future event) because by time <span class="math inline">\(t\)</span> the past event at time <span class="math inline">\(t-1\)</span> will have already been “realized” in the stochastic process.</p>
-<p>Note: conditional probabilities of the form <span class="math inline">\(P(X_{t-1}|X_t)\)</span> might be interesting from the perspective of an observer who perceives the state of the system at time <span class="math inline">\(t\)</span> and wishes to characterize the probability of the preceding state.</p>
-<p>But this “natural ordering” is not present in all stochastic processes. One example of a process without any natural ordering arises in the field of spatial statistics.</p>
+\]</span> Above, in the first several equalities we apply the definition of conditional probability to write a <span class="math inline">\(k\)</span>-variate joint probability density as the product of a univariate conditional and <span class="math inline">\((k-1)\)</span>-variate (joint) marginal probability densities. In the penultimate line, we apply the Markov Property to conclude that each conditional probability depends only on the immediately preceding variate in the Markov chain. The last line puts the expression into product notation.</p>
+<p>This approach works in the case of a “natural ordering” or “favored direction” of the Markov Chain. Commonly an ordering is implied by the idea that the stochastic process is evolving over time. The process starts at an initial state <span class="math inline">\(X_0\)</span>, then <span class="math inline">\(X_1\)</span> follows <span class="math inline">\(X_0\)</span>, <span class="math inline">\(X_2\)</span> follows <span class="math inline">\(X_1\)</span>, …, <span class="math inline">\(X_t\)</span> follows <span class="math inline">\(X_{t-1}\)</span>, and so on. Under the Markov property it is not useful to specify a model through conditional probabilities of the form <span class="math inline">\(P(X_{t-1}|X_t)\)</span> (past event conditioned on future event) because by time <span class="math inline">\(t\)</span> the past event at time <span class="math inline">\(t-1\)</span> will have already been “realized” in the stochastic process. That is the state at time <span class="math inline">\(t\)</span> has no influence on the state at time <span class="math inline">\(t-1\)</span> in the system.</p>
+<p>Note: conditional probabilities of the form <span class="math inline">\(P(X_{t-1}|X_t)\)</span> might be interesting from the perspective of an observer who perceives the state of the system at time <span class="math inline">\(t\)</span> and wishes to characterize the probability of the previous state.</p>
+<p>But this natural ordering is not present in all stochastic processes. The most basic example might be the case where <span class="math display">\[
+\Pr(X_t = s_t|X_{t-1}=s_{t-1},\dots,X_0 = s_0) = \Pr(X_t = s_t|X_{t-1}=s_{t-1})
+\]</span></p>
 
 
 
