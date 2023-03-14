@@ -91,8 +91,8 @@ Thus,
 $$
 \begin{align*}
 \boldsymbol\beta\,|\,\text{rest} &\sim \text{Normal}_{qp}(\mathbf{V}_\beta^{-1}\mathbf{M}_\beta, \mathbf{V}_\beta^{-1})\\
-\mathbf{V}_\beta &= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Omega}^{-1}\\
-\mathbf{M}_\beta &= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Omega}^{-1}\boldsymbol\mu
+\mathbf{V}_\beta &= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Gamma}^{-1}\\
+\mathbf{M}_\beta &= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Gamma}^{-1}\boldsymbol\mu
 \end{align*}
 $$
 
@@ -290,14 +290,28 @@ Under independence we can update each element of the diagonal of $\boldsymbol\Om
 $$
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&\propto p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
-&\propto \big|(\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \Lambda\big|^{-1/2} \exp\left\{-\frac{1}{2}\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})^{-1}\otimes\boldsymbol\Lambda\right)^{-1}\boldsymbol\phi'\right\}\\
-&\quad \; \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&\propto \big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T\right)\right\}\\
-&\quad \; \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}
+&\propto 
+p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
+&\propto 
+\big|(\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\big|^{-1/2} \exp\left\{-\frac{1}{2}\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})^{-1}\otimes\boldsymbol\Lambda\right)^{-1}\boldsymbol\phi'\right\}\\
+&\quad \; 
+\times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
+&\propto 
+\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T\right)\right\}\\
+&\quad \; 
+\times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
+&\propto 
+\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\left(\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T \otimes 1\right)\right)\right\}\\
+&\quad \; 
+\times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
+&\propto 
+\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\left(\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T \otimes 1\right)\right)\right\}\\
+&\quad \; 
+\times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
+&= \text{(now what?)}
 \end{align*}
 $$
-At this step I need to somehow factor $\boldsymbol\Lambda^{-1}$ from the trace in the first density. There is an identity which would be useful, namely that for square matrices $\mathbf{A}$ and $\mathbf{B}$, $\text{Tr}(\mathbf{A} \otimes \mathbf{B}) = \text{Tr}(\mathbf{A})\text{Tr}(\mathbf{B})$, but I am not sure how to apply that here with the $\boldsymbol\phi'$ terms also present in the trace.
+At this step I wanted to used the mixed-product property of Kronecker products to expand the trace, but this property only holds if the matrix products are well defined. Unfortunately, $(\mathbf{D}-\rho\mathbf{W})\boldsymbol\phi'(\boldsymbol\phi')^T$ is not well defined because $(\mathbf{D}-\rho\mathbf{W})$ is $n \times n$ and $\boldsymbol\phi'(\boldsymbol\phi')^T$ is $np \times np$.
 
 Without an immediate solution, let's attempt to derive the full conditional for $\boldsymbol\Lambda^{-1}$ using the conditional distributions for $\boldsymbol\phi_i$.
 
@@ -312,29 +326,59 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \{\b
 p(\boldsymbol\phi_n|\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})p(\boldsymbol\Lambda)
 \end{align*}
 $$
-where the last line follows by application of Brook's Lemma. Choose $\boldsymbol\phi'_0 = \boldsymbol{0}$ for the fixed point in the support of $\boldsymbol\phi'$. This should simplify things later.
+where the last line follows by application of Brook's Lemma to $p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)$. We've dropped $\boldsymbol\Lambda$ and $\rho$ from conditioning notation in the resulting product of ratios, but the conditioning is very much still present. We choose $\boldsymbol\phi'_0 = \boldsymbol{0}$ for the fixed point in the support of $\boldsymbol\phi'$. This should simplify things later.
 
 ::: {.callout-note}
 Could I have derived the full conditionals incorrectly for the univariate case? I think I just used the product of the conditionals there and not Brook's Lemma. . . this might explain why my MCMC had issues with convergence. I should go back and check.
 :::
 
-We have a particularly tedious product of ratios in the last line of the above derivation. Let's focus on the first term, then the $k$th term, to understand the form of the full conditional for $\boldsymbol\Lambda$.
+We have a particularly tedious product of ratios in the last line of the above derivation. Let's focus on the first term, then the $k$th term, to understand the form of the full conditional for $\boldsymbol\Lambda$. Let
+$$
+\mathbf{m}_i = \rho\sum_{j\in \mathcal{N}_i}\mathbf{B}_{ij}\boldsymbol\phi_j
+$$
+
 
 The first term,
 $$
 \begin{align*}
 \frac{p(\boldsymbol\phi_1 \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}{p(\boldsymbol{0} \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}
 &= 
-\frac{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol{0}-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol{0}-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}\\
+\frac{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\mathbf{m}_1\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\mathbf{m}_1\right)\right\}}{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol{0}-\mathbf{m}_1\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol{0}-\mathbf{m}_1\right)\right\}}\\
 &=
-\frac{\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}{\exp\left\{-\frac{1}{2w_{1+}}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}}\\
+\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\mathbf{m}_1\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\mathbf{m}_1\right) + \frac{1}{2w_{1+}}\mathbf{m}_1^T\boldsymbol\Lambda^{-1}\mathbf{m}_1\right\}\\
 &=
-\exp\left\{-\frac{1}{2w_{1+}}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right) + \frac{1}{2w_{1+}}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right\}\\
+\exp\left\{-\frac{1}{2w_{1+}}\left[\left(\boldsymbol\phi_1-\mathbf{m}_1\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\mathbf{m}_1\right) -\mathbf{m}_1^T\boldsymbol\Lambda^{-1}\mathbf{m}_1\right]\right\}\\
 &=
-\exp\left\{-\frac{1}{2w_{1+}}\left[\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right) -\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(-\rho\sum_{j\in\mathcal{N}_i}\mathbf{B}_{1j}\boldsymbol\phi_j\right)\right]\right\}\\
+\exp\left\{-\frac{1}{2w_{1+}}\left[\boldsymbol\phi^T_1\boldsymbol\Lambda^{-1}\boldsymbol\phi_1 - 2\mathbf{m}_1^T\boldsymbol\Lambda^{-1}\boldsymbol\phi^T_1\right]\right\}\\
 &=
-\exp\left\{-\frac{1}{2w_{1+}}\left[\left(\boldsymbol\phi_1\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1\right) \right]\right\}
+\exp\left\{-\frac{1}{2w_{1+}}\text{Tr}\left[\boldsymbol\phi^T_1\boldsymbol\Lambda^{-1}\boldsymbol\phi_1 - 2\mathbf{m}_1^T\boldsymbol\Lambda^{-1}\boldsymbol\phi_1\right]\right\}\\
+&=
+\exp\left\{-\frac{1}{2w_{1+}}\left(\text{Tr}\left[\boldsymbol\phi^T_1\boldsymbol\Lambda^{-1}\boldsymbol\phi_1\right] - \text{Tr}\left[ 2\mathbf{m}_1^T\boldsymbol\Lambda^{-1}\boldsymbol\phi_1\right]\right)\right\}\\
+&=
+\exp\left\{-\frac{1}{2w_{1+}}\left(\text{Tr}\left[\boldsymbol\Lambda^{-1}\boldsymbol\phi_1\boldsymbol\phi^T_1\right] - \text{Tr}\left[ 2\boldsymbol\Lambda^{-1}\boldsymbol\phi_1\mathbf{m}_1^T\right]\right)\right\}\\
+&=
+\exp\left\{-\frac{1}{2w_{1+}}\text{Tr}\left[\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1\boldsymbol\phi^T_1 -  2\boldsymbol\phi_1\mathbf{m}_1^T\right)\right]\right\}\\
 \end{align*}
 $$
+
+
+
+Before describing the $k$th term it will be useful to adjust the notation a bit. For the $k$th term there is a set of $k-1$ preceding values,$\{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1}$, fixed at $\boldsymbol{0}$ and a set of $n-(k+1)$ succeeding variates, $\{\boldsymbol\phi_{i}\}_{i={k+1}}^n$. This will affect the sum in the conditional probability by forcing some terms to $\boldsymbol{0}$. Let $Q_k$ represents the set of locations for which $\boldsymbol\phi_j$ is set to $\boldsymbol{0}$ and $P_k$ be the set of locations for which we retain $\boldsymbol\phi_i$ as a variate at term $k$ in Brook's factorization. Then the conditional for $\boldsymbol\phi_k$ will have the form
+
+$$
+p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n) = \exp\left\{-\frac{1}{2w_{k+}}\left(\boldsymbol\phi_k - \rho\sum_{\substack{j\in\mathcal{N}_k \\ j \in P_k}}\mathbf{B}_{kj}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k - \rho\sum_{\substack{j\in\mathcal{N}_k \\ j \in P_k}}\mathbf{B}_{kj}\boldsymbol\phi_j\right)\right\}
+$$
+
+As it so happens, the $k$th term also reduces nicely, following ths same derivation as for the 1st term.
+$$
+\begin{align*}
+\frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}{p(\boldsymbol\phi_{k,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)} 
+&=
+\exp\left\{-\frac{1}{2w_{k+}}\left[\left(\boldsymbol\phi_k\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k\right) \right]\right\}
+\end{align*}
+$$
+
+Earlier we dropped the denominator in the $n$th term of Brook's factorization, but it is actually easier to include it to simplify the $n$th term. Re-check this derivation. . . it feels. . . wrong.
+
 
 
