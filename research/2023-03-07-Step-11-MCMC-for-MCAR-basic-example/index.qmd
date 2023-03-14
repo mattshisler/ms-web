@@ -361,24 +361,10 @@ $$
 \end{align*}
 $$
 
+Before describing the $k$th term it will be useful to adjust the notation a bit. For the $k$th term there is a set of $k-1$ preceding values,$\{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1}$, fixed at $\boldsymbol{0}$ and a set of $n-(k+1)$ succeeding variates, $\{\boldsymbol\phi_{i}\}_{i={k+1}}^n$. This will affect the sum in the conditional probability by forcing some terms to $\boldsymbol{0}$. Let $Q_k$ represents the set of locations for which $\boldsymbol\phi_j$ is set to $\boldsymbol{0}$ and $P_k$ be the set of locations for which we retain $\boldsymbol\phi_i$ as a variate at term $k$ in Brook's factorization. Then the conditional for $\boldsymbol\phi_k$ will have the form.
 
 
-Before describing the $k$th term it will be useful to adjust the notation a bit. For the $k$th term there is a set of $k-1$ preceding values,$\{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1}$, fixed at $\boldsymbol{0}$ and a set of $n-(k+1)$ succeeding variates, $\{\boldsymbol\phi_{i}\}_{i={k+1}}^n$. This will affect the sum in the conditional probability by forcing some terms to $\boldsymbol{0}$. Let $Q_k$ represents the set of locations for which $\boldsymbol\phi_j$ is set to $\boldsymbol{0}$ and $P_k$ be the set of locations for which we retain $\boldsymbol\phi_i$ as a variate at term $k$ in Brook's factorization. Then the conditional for $\boldsymbol\phi_k$ will have the form
 
-$$
-p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n) = \exp\left\{-\frac{1}{2w_{k+}}\left(\boldsymbol\phi_k - \rho\sum_{\substack{j\in\mathcal{N}_k \\ j \in P_k}}\mathbf{B}_{kj}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k - \rho\sum_{\substack{j\in\mathcal{N}_k \\ j \in P_k}}\mathbf{B}_{kj}\boldsymbol\phi_j\right)\right\}
-$$
-
-As it so happens, the $k$th term also reduces nicely, following ths same derivation as for the 1st term.
-$$
-\begin{align*}
-\frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}{p(\boldsymbol\phi_{k,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)} 
-&=
-\exp\left\{-\frac{1}{2w_{k+}}\left[\left(\boldsymbol\phi_k\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k\right) \right]\right\}
-\end{align*}
-$$
-
-Earlier we dropped the denominator in the $n$th term of Brook's factorization, but it is actually easier to include it to simplify the $n$th term. Re-check this derivation. . . it feels. . . wrong.
 
 
 

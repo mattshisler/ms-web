@@ -518,18 +518,7 @@ Note
 \exp\left\{-\frac{1}{2w_{1+}}\text{Tr}\left[\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_1\boldsymbol\phi^T_1 -  2\boldsymbol\phi_1\mathbf{m}_1^T\right)\right]\right\}\\
 \end{align*}
 \]</span></p>
-<p>Before describing the <span class="math inline">\(k\)</span>th term it will be useful to adjust the notation a bit. For the <span class="math inline">\(k\)</span>th term there is a set of <span class="math inline">\(k-1\)</span> preceding values,<span class="math inline">\(\{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1}\)</span>, fixed at <span class="math inline">\(\boldsymbol{0}\)</span> and a set of <span class="math inline">\(n-(k+1)\)</span> succeeding variates, <span class="math inline">\(\{\boldsymbol\phi_{i}\}_{i={k+1}}^n\)</span>. This will affect the sum in the conditional probability by forcing some terms to <span class="math inline">\(\boldsymbol{0}\)</span>. Let <span class="math inline">\(Q_k\)</span> represents the set of locations for which <span class="math inline">\(\boldsymbol\phi_j\)</span> is set to <span class="math inline">\(\boldsymbol{0}\)</span> and <span class="math inline">\(P_k\)</span> be the set of locations for which we retain <span class="math inline">\(\boldsymbol\phi_i\)</span> as a variate at term <span class="math inline">\(k\)</span> in Brook’s factorization. Then the conditional for <span class="math inline">\(\boldsymbol\phi_k\)</span> will have the form</p>
-<p><span class="math display">\[
-p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n) = \exp\left\{-\frac{1}{2w_{k+}}\left(\boldsymbol\phi_k - \rho\sum_{\substack{j\in\mathcal{N}_k \\ j \in P_k}}\mathbf{B}_{kj}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k - \rho\sum_{\substack{j\in\mathcal{N}_k \\ j \in P_k}}\mathbf{B}_{kj}\boldsymbol\phi_j\right)\right\}
-\]</span></p>
-<p>As it so happens, the <span class="math inline">\(k\)</span>th term also reduces nicely, following ths same derivation as for the 1st term. <span class="math display">\[
-\begin{align*}
-\frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}{p(\boldsymbol\phi_{k,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}
-&amp;=
-\exp\left\{-\frac{1}{2w_{k+}}\left[\left(\boldsymbol\phi_k\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k\right) \right]\right\}
-\end{align*}
-\]</span></p>
-<p>Earlier we dropped the denominator in the <span class="math inline">\(n\)</span>th term of Brook’s factorization, but it is actually easier to include it to simplify the <span class="math inline">\(n\)</span>th term. Re-check this derivation. . . it feels. . . wrong.</p>
+<p>Before describing the <span class="math inline">\(k\)</span>th term it will be useful to adjust the notation a bit. For the <span class="math inline">\(k\)</span>th term there is a set of <span class="math inline">\(k-1\)</span> preceding values,<span class="math inline">\(\{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1}\)</span>, fixed at <span class="math inline">\(\boldsymbol{0}\)</span> and a set of <span class="math inline">\(n-(k+1)\)</span> succeeding variates, <span class="math inline">\(\{\boldsymbol\phi_{i}\}_{i={k+1}}^n\)</span>. This will affect the sum in the conditional probability by forcing some terms to <span class="math inline">\(\boldsymbol{0}\)</span>. Let <span class="math inline">\(Q_k\)</span> represents the set of locations for which <span class="math inline">\(\boldsymbol\phi_j\)</span> is set to <span class="math inline">\(\boldsymbol{0}\)</span> and <span class="math inline">\(P_k\)</span> be the set of locations for which we retain <span class="math inline">\(\boldsymbol\phi_i\)</span> as a variate at term <span class="math inline">\(k\)</span> in Brook’s factorization. Then the conditional for <span class="math inline">\(\boldsymbol\phi_k\)</span> will have the form.</p>
 
 
 </section>
