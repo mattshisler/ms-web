@@ -400,21 +400,8 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \{\b
 \big|\boldsymbol\Lambda\big|^{-(\nu + 2p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)\right]\right\}\\
 \end{align*}
 $$
-and we conclude $\boldsymbol\Lambda \,|\, \text{rest} \sim \text{InvWish}\left(p + \nu,\, \mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right) $
+and we conclude $\boldsymbol\Lambda \,|\, \text{rest} \sim \text{InvWish}\left(p + \nu,\, \mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)$
 
-
-Is this actually going to work? I still have to consider $p(\boldsymbol\phi' = \mathbf{0} \,|\, \boldsymbol\Lambda,\rho)$ which is a function of $\boldsymbol\Lambda$ 
-
-$$
-
-$$
-
-
-
-Let $Q_k$ represents the set of locations for which $\boldsymbol\phi_j$ is set to $\boldsymbol{0}$ and $P_k$ be the set of locations for which we retain $\boldsymbol\phi_i$ as a variate at term $k$ in Brook's factorization. 
-
-
-Then the conditional for $\boldsymbol\phi_k$ will have the form.
 
 
 
