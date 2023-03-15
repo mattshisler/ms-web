@@ -178,7 +178,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul>
   <li><a href="#intro" id="toc-intro" class="nav-link active" data-scroll-target="#intro">Intro</a></li>
-  <li><a href="#fc-for-covariance-of-spatial-random-vector" id="toc-fc-for-covariance-of-spatial-random-vector" class="nav-link" data-scroll-target="#fc-for-covariance-of-spatial-random-vector">FC for Covariance of Spatial Random Vector</a></li>
+  <li><a href="#fc-for-fixed-effects" id="toc-fc-for-fixed-effects" class="nav-link" data-scroll-target="#fc-for-fixed-effects">FC for Fixed effects</a></li>
+  <li><a href="#fc-for-spatial-random-vector" id="toc-fc-for-spatial-random-vector" class="nav-link" data-scroll-target="#fc-for-spatial-random-vector">FC for Spatial Random Vector</a></li>
+  <li><a href="#fc-for-boldsymbolomega" id="toc-fc-for-boldsymbolomega" class="nav-link" data-scroll-target="#fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></a></li>
+  <li><a href="#fc-for-covariance-of-the-spatial-random-vector" id="toc-fc-for-covariance-of-the-spatial-random-vector" class="nav-link" data-scroll-target="#fc-for-covariance-of-the-spatial-random-vector">FC for Covariance of the Spatial Random Vector</a></li>
   </ul>
 </nav>
     </div>
@@ -259,7 +262,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \boldsymbol\delta_i &amp;\sim \text{Normal}_{p}\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \,  \boldsymbol\Omega\right)\\
 \boldsymbol\phi_i|\boldsymbol\phi_{j\ne i},\boldsymbol\Lambda &amp;\sim \text{Normal}_p\left(\rho\sum_{i \sim j}\mathbf{B}_{ij}\boldsymbol\phi_j, \, w^{-1}_{i+}\boldsymbol\Lambda\right)\\
 \boldsymbol\beta &amp;\sim \text{Normal}_{qp}(\boldsymbol\mu, \, \boldsymbol\Gamma)\\
-\omega_{kk} &amp;\sim \text{InvGamm}(a_k, \, b_k)\\
+\omega_{kk} &amp;\sim \text{InvGamm}(a_k, \, b_k) \quad \text{OR} \quad \boldsymbol\Omega \sim \text{InvWish}(\psi,\mathbf{G})\\
 \boldsymbol\Lambda &amp;\sim \text{InvWish}(\nu, \mathbf{R})\\
 \rho &amp;\sim \text{Unif}(0, \,1)
 \end{align*}
@@ -270,12 +273,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \boldsymbol\delta_i &amp;\sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \;  \boldsymbol\Omega\right)\\
 \boldsymbol\beta &amp;\sim \text{Normal}_{qp}\left(\boldsymbol\mu, \boldsymbol\Gamma\right)\\
 \boldsymbol\phi' &amp;\sim \text{Normal}_{np}\left(\boldsymbol 0, (\mathbf{D-\rho\mathbf{W}})^{-1} \otimes \boldsymbol\Lambda\right)\\
-\omega_{kk} &amp;\sim \text{InvGamm}(a_k, b_k)\\
+\omega_{kk} &amp;\sim \text{InvGamm}(a_k, b_k) \quad \text{OR} \quad \boldsymbol\Omega \sim \text{InvWish}(\psi,\mathbf{G})\\
 \boldsymbol\Lambda &amp;\sim \text{InvWish}(\nu, \mathbf{R})\\
 \rho &amp;\sim \text{Unif}(0,1)
 \end{align*}
 \]</span></p>
 <p>In this specification we take elements of <span class="math inline">\(\boldsymbol\delta_i\)</span> to be conditionally independent (i.e.&nbsp;<span class="math inline">\(\boldsymbol\Omega\)</span> is a diagonal matrix) which in general need not be the case.</p>
+</section>
+<section id="fc-for-fixed-effects" class="level2">
+<h2 class="anchored" data-anchor-id="fc-for-fixed-effects">FC for Fixed effects</h2>
 <p>Start with the full conditional for <span class="math inline">\(\boldsymbol\beta\)</span>. <span class="math display">\[
 \begin{align*}
 p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
@@ -294,6 +300,9 @@ p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 \mathbf{M}_\beta &amp;= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Gamma}^{-1}\boldsymbol\mu
 \end{align*}
 \]</span></p>
+</section>
+<section id="fc-for-spatial-random-vector" class="level2">
+<h2 class="anchored" data-anchor-id="fc-for-spatial-random-vector">FC for Spatial Random Vector</h2>
 <p>Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span> and draw samples in <span class="math inline">\(n\)</span> sub-blocks of parameters, or we could derive the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span> and update all <span class="math inline">\(\boldsymbol\phi_i\)</span> in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let’s try to tackle that.</p>
 <p>The trickiness of updating <span class="math inline">\(\boldsymbol\phi'\)</span> as a single block is due to our model specification for <span class="math inline">\(\boldsymbol\delta_i\)</span>. The likelihood for <span class="math inline">\(\boldsymbol\delta_i\)</span> is not compatible with the prior on <span class="math inline">\(\boldsymbol\phi'\)</span> because the spatial term in the former is specified in terms of <span class="math inline">\(p \times 1\)</span> vectors while in the latter spatial term is a <span class="math inline">\(np \times 1\)</span> vector.</p>
 <p>We could either construct the joint distribution of the <span class="math inline">\(\boldsymbol\delta_i\)</span> vectors or we could try to write <span class="math inline">\(\boldsymbol\phi_i\)</span> in terms of <span class="math inline">\(\boldsymbol\phi'\)</span> and substitute into the corresponding <span class="math inline">\(\boldsymbol\delta_i\)</span> distributions.</p>
@@ -332,7 +341,8 @@ p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 \vdots \\
 \boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
 \end{pmatrix}.
-\]</span> Then if we proceed in deriving the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>, we will have</p>
+\]</span></p>
+<p>Then if we proceed in deriving the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>, we will have</p>
 <p><span class="math display">\[
 \begin{align*}
 p(\boldsymbol\phi' \,|\, \text{rest}) &amp;\propto p(\boldsymbol\delta', \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
@@ -445,11 +455,18 @@ p(\boldsymbol\phi' \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 \]</span> So we can substitute, <span class="math display">\[
 (\boldsymbol\delta' - \mathbf{A}) = \text{vec}(\boldsymbol\Delta-\mathbf{B}\mathbf{Z}^T)
 \]</span> in the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
+<p>We might desire to sample full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span> rather than the full joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span>. In this appoach the derivaations are as follows. . .</p>
+<p>(work in progress)</p>
 </section>
-<section id="fc-for-covariance-of-spatial-random-vector" class="level2">
-<h2 class="anchored" data-anchor-id="fc-for-covariance-of-spatial-random-vector">FC for Covariance of Spatial Random Vector</h2>
+<section id="fc-for-boldsymbolomega" class="level2">
+<h2 class="anchored" data-anchor-id="fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></h2>
 <p>Next, we will consider the full conditional for <span class="math inline">\(\boldsymbol\Omega\)</span> under two cases. Either <span class="math inline">\(\boldsymbol\Omega\)</span> is diagonal, i.e.&nbsp;<span class="math inline">\(\boldsymbol\delta_i\)</span> is independent conditional on <span class="math inline">\(\boldsymbol\phi_i\)</span>, or <span class="math inline">\(\boldsymbol\Omega\)</span> is symmetric positive-definite matrix, i.e.&nbsp;no assumed structure.</p>
-<p>Under independence we can update each element of the diagonal of <span class="math inline">\(\boldsymbol\Omega\)</span> individually <span class="math display">\[
+<p>Under independence we can update each element of the diagonal of <span class="math inline">\(\boldsymbol\Omega\)</span> individually. . .</p>
+<p>(work in progress)</p>
+</section>
+<section id="fc-for-covariance-of-the-spatial-random-vector" class="level2">
+<h2 class="anchored" data-anchor-id="fc-for-covariance-of-the-spatial-random-vector">FC for Covariance of the Spatial Random Vector</h2>
+<p><span class="math display">\[
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
 &amp;\propto
@@ -469,7 +486,7 @@ p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
 &amp;= \text{(now what?)}
 \end{align*}
 \]</span> At this step I wanted to used the mixed-product property of Kronecker products to expand the trace, but this property only holds if the matrix products are well defined. Unfortunately, <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\boldsymbol\phi'(\boldsymbol\phi')^T\)</span> is not well defined because <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\)</span> is <span class="math inline">\(n \times n\)</span> and <span class="math inline">\(\boldsymbol\phi'(\boldsymbol\phi')^T\)</span> is <span class="math inline">\(np \times np\)</span>.</p>
-<p>Without an immediate solution, let’s attempt to derive the full conditional for <span class="math inline">\(\boldsymbol\Lambda^{-1}\)</span> using the conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
+<p>Without an immediate solution, let’s attempt to derive the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span> using the conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
 <p><span class="math display">\[
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
@@ -481,9 +498,9 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, 
 &amp;\quad \quad \vdots \\
 &amp;\quad \;\times\frac{p(\boldsymbol\phi_n \,| \,
 \{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})}{p(\boldsymbol\phi_{n,0} \,| \,
-\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})} p(\boldsymbol\phi' = \mathbf{0} \,|\, \boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)
+\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})} p(\boldsymbol\phi' = \boldsymbol\phi'_0 \,|\, \boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)
 \end{align*}
-\]</span> where the last line follows by application of Brook’s Lemma to <span class="math inline">\(p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)\)</span>. We’ve dropped <span class="math inline">\(\boldsymbol\Lambda\)</span> and <span class="math inline">\(\rho\)</span> from conditioning notation in the resulting product of ratios, but the conditioning is very much still present. We choose <span class="math inline">\(\boldsymbol\phi'_0 = \boldsymbol{0}\)</span> for the fixed point in the support of <span class="math inline">\(\boldsymbol\phi'\)</span>. This should simplify things later.</p>
+\]</span> where the last line follows by application of Brook’s Lemma to <span class="math inline">\(p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)\)</span>. We’ve dropped <span class="math inline">\(\boldsymbol\Lambda\)</span> and <span class="math inline">\(\rho\)</span> from conditioning notation in the resulting product of ratios, but the conditioning is very much still present. We choose <span class="math inline">\(\boldsymbol\phi'_0 = \boldsymbol{0}\)</span> for the fixed point in the support of <span class="math inline">\(\boldsymbol\phi'\)</span>. This will simplify things later and allow us to avoid the situation we ran into ealier.</p>
 <div class="callout-note callout callout-style-default callout-captioned">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -497,7 +514,7 @@ Note
 <p>Could I have derived the full conditionals incorrectly for the univariate case? I think I just used the product of the conditionals there and not Brook’s Lemma. . . this might explain why my MCMC had issues with convergence. I should go back and check.</p>
 </div>
 </div>
-<p>We have a particularly tedious product of ratios in the last line of the above derivation. Let’s focus on the <span class="math inline">\(k\)</span>th term first, then condsider the entire product to understand the form of the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span>. Let <span class="math display">\[
+<p>We have a particularly tedious product of ratios. Let’s focus on the <span class="math inline">\(k\)</span>th term first, then consider the entire product to understand the form of the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span>. Let <span class="math display">\[
 \mathbf{m}_k = \rho\sum_{\substack j \in \mathcal{N}_k \\ j \, &gt; \, k}\mathbf{B}_{kj}\boldsymbol\phi_j
 \]</span> Note that at the <span class="math inline">\(k\)</span>th term we are considering the density as a function of some non-zero conditioned variates. The <span class="math inline">\(\boldsymbol\phi_j\)</span> for <span class="math inline">\(j &lt; k\)</span> have been set to <span class="math inline">\(\mathbf{0}\)</span>. This may affect the sum in the conditional mean, so we restrict the sum to terms that are non-zero, that is <span class="math inline">\(\boldsymbol\phi_j\)</span> where <span class="math inline">\(j \in \mathcal{N}_k\)</span> and <span class="math inline">\(j &gt; k\)</span>.</p>
 <p>Then the <span class="math inline">\(k\)</span>th term, <span class="math display">\[

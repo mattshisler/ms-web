@@ -52,7 +52,7 @@ $$
 \boldsymbol\delta_i &\sim \text{Normal}_{p}\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \,  \boldsymbol\Omega\right)\\
 \boldsymbol\phi_i|\boldsymbol\phi_{j\ne i},\boldsymbol\Lambda &\sim \text{Normal}_p\left(\rho\sum_{i \sim j}\mathbf{B}_{ij}\boldsymbol\phi_j, \, w^{-1}_{i+}\boldsymbol\Lambda\right)\\
 \boldsymbol\beta &\sim \text{Normal}_{qp}(\boldsymbol\mu, \, \boldsymbol\Gamma)\\
-\omega_{kk} &\sim \text{InvGamm}(a_k, \, b_k)\\
+\omega_{kk} &\sim \text{InvGamm}(a_k, \, b_k) \quad \text{OR} \quad \boldsymbol\Omega \sim \text{InvWish}(\psi,\mathbf{G})\\
 \boldsymbol\Lambda &\sim \text{InvWish}(\nu, \mathbf{R})\\
 \rho &\sim \text{Unif}(0, \,1)
 \end{align*}
@@ -65,7 +65,7 @@ $$
 \boldsymbol\delta_i &\sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \;  \boldsymbol\Omega\right)\\
 \boldsymbol\beta &\sim \text{Normal}_{qp}\left(\boldsymbol\mu, \boldsymbol\Gamma\right)\\
 \boldsymbol\phi' &\sim \text{Normal}_{np}\left(\boldsymbol 0, (\mathbf{D-\rho\mathbf{W}})^{-1} \otimes \boldsymbol\Lambda\right)\\
-\omega_{kk} &\sim \text{InvGamm}(a_k, b_k)\\
+\omega_{kk} &\sim \text{InvGamm}(a_k, b_k) \quad \text{OR} \quad \boldsymbol\Omega \sim \text{InvWish}(\psi,\mathbf{G})\\
 \boldsymbol\Lambda &\sim \text{InvWish}(\nu, \mathbf{R})\\
 \rho &\sim \text{Unif}(0,1)
 \end{align*}
@@ -73,6 +73,7 @@ $$
 
 In this specification we take elements of $\boldsymbol\delta_i$ to be conditionally independent (i.e. $\boldsymbol\Omega$ is a diagonal matrix) which in general need not be the case.
 
+## FC for Fixed effects
 
 Start with the full conditional for $\boldsymbol\beta$.
 $$
@@ -95,6 +96,8 @@ $$
 \mathbf{M}_\beta &= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Gamma}^{-1}\boldsymbol\mu
 \end{align*}
 $$
+
+## FC for Spatial Random Vector
 
 Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for $\boldsymbol\phi_i$ and draw samples in $n$ sub-blocks of parameters, or we could derive the full conditional for $\boldsymbol\phi'$ and update all $\boldsymbol\phi_i$ in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let's try to tackle that.
 
@@ -143,6 +146,7 @@ $$
 \boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
 \end{pmatrix}.
 $$
+
 Then if we proceed in deriving the full conditional for $\boldsymbol\phi'$, we will have
 
 $$
@@ -284,11 +288,20 @@ $$
 $$
 in the full conditional for $\boldsymbol\phi'$.
 
-## FC for Covariance of Spatial Random Vector
+We might desire to sample full conditionals for $\boldsymbol\phi_i$ rather than the full joint distribution for $\boldsymbol\phi'$. In this appoach the derivaations are as follows. . .
+
+(work in progress)
+
+## FC for $\boldsymbol\Omega$
 
 Next, we will consider the full conditional for $\boldsymbol\Omega$ under two cases. Either $\boldsymbol\Omega$ is diagonal, i.e. $\boldsymbol\delta_i$ is independent conditional on $\boldsymbol\phi_i$, or $\boldsymbol\Omega$ is symmetric positive-definite matrix, i.e. no assumed structure.
 
-Under independence we can update each element of the diagonal of $\boldsymbol\Omega$ individually
+Under independence we can update each element of the diagonal of $\boldsymbol\Omega$ individually. . .
+
+(work in progress)
+
+## FC for Covariance of the Spatial Random Vector
+
 $$
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
@@ -311,7 +324,7 @@ p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
 $$
 At this step I wanted to used the mixed-product property of Kronecker products to expand the trace, but this property only holds if the matrix products are well defined. Unfortunately, $(\mathbf{D}-\rho\mathbf{W})\boldsymbol\phi'(\boldsymbol\phi')^T$ is not well defined because $(\mathbf{D}-\rho\mathbf{W})$ is $n \times n$ and $\boldsymbol\phi'(\boldsymbol\phi')^T$ is $np \times np$.
 
-Without an immediate solution, let's attempt to derive the full conditional for $\boldsymbol\Lambda^{-1}$ using the conditional distributions for $\boldsymbol\phi_i$.
+Without an immediate solution, let's attempt to derive the full conditional for $\boldsymbol\Lambda$ using the conditional distributions for $\boldsymbol\phi_i$.
 
 $$
 \begin{align*}
@@ -324,16 +337,16 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \{\b
 &\quad \quad \vdots \\
 &\quad \;\times\frac{p(\boldsymbol\phi_n \,| \, 
 \{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})}{p(\boldsymbol\phi_{n,0} \,| \, 
-\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})} p(\boldsymbol\phi' = \mathbf{0} \,|\, \boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)
+\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})} p(\boldsymbol\phi' = \boldsymbol\phi'_0 \,|\, \boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)
 \end{align*}
 $$
-where the last line follows by application of Brook's Lemma to $p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)$. We've dropped $\boldsymbol\Lambda$ and $\rho$ from conditioning notation in the resulting product of ratios, but the conditioning is very much still present. We choose $\boldsymbol\phi'_0 = \boldsymbol{0}$ for the fixed point in the support of $\boldsymbol\phi'$. This should simplify things later.
+where the last line follows by application of Brook's Lemma to $p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)$. We've dropped $\boldsymbol\Lambda$ and $\rho$ from conditioning notation in the resulting product of ratios, but the conditioning is very much still present. We choose $\boldsymbol\phi'_0 = \boldsymbol{0}$ for the fixed point in the support of $\boldsymbol\phi'$. This will simplify things later and allow us to avoid the situation we ran into ealier.
 
 ::: {.callout-note}
 Could I have derived the full conditionals incorrectly for the univariate case? I think I just used the product of the conditionals there and not Brook's Lemma. . . this might explain why my MCMC had issues with convergence. I should go back and check.
 :::
 
-We have a particularly tedious product of ratios in the last line of the above derivation. Let's focus on the $k$th term first, then condsider the entire product to understand the form of the full conditional for $\boldsymbol\Lambda$. Let
+We have a particularly tedious product of ratios. Let's focus on the $k$th term first, then consider the entire product to understand the form of the full conditional for $\boldsymbol\Lambda$. Let
 $$
 \mathbf{m}_k = \rho\sum_{\substack j \in \mathcal{N}_k \\ j \, > \, k}\mathbf{B}_{kj}\boldsymbol\phi_j
 $$
@@ -401,9 +414,6 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \{\b
 \end{align*}
 $$
 and we conclude $\boldsymbol\Lambda \,|\, \text{rest} \sim \text{InvWish}\left(p + \nu,\, \mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)$
-
-
-
 
 
 
