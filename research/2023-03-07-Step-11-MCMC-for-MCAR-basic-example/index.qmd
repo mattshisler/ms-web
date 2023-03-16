@@ -435,7 +435,7 @@ Where $\mathbf{W}_U$ is ab $n \times n$ upper triangular matrix constructed by z
 It is important to note that $\boldsymbol\Phi$ is constructed with *rows* equal to $\boldsymbol\phi_k$ which results in flipping $\boldsymbol\Phi\boldsymbol\Phi^T$, what we would expect, to instead be $\boldsymbol\Phi^T\boldsymbol\Phi$.
 
 ::: {.callout-note}
-This is suspiciously close to $(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi^T\boldsymbol\Phi$. My *guess* is that $2\boldsymbol\Phi^T\mathbf{W}_U\boldsymbol\Phi = \boldsymbol\Phi^T\mathbf{W}\boldsymbol\Phi$, but I will need to verify this.
+This is suspiciously close to $(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi^T\boldsymbol\Phi$. Perhaps $2\boldsymbol\Phi^T\mathbf{W}_U\boldsymbol\Phi = \boldsymbol\Phi^T\mathbf{W}\boldsymbol\Phi$? It would be nice, but actually I don't think this is true.
 :::
 
 
