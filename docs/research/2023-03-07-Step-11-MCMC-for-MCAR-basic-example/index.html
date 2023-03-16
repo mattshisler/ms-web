@@ -184,8 +184,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#joint-fc-approach" id="toc-joint-fc-approach" class="nav-link" data-scroll-target="#joint-fc-approach">Joint FC approach</a></li>
   <li><a href="#marginal-site-by-site-fc-approach" id="toc-marginal-site-by-site-fc-approach" class="nav-link" data-scroll-target="#marginal-site-by-site-fc-approach">Marginal (site-by-site) FC approach</a></li>
   </ul></li>
-  <li><a href="#fc-for-boldsymbolomega" id="toc-fc-for-boldsymbolomega" class="nav-link" data-scroll-target="#fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></a></li>
   <li><a href="#fc-for-covariance-of-the-spatial-random-vector" id="toc-fc-for-covariance-of-the-spatial-random-vector" class="nav-link" data-scroll-target="#fc-for-covariance-of-the-spatial-random-vector">FC for Covariance of the Spatial Random Vector</a></li>
+  <li><a href="#fc-for-boldsymbolomega" id="toc-fc-for-boldsymbolomega" class="nav-link" data-scroll-target="#fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></a>
+  <ul class="collapse">
+  <li><a href="#general-boldsymbolomega" id="toc-general-boldsymbolomega" class="nav-link" data-scroll-target="#general-boldsymbolomega">General <span class="math inline">\(\boldsymbol\Omega\)</span></a></li>
+  <li><a href="#diagonal-boldsymbolomega" id="toc-diagonal-boldsymbolomega" class="nav-link" data-scroll-target="#diagonal-boldsymbolomega">Diagonal <span class="math inline">\(\boldsymbol\Omega\)</span></a></li>
+  </ul></li>
+  <li><a href="#metropolis-hastings-step-for-spatial-stength-parameter-rho" id="toc-metropolis-hastings-step-for-spatial-stength-parameter-rho" class="nav-link" data-scroll-target="#metropolis-hastings-step-for-spatial-stength-parameter-rho">Metropolis-Hastings Step for Spatial Stength parameter <span class="math inline">\(\rho\)</span></a></li>
   </ul>
 </nav>
     </div>
@@ -251,7 +256,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 <section id="intro" class="level2">
 <h2 class="anchored" data-anchor-id="intro">Intro</h2>
-<p>In this post we will code an MCMC sampler for a Bayesian hierarchical model with an MCAR prior specified in the second stage. For simplicity, we will consider the case common spatial strength parameter <span class="math inline">\(\rho\)</span>.</p>
+<p>In this post we will derive full conditionals for a Bayesian hierarchical model with an MCAR prior specified in the second stage. For simplicity, we will consider the case common spatial strength parameter <span class="math inline">\(\rho\)</span>.</p>
 <p>Let <span class="math inline">\(\mathcal{D}\)</span> be a spatial domain partitioned into <span class="math inline">\(n\)</span> areal units indexed by <span class="math inline">\(i\)</span>. Following the notation of Step 3 (link), let <span class="math inline">\(\boldsymbol\delta_i\)</span> be a multivariate (<span class="math inline">\(p \times 1\)</span>) response vector with conditional expectation <span class="math display">\[
 \text{E}(\boldsymbol\delta_i \,|\,\boldsymbol\phi_i)  = \boldsymbol{\mathcal{Z}}_i \boldsymbol\beta + \boldsymbol\phi_i
 \]</span> and covariance <span class="math display">\[
@@ -264,8 +269,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p><span class="math display">\[
 \begin{align*}
 \boldsymbol\delta_i &amp;\sim \text{Normal}_{p}\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \,  \boldsymbol\Omega\right)\\
-\boldsymbol\phi_i|\boldsymbol\phi_{j\ne i},\boldsymbol\Lambda &amp;\sim \text{Normal}_p\left(\rho\sum_{i \sim j}\mathbf{B}_{ij}\boldsymbol\phi_j, \, w^{-1}_{i+}\boldsymbol\Lambda\right)\\
 \boldsymbol\beta &amp;\sim \text{Normal}_{qp}(\boldsymbol\mu, \, \boldsymbol\Gamma)\\
+\boldsymbol\phi_i|\boldsymbol\phi_{j\ne i},\boldsymbol\Lambda &amp;\sim \text{Normal}_p\left(\rho\sum_{i \sim j}\mathbf{B}_{ij}\boldsymbol\phi_j, \, w^{-1}_{i+}\boldsymbol\Lambda\right)\\
 \omega_{kk} &amp;\sim \text{InvGamm}(a_k, \, b_k) \quad \text{OR} \quad \boldsymbol\Omega \sim \text{InvWish}(\psi,\mathbf{G})\\
 \boldsymbol\Lambda &amp;\sim \text{InvWish}(\nu, \mathbf{R})\\
 \rho &amp;\sim \text{Unif}(0, \,1)
@@ -307,9 +312,9 @@ p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \b
 </section>
 <section id="fc-for-spatial-random-vector" class="level2">
 <h2 class="anchored" data-anchor-id="fc-for-spatial-random-vector">FC for Spatial Random Vector</h2>
+<p>Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span> and draw samples in <span class="math inline">\(n\)</span> sub-blocks of parameters, or we could derive the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span> and update all <span class="math inline">\(\boldsymbol\phi_i\)</span> in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let’s try to tackle that first, then derive the full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
 <section id="joint-fc-approach" class="level3">
 <h3 class="anchored" data-anchor-id="joint-fc-approach">Joint FC approach</h3>
-<p>Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span> and draw samples in <span class="math inline">\(n\)</span> sub-blocks of parameters, or we could derive the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span> and update all <span class="math inline">\(\boldsymbol\phi_i\)</span> in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let’s try to tackle that.</p>
 <p>The trickiness of updating <span class="math inline">\(\boldsymbol\phi'\)</span> as a single block is due to our model specification for <span class="math inline">\(\boldsymbol\delta_i\)</span>. The likelihood for <span class="math inline">\(\boldsymbol\delta_i\)</span> is not compatible with the prior on <span class="math inline">\(\boldsymbol\phi'\)</span> because the spatial term in the former is specified in terms of <span class="math inline">\(p \times 1\)</span> vectors while in the latter spatial term is a <span class="math inline">\(np \times 1\)</span> vector.</p>
 <p>We could either construct the joint distribution of the <span class="math inline">\(\boldsymbol\delta_i\)</span> vectors or we could try to write <span class="math inline">\(\boldsymbol\phi_i\)</span> in terms of <span class="math inline">\(\boldsymbol\phi'\)</span> and substitute into the corresponding <span class="math inline">\(\boldsymbol\delta_i\)</span> distributions.</p>
 <p>Let, <span class="math display">\[
@@ -494,12 +499,6 @@ p(\boldsymbol\delta_i \,|\, \boldsymbol\phi_i, \boldsymbol\beta, \boldsymbol\Ome
 \]</span> taking <span class="math inline">\(\mathbf{B}_{ij} = \frac{w_{ij}}{w_{i+}}\mathbf{I}_p\)</span>, we will have <span class="math inline">\(\mathbf{M}_{\phi_i} = \boldsymbol\Omega^{-1}\left(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\right) + \rho \boldsymbol\Lambda^{-1}\sum_{j \in \mathcal{N}_i}w_{ij}\boldsymbol\phi_j\)</span>.</p>
 </section>
 </section>
-<section id="fc-for-boldsymbolomega" class="level2">
-<h2 class="anchored" data-anchor-id="fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></h2>
-<p>Next, we will consider the full conditional for <span class="math inline">\(\boldsymbol\Omega\)</span> under two cases. Either <span class="math inline">\(\boldsymbol\Omega\)</span> is diagonal, i.e.&nbsp;<span class="math inline">\(\boldsymbol\delta_i\)</span> is independent conditional on <span class="math inline">\(\boldsymbol\phi_i\)</span>, or <span class="math inline">\(\boldsymbol\Omega\)</span> is symmetric positive-definite matrix, i.e.&nbsp;no assumed structure.</p>
-<p>Under independence we can update each element of the diagonal of <span class="math inline">\(\boldsymbol\Omega\)</span> individually. . .</p>
-<p>(work in progress)</p>
-</section>
 <section id="fc-for-covariance-of-the-spatial-random-vector" class="level2">
 <h2 class="anchored" data-anchor-id="fc-for-covariance-of-the-spatial-random-vector">FC for Covariance of the Spatial Random Vector</h2>
 <p><span class="math display">\[
@@ -635,6 +634,43 @@ Note
 <p>This is suspiciously close to <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi^T\boldsymbol\Phi\)</span>. Perhaps <span class="math inline">\(2\boldsymbol\Phi^T\mathbf{W}_U\boldsymbol\Phi = \boldsymbol\Phi^T\mathbf{W}\boldsymbol\Phi\)</span>? It would be nice, but actually I don’t think this is true.</p>
 </div>
 </div>
+</section>
+<section id="fc-for-boldsymbolomega" class="level2">
+<h2 class="anchored" data-anchor-id="fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></h2>
+<p>Next, we will consider the full conditional for <span class="math inline">\(\boldsymbol\Omega\)</span> under two cases. Either <span class="math inline">\(\boldsymbol\Omega\)</span> is diagonal, i.e.&nbsp;<span class="math inline">\(\boldsymbol\delta_i\)</span> is independent conditional on <span class="math inline">\(\boldsymbol\phi_i\)</span>, or <span class="math inline">\(\boldsymbol\Omega\)</span> is symmetric positive-definite matrix, i.e.&nbsp;no assumed structure.</p>
+<section id="general-boldsymbolomega" class="level3">
+<h3 class="anchored" data-anchor-id="general-boldsymbolomega">General <span class="math inline">\(\boldsymbol\Omega\)</span></h3>
+<p>We’ll get right into it</p>
+<p><span class="math display">\[
+\begin{align*}
+p(\boldsymbol\Omega \,|\, \text{rest})
+&amp;\propto
+p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta,\boldsymbol\Omega, \boldsymbol\Lambda,\rho)\\
+&amp;\propto
+\left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\Omega)\\
+&amp;\propto
+|\boldsymbol\Omega|^{n/2}\exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
+&amp;\quad \; \times |\boldsymbol\Omega|^{-(\xi + p + 1)/2}\exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Omega^{-1}\mathbf{G}\right)\right\}\\
+&amp;= |\boldsymbol\Omega|^{-(n + \xi + p + 1)/2}\exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Omega^{-1}(\mathbf{H} + \mathbf{G})\right)\right\}\\
+\end{align*}
+\]</span></p>
+<p>where <span class="math inline">\(\mathbf{H} = \sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\)</span></p>
+<p>Thus, <span class="math display">\[
+\begin{align*}
+\boldsymbol\Omega \,|\, \text{rest} &amp;\sim \text{InvWish}\left(n+\xi, \mathbf{H}+\mathbf{G}\right)\\
+n &amp;= \text{# of spatial locations}\\
+\mathbf{H} &amp;= \sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T
+\end{align*}
+\]</span></p>
+</section>
+<section id="diagonal-boldsymbolomega" class="level3">
+<h3 class="anchored" data-anchor-id="diagonal-boldsymbolomega">Diagonal <span class="math inline">\(\boldsymbol\Omega\)</span></h3>
+<p>TODO</p>
+</section>
+</section>
+<section id="metropolis-hastings-step-for-spatial-stength-parameter-rho" class="level2">
+<h2 class="anchored" data-anchor-id="metropolis-hastings-step-for-spatial-stength-parameter-rho">Metropolis-Hastings Step for Spatial Stength parameter <span class="math inline">\(\rho\)</span></h2>
+<p>TODO</p>
 
 
 </section>
