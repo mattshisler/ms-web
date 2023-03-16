@@ -423,7 +423,7 @@ $$
 &= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\mathbf{m}_k^T\\
 &= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
 &= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
-&= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
+&= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
 &= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^n\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}w_{kj}\boldsymbol\phi_j^T\\
 &= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\boldsymbol\Phi^T\mathbf{W}_{U}\boldsymbol\Phi\\
 \end{align*}
