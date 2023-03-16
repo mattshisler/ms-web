@@ -73,7 +73,7 @@ $$
 
 In this specification we take elements of $\boldsymbol\delta_i$ to be conditionally independent (i.e. $\boldsymbol\Omega$ is a diagonal matrix) which in general need not be the case.
 
-## FC for Fixed effects
+## FC for Fixed effects - $\boldsymbol\beta$
 
 Start with the full conditional for $\boldsymbol\beta$.
 $$
@@ -97,11 +97,11 @@ $$
 \end{align*}
 $$
 
-## FC for Spatial Random Vector
+## FC for Spatial Random Vector - $\boldsymbol\phi_i$ or $\boldsymbol\phi'$
 
 Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for $\boldsymbol\phi_i$ and draw samples in $n$ sub-blocks of parameters, or we could derive the full conditional for $\boldsymbol\phi'$ and update all $\boldsymbol\phi_i$ in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let's try to tackle that first, then derive the full conditionals for $\boldsymbol\phi_i$.
 
-### Joint FC approach
+### Joint FC approach - $\boldsymbol\phi'$
 
 The trickiness of updating $\boldsymbol\phi'$ as a single block is due to our model specification for $\boldsymbol\delta_i$. The likelihood for $\boldsymbol\delta_i$ is not compatible with the prior on $\boldsymbol\phi'$ because the spatial term in the former is specified in terms of $p \times 1$ vectors while in the latter spatial term is a $np \times 1$ vector.
 
@@ -290,7 +290,7 @@ $$
 $$
 in the full conditional for $\boldsymbol\phi'$.
 
-### Marginal (site-by-site) FC approach
+### Marginal (site-by-site) FC approach - $\boldsymbol\phi_i$
 
 We might desire to sample full conditionals for $\boldsymbol\phi_i$ rather than the full joint distribution for $\boldsymbol\phi'$. 
 
@@ -325,7 +325,7 @@ $$
 $$
 taking $\mathbf{B}_{ij} = \frac{w_{ij}}{w_{i+}}\mathbf{I}_p$, we will have $\mathbf{M}_{\phi_i} = \boldsymbol\Omega^{-1}\left(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\right) + \rho \boldsymbol\Lambda^{-1}\sum_{j \in \mathcal{N}_i}w_{ij}\boldsymbol\phi_j$.
 
-## FC for Covariance of the Spatial Random Vector
+## FC for Covariance of the Spatial Random Vector - $\boldsymbol\Lambda$
 
 $$
 \begin{align*}
@@ -491,7 +491,7 @@ Thus,
 $$
 \begin{align*}
 \boldsymbol\Omega \,|\, \text{rest} &\sim \text{InvWish}\left(n+\xi, \mathbf{H}+\mathbf{G}\right)\\
-n &= \text{# of spatial locations}\\
+n &= \text{number of spatial locations}\\
 \mathbf{H} &= \sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T
 \end{align*}
 $$
@@ -500,7 +500,7 @@ $$
 
 TODO
 
-## Metropolis-Hastings Step for Spatial Stength parameter $\rho$
+## Metropolis-Hastings Step for Spatial Stength parameter - $\rho$
 
 TODO
 
