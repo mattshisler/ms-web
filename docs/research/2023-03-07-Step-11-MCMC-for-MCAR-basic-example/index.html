@@ -579,12 +579,26 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, 
 &amp;= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\mathbf{m}_k^T\\
 &amp;= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
 &amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
-&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
-&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\sum_{k=1}^n\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}w_{kj}\boldsymbol\phi_j^T\\
-&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\boldsymbol\Phi^T\mathbf{W}_{U}\boldsymbol\Phi\\
+&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
+&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^n\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}w_{kj}\boldsymbol\phi_j^T\\
+&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\boldsymbol\Phi^T\mathbf{W}_{U}\boldsymbol\Phi\\
+&amp;=
 \end{align*}
 \]</span> Where <span class="math inline">\(\mathbf{W}_U\)</span> is ab <span class="math inline">\(n \times n\)</span> upper triangular matrix constructed by zeroing out the lower triangle of <span class="math inline">\(\mathbf{W}\)</span>. This has the affect of setting <span class="math inline">\(\boldsymbol\phi_j = \boldsymbol 0\)</span> for <span class="math inline">\(j \le k\)</span> which defines the sum <span class="math inline">\(\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}w_{kj}\boldsymbol\phi_j^T\)</span>.</p>
 <p>It is important to note that <span class="math inline">\(\boldsymbol\Phi\)</span> is constructed with <em>rows</em> equal to <span class="math inline">\(\boldsymbol\phi_k\)</span> which results in flipping <span class="math inline">\(\boldsymbol\Phi\boldsymbol\Phi^T\)</span>, what we would expect, to instead be <span class="math inline">\(\boldsymbol\Phi^T\boldsymbol\Phi\)</span>.</p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is suspiciously close to <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi^T\boldsymbol\Phi\)</span>. My <em>guess</em> is that <span class="math inline">\(2\boldsymbol\Phi^T\mathbf{W}_U\boldsymbol\Phi = \boldsymbol\Phi^T\mathbf{W}\boldsymbol\Phi = \mathbf{W}\boldsymbol\Phi^T\boldsymbol\Phi\)</span>, but I will need to verify this.</p>
+</div>
+</div>
 
 
 </section>

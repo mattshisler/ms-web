@@ -426,6 +426,7 @@ $$
 &= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
 &= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^n\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}w_{kj}\boldsymbol\phi_j^T\\
 &= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\boldsymbol\Phi^T\mathbf{W}_{U}\boldsymbol\Phi\\
+&= 
 \end{align*}
 $$
 Where $\mathbf{W}_U$ is ab $n \times n$ upper triangular matrix constructed by zeroing out the lower triangle of $\mathbf{W}$. This has the affect of setting $\boldsymbol\phi_j = \boldsymbol 0$ for $j \le k$ which defines the sum $\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}w_{kj}\boldsymbol\phi_j^T$.
