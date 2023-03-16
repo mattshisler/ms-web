@@ -348,7 +348,7 @@ Could I have derived the full conditionals incorrectly for the univariate case? 
 
 We have a particularly tedious product of ratios. Let's focus on the $k$th term first, then consider the entire product to understand the form of the full conditional for $\boldsymbol\Lambda$. Let
 $$
-\mathbf{m}_k = \rho\sum_{\substack j \in \mathcal{N}_k \\ j \, > \, k}\mathbf{B}_{kj}\boldsymbol\phi_j
+\mathbf{m}_k = \rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\mathbf{B}_{kj}\boldsymbol\phi_j
 $$
 Note that at the $k$th term we are considering the density as a function of some non-zero conditioned variates. The $\boldsymbol\phi_j$ for $j < k$ have been set to $\mathbf{0}$. This may affect the sum in the conditional mean, so we restrict the sum to terms that are non-zero, that is $\boldsymbol\phi_j$ where $j \in \mathcal{N}_k$ and $j > k$.
 
@@ -414,6 +414,25 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \{\b
 \end{align*}
 $$
 and we conclude $\boldsymbol\Lambda \,|\, \text{rest} \sim \text{InvWish}\left(p + \nu,\, \mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)$
+
+This full conditional seems reasonable, but computing $\sum_{k=1}^n \mathbf{S}_k$ may prove a bit tricky. Perhaps there are some simplifications to be made for this term in particular.
+
+$$
+\begin{align*}
+\sum_{k=1}^n \mathbf{S}_k &= \sum_{k=1}^nw_{k+}\left(\boldsymbol\phi_k\boldsymbol\phi^T_k -  2\boldsymbol\phi_k\mathbf{m}_k^T\right)\\
+&= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\mathbf{m}_k^T\\
+&= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
+&= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
+&= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
+&= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\sum_{k=1}^n\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}w_{kj}\boldsymbol\phi_j^T\\
+&= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\boldsymbol\Phi^T\mathbf{W}_{U}\boldsymbol\Phi\\
+\end{align*}
+$$
+Where $\mathbf{W}_U$ is ab $n \times n$ upper triangular matrix constructed by zeroing out the lower triangle of $\mathbf{W}$. This has the affect of setting $\boldsymbol\phi_j = \boldsymbol 0$ for $j \le k$ which defines the sum $\sum_{\substack{j \in \mathcal{N}_k \\ j \, > \, k}}w_{kj}\boldsymbol\phi_j^T$.
+
+It is important to note that $\boldsymbol\Phi$ is constructed with *rows* equal to $\boldsymbol\phi_k$ which results in flipping $\boldsymbol\Phi\boldsymbol\Phi^T$, what we would expect, to instead be $\boldsymbol\Phi^T\boldsymbol\Phi$.
+
+
 
 
 

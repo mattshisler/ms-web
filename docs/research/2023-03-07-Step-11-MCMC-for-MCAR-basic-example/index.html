@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -515,7 +515,7 @@ Note
 </div>
 </div>
 <p>We have a particularly tedious product of ratios. Let’s focus on the <span class="math inline">\(k\)</span>th term first, then consider the entire product to understand the form of the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span>. Let <span class="math display">\[
-\mathbf{m}_k = \rho\sum_{\substack j \in \mathcal{N}_k \\ j \, &gt; \, k}\mathbf{B}_{kj}\boldsymbol\phi_j
+\mathbf{m}_k = \rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\mathbf{B}_{kj}\boldsymbol\phi_j
 \]</span> Note that at the <span class="math inline">\(k\)</span>th term we are considering the density as a function of some non-zero conditioned variates. The <span class="math inline">\(\boldsymbol\phi_j\)</span> for <span class="math inline">\(j &lt; k\)</span> have been set to <span class="math inline">\(\mathbf{0}\)</span>. This may affect the sum in the conditional mean, so we restrict the sum to terms that are non-zero, that is <span class="math inline">\(\boldsymbol\phi_j\)</span> where <span class="math inline">\(j \in \mathcal{N}_k\)</span> and <span class="math inline">\(j &gt; k\)</span>.</p>
 <p>Then the <span class="math inline">\(k\)</span>th term, <span class="math display">\[
 \begin{align*}
@@ -572,6 +572,19 @@ p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, 
 \big|\boldsymbol\Lambda\big|^{-(\nu + 2p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)\right]\right\}\\
 \end{align*}
 \]</span> and we conclude <span class="math inline">\(\boldsymbol\Lambda \,|\, \text{rest} \sim \text{InvWish}\left(p + \nu,\, \mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)\)</span></p>
+<p>This full conditional seems reasonable, but computing <span class="math inline">\(\sum_{k=1}^n \mathbf{S}_k\)</span> may prove a bit tricky. Perhaps there are some simplifications to be made for this term in particular.</p>
+<p><span class="math display">\[
+\begin{align*}
+\sum_{k=1}^n \mathbf{S}_k &amp;= \sum_{k=1}^nw_{k+}\left(\boldsymbol\phi_k\boldsymbol\phi^T_k -  2\boldsymbol\phi_k\mathbf{m}_k^T\right)\\
+&amp;= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\mathbf{m}_k^T\\
+&amp;= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
+&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
+&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
+&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\sum_{k=1}^n\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}w_{kj}\boldsymbol\phi_j^T\\
+&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - \rho\boldsymbol\Phi^T\mathbf{W}_{U}\boldsymbol\Phi\\
+\end{align*}
+\]</span> Where <span class="math inline">\(\mathbf{W}_U\)</span> is ab <span class="math inline">\(n \times n\)</span> upper triangular matrix constructed by zeroing out the lower triangle of <span class="math inline">\(\mathbf{W}\)</span>. This has the affect of setting <span class="math inline">\(\boldsymbol\phi_j = \boldsymbol 0\)</span> for <span class="math inline">\(j \le k\)</span> which defines the sum <span class="math inline">\(\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}w_{kj}\boldsymbol\phi_j^T\)</span>.</p>
+<p>It is important to note that <span class="math inline">\(\boldsymbol\Phi\)</span> is constructed with <em>rows</em> equal to <span class="math inline">\(\boldsymbol\phi_k\)</span> which results in flipping <span class="math inline">\(\boldsymbol\Phi\boldsymbol\Phi^T\)</span>, what we would expect, to instead be <span class="math inline">\(\boldsymbol\Phi^T\boldsymbol\Phi\)</span>.</p>
 
 
 </section>
