@@ -517,20 +517,39 @@ p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
 &amp;\quad \;
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
 &amp;\propto
-\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T\right)\right\}\\
+\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right)\right\}\\
 &amp;\quad \;
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
 &amp;\propto
-\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\left(\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T \otimes 1\right)\right)\right\}\\
+\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Lambda^{-1} \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi\right)\right\}\\
 &amp;\quad \;
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&amp;= \text{(now what?)}
+&amp;= \big|\boldsymbol\Lambda\big|^{-(p +\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi \right)\right\}
 \end{align*}
-\]</span> At this step I wanted to used the mixed-product property of Kronecker products to expand the trace, but this property only holds if the matrix products are well defined. Unfortunately, <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\boldsymbol\phi'(\boldsymbol\phi')^T\)</span> is not well defined because <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\)</span> is <span class="math inline">\(n \times n\)</span> and <span class="math inline">\(\boldsymbol\phi'(\boldsymbol\phi')^T\)</span> is <span class="math inline">\(np \times np\)</span>.</p>
+\]</span> Thus, <span class="math display">\[
+\begin{align*}
+\boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWish}\left(p + \nu, \mathbf{R}+\mathbf{S}\right)\\
+p &amp;= \text{dim}(\boldsymbol\phi_i)\\
+\mathbf{S} &amp;= \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi
+\end{align*}
+\]</span></p>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>I believe I’ve completed this derivation. The key trick is found in <em>Aspects of Multivariate Statistical Theory</em> by Robb J. Muirhead on page 76, Lemma 2.2.3. Interestingly it is not immediately obvious that it agrees with the following derivation using Brook’s Lemma. Perhaps that is something worth checking. The route using Brook’s Lemma was tedious. I would not be surprised if I made some errors there.</p>
+</div>
+</div>
 </section>
 <section id="using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma" class="level3">
 <h3 class="anchored" data-anchor-id="using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma">Using conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span> and Brook’s Lemma</h3>
-<p>Without an immediate solution, let’s attempt to derive the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span> using the conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
+<p>An alternative path, let’s attempt to derive the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span> using the conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
 <p><span class="math display">\[
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\

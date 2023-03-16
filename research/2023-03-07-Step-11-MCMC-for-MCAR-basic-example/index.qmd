@@ -339,21 +339,32 @@ p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
 &\quad \; 
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
 &\propto 
-\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T\right)\right\}\\
+\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right)\right\}\\
 &\quad \; 
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
 &\propto 
-\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\left(\boldsymbol\phi'\left(\boldsymbol\phi'\right)^T \otimes 1\right)\right)\right\}\\
+\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Lambda^{-1} \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi\right)\right\}\\
 &\quad \; 
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&= \text{(now what?)}
+&= \big|\boldsymbol\Lambda\big|^{-(p +\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi \right)\right\}
 \end{align*}
 $$
-At this step I wanted to used the mixed-product property of Kronecker products to expand the trace, but this property only holds if the matrix products are well defined. Unfortunately, $(\mathbf{D}-\rho\mathbf{W})\boldsymbol\phi'(\boldsymbol\phi')^T$ is not well defined because $(\mathbf{D}-\rho\mathbf{W})$ is $n \times n$ and $\boldsymbol\phi'(\boldsymbol\phi')^T$ is $np \times np$.
+Thus,
+$$
+\begin{align*}
+\boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWish}\left(p + \nu, \mathbf{R}+\mathbf{S}\right)\\
+p &= \text{dim}(\boldsymbol\phi_i)\\
+\mathbf{S} &= \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi
+\end{align*}
+$$
+
+::: {.callout-note}
+I believe I've completed this derivation. The key trick is found in *Aspects of Multivariate Statistical Theory* by Robb J. Muirhead on page 76, Lemma 2.2.3. Interestingly it is not immediately obvious that it agrees with the following derivation using Brook's Lemma. Perhaps that is something worth checking. The route using Brook's Lemma was tedious. I would not be surprised if I made some errors there.
+:::
 
 ### Using conditional distributions for $\boldsymbol\phi_i$ and Brook's Lemma
 
-Without an immediate solution, let's attempt to derive the full conditional for $\boldsymbol\Lambda$ using the conditional distributions for $\boldsymbol\phi_i$.
+An alternative path, let's attempt to derive the full conditional for $\boldsymbol\Lambda$ using the conditional distributions for $\boldsymbol\phi_i$.
 
 $$
 \begin{align*}
