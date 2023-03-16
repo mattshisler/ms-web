@@ -99,6 +99,8 @@ $$
 
 ## FC for Spatial Random Vector
 
+### Joint FC approach
+
 Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for $\boldsymbol\phi_i$ and draw samples in $n$ sub-blocks of parameters, or we could derive the full conditional for $\boldsymbol\phi'$ and update all $\boldsymbol\phi_i$ in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let's try to tackle that.
 
 The trickiness of updating $\boldsymbol\phi'$ as a single block is due to our model specification for $\boldsymbol\delta_i$. The likelihood for $\boldsymbol\delta_i$ is not compatible with the prior on $\boldsymbol\phi'$ because the spatial term in the former is specified in terms of $p \times 1$ vectors while in the latter spatial term is a $np \times 1$ vector.
@@ -288,9 +290,41 @@ $$
 $$
 in the full conditional for $\boldsymbol\phi'$.
 
-We might desire to sample full conditionals for $\boldsymbol\phi_i$ rather than the full joint distribution for $\boldsymbol\phi'$. In this appoach the derivaations are as follows. . .
+### Marginal (site-by-site) FC approach
 
-(work in progress)
+We might desire to sample full conditionals for $\boldsymbol\phi_i$ rather than the full joint distribution for $\boldsymbol\phi'$. 
+
+$$
+\begin{align*}
+p(\boldsymbol\phi_i \,|\, \text{rest})
+&\propto 
+p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
+&\propto 
+p(\boldsymbol\delta_i \,|\, \boldsymbol\phi_i, \boldsymbol\beta, \boldsymbol\Omega)p(\boldsymbol\phi_i \,|\, \boldsymbol\Lambda, \rho)\\
+&\propto 
+\exp\left\{-\frac{1}{2}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
+&\quad \, \times 
+\exp\left\{-\frac{w_{i+}}{2}\left(\boldsymbol\phi_i - \rho\sum_{j \in \mathcal{N}_i}\mathbf{B}_{ij}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_i - \rho\sum_{j \in \mathcal{N}_i}\mathbf{B}_{ij}\boldsymbol\phi_j\right)\right\}\\
+&\propto 
+\exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol\phi_i - 2\left(\boldsymbol\delta_i^T -\boldsymbol\beta^T\boldsymbol{\mathcal{Z}}^T_i\right)\boldsymbol\Omega^{-1}\boldsymbol\phi_i\right]\right\}\\
+&\quad \, \times 
+\exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi_i)^Tw_{i+}\boldsymbol\Lambda^{-1}\boldsymbol\phi_i - 2\rho w_{i+}\left(\sum_{j \in \mathcal{N}_i}\boldsymbol\phi_j^T\mathbf{B}_{ij}^T\right)\boldsymbol\Lambda^{-1}\boldsymbol\phi_i\right]\right\}\\
+&=
+\exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi_i)^T\left(\boldsymbol\Omega^{-1} + w_{i+}\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi_i - 2\left[\left(\boldsymbol\delta_i^T -\boldsymbol\beta^T\boldsymbol{\mathcal{Z}}^T_i\right)\boldsymbol\Omega^{-1} + \rho w_{i+}\left(\sum_{j \in \mathcal{N}_i}\boldsymbol\phi_j^T\mathbf{B}_{ij}^T\right)\boldsymbol\Lambda^{-1}\right]\boldsymbol\phi_i\right]\right\}\\
+\end{align*}
+$$
+
+Thus,
+
+$$
+\begin{align*}
+\boldsymbol\phi_i\,|\,\text{rest} &\sim \text{Normal}_{p}(\mathbf{V}_{\phi_i}^{-1}\mathbf{M}_{\phi_i}, \mathbf{V}_{\phi_i}^{-1})\\
+\mathbf{V}_{\phi_i} &= \boldsymbol\Omega^{-1} + w_{i+}\boldsymbol\Lambda^{-1}\\
+\mathbf{M}_{\phi_i} &= \boldsymbol\Omega^{-1}\left(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\right) + \rho w_{i+}\boldsymbol\Lambda^{-1}\sum_{j \in \mathcal{N}_i}\mathbf{B}_{ij}\boldsymbol\phi_j
+\end{align*}
+$$
+taking $\mathbf{B}_{ij} = \frac{w_{ij}}{w_{i+}}\mathbf{I}_p$, we will have $\mathbf{M}_{\phi_i} = \boldsymbol\Omega^{-1}\left(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\right) + \rho \boldsymbol\Lambda^{-1}\sum_{j \in \mathcal{N}_i}w_{ij}\boldsymbol\phi_j$.
+
 
 ## FC for $\boldsymbol\Omega$
 
