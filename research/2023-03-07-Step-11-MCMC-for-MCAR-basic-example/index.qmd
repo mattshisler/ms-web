@@ -327,6 +327,8 @@ taking $\mathbf{B}_{ij} = \frac{w_{ij}}{w_{i+}}\mathbf{I}_p$, we will have $\mat
 
 ## FC for Covariance of the Spatial Random Vector - $\boldsymbol\Lambda$
 
+### Using joint distribution for $\boldsymbol\phi'$
+
 $$
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
@@ -348,6 +350,8 @@ p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
 \end{align*}
 $$
 At this step I wanted to used the mixed-product property of Kronecker products to expand the trace, but this property only holds if the matrix products are well defined. Unfortunately, $(\mathbf{D}-\rho\mathbf{W})\boldsymbol\phi'(\boldsymbol\phi')^T$ is not well defined because $(\mathbf{D}-\rho\mathbf{W})$ is $n \times n$ and $\boldsymbol\phi'(\boldsymbol\phi')^T$ is $np \times np$.
+
+### Using conditional distributions for $\boldsymbol\phi_i$ and Brook's Lemma
 
 Without an immediate solution, let's attempt to derive the full conditional for $\boldsymbol\Lambda$ using the conditional distributions for $\boldsymbol\phi_i$.
 

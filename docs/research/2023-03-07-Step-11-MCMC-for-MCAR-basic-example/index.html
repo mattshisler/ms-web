@@ -184,7 +184,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#joint-fc-approach---boldsymbolphi" id="toc-joint-fc-approach---boldsymbolphi" class="nav-link" data-scroll-target="#joint-fc-approach---boldsymbolphi">Joint FC approach - <span class="math inline">\(\boldsymbol\phi'\)</span></a></li>
   <li><a href="#marginal-site-by-site-fc-approach---boldsymbolphi_i" id="toc-marginal-site-by-site-fc-approach---boldsymbolphi_i" class="nav-link" data-scroll-target="#marginal-site-by-site-fc-approach---boldsymbolphi_i">Marginal (site-by-site) FC approach - <span class="math inline">\(\boldsymbol\phi_i\)</span></a></li>
   </ul></li>
-  <li><a href="#fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" id="toc-fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" class="nav-link" data-scroll-target="#fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda">FC for Covariance of the Spatial Random Vector - <span class="math inline">\(\boldsymbol\Lambda\)</span></a></li>
+  <li><a href="#fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" id="toc-fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" class="nav-link" data-scroll-target="#fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda">FC for Covariance of the Spatial Random Vector - <span class="math inline">\(\boldsymbol\Lambda\)</span></a>
+  <ul class="collapse">
+  <li><a href="#using-joint-distribution-for-boldsymbolphi" id="toc-using-joint-distribution-for-boldsymbolphi" class="nav-link" data-scroll-target="#using-joint-distribution-for-boldsymbolphi">Using joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span></a></li>
+  <li><a href="#using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma" id="toc-using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma" class="nav-link" data-scroll-target="#using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma">Using conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span> and Brook’s Lemma</a></li>
+  </ul></li>
   <li><a href="#fc-for-boldsymbolomega" id="toc-fc-for-boldsymbolomega" class="nav-link" data-scroll-target="#fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></a>
   <ul class="collapse">
   <li><a href="#general-boldsymbolomega" id="toc-general-boldsymbolomega" class="nav-link" data-scroll-target="#general-boldsymbolomega">General <span class="math inline">\(\boldsymbol\Omega\)</span></a></li>
@@ -501,6 +505,8 @@ p(\boldsymbol\delta_i \,|\, \boldsymbol\phi_i, \boldsymbol\beta, \boldsymbol\Ome
 </section>
 <section id="fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" class="level2">
 <h2 class="anchored" data-anchor-id="fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda">FC for Covariance of the Spatial Random Vector - <span class="math inline">\(\boldsymbol\Lambda\)</span></h2>
+<section id="using-joint-distribution-for-boldsymbolphi" class="level3">
+<h3 class="anchored" data-anchor-id="using-joint-distribution-for-boldsymbolphi">Using joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span></h3>
 <p><span class="math display">\[
 \begin{align*}
 p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
@@ -521,6 +527,9 @@ p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
 &amp;= \text{(now what?)}
 \end{align*}
 \]</span> At this step I wanted to used the mixed-product property of Kronecker products to expand the trace, but this property only holds if the matrix products are well defined. Unfortunately, <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\boldsymbol\phi'(\boldsymbol\phi')^T\)</span> is not well defined because <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\)</span> is <span class="math inline">\(n \times n\)</span> and <span class="math inline">\(\boldsymbol\phi'(\boldsymbol\phi')^T\)</span> is <span class="math inline">\(np \times np\)</span>.</p>
+</section>
+<section id="using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma" class="level3">
+<h3 class="anchored" data-anchor-id="using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma">Using conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span> and Brook’s Lemma</h3>
 <p>Without an immediate solution, let’s attempt to derive the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span> using the conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
 <p><span class="math display">\[
 \begin{align*}
@@ -634,6 +643,7 @@ Note
 <p>This is suspiciously close to <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi^T\boldsymbol\Phi\)</span>. Perhaps <span class="math inline">\(2\boldsymbol\Phi^T\mathbf{W}_U\boldsymbol\Phi = \boldsymbol\Phi^T\mathbf{W}\boldsymbol\Phi\)</span>? It would be nice, but actually I don’t think this is true.</p>
 </div>
 </div>
+</section>
 </section>
 <section id="fc-for-boldsymbolomega" class="level2">
 <h2 class="anchored" data-anchor-id="fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></h2>
