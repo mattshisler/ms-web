@@ -339,21 +339,21 @@ p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
 &\quad \; 
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
 &\propto 
-\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right)\right\}\\
+\big|\boldsymbol\Lambda\big|^{-n/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right)\right\}\\
 &\quad \; 
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
 &\propto 
-\big|\boldsymbol\Lambda\big|^{-p/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Lambda^{-1} \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi\right)\right\}\\
+\big|\boldsymbol\Lambda\big|^{-n/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Lambda^{-1} \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi\right)\right\}\\
 &\quad \; 
 \times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&= \big|\boldsymbol\Lambda\big|^{-(p +\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi \right)\right\}
+&= \big|\boldsymbol\Lambda\big|^{-(n +\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi \right)\right\}
 \end{align*}
 $$
 Thus,
 $$
 \begin{align*}
-\boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWish}\left(p + \nu, \mathbf{R}+\mathbf{S}\right)\\
-p &= \text{dim}(\boldsymbol\phi_i)\\
+\boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWish}\left(n + \nu, \mathbf{R}+\mathbf{S}\right)\\
+n &= \text{number of spatial locations}\\
 \mathbf{S} &= \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi
 \end{align*}
 $$
