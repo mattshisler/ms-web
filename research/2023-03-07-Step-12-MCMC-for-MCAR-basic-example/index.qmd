@@ -151,7 +151,7 @@ First, we need to simulate some data.
 First, define and partition the spatial domain.
 ```{r}
 # specify spatial domain
-n <- 20^2
+n <- 40^2
 spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
 spat_domain$label <- 1:n
 
@@ -220,6 +220,100 @@ ggplot(spat_domain) +
   coord_fixed() + 
   theme_void()
 ```
+
+Now for the MCMC.
+```{r}
+#| eval: false
+
+# set-up
+niter <- 100
+keep_B      <- array(NA, dim(p, q, niter))
+keep_Omega  <- array(NA, dim(p, p, niter))
+keep_Lambda <- array(NA, dim(p, p, niter))
+keep_Phi    <- array(NA, dim(n, p, niter))
+keep_rho    <- rep(NA, niter)
+
+# initial values
+beta   <- matrix(rep(0, q*p), ncol = 1)
+B      <- matrix(c(beta), nrow = p)
+Omega  <- diag(p)
+Lambda <- diag(p)
+Phi    <- matrix(0, nrow = n, ncol = p)
+keep_B[,,1]      <- B
+keep_Omega[,,1]  <- Omega
+keep_Lambda[,,1] <- Lambda
+keep_Phi[,,1]    <- Phi
+
+# prior parameters
+mu        <- rep(0, q*p)
+Gamma     <- 10000*diag(p)
+Gamma_inv <- solve(Gamma) 
+G  <- 
+R  <- 
+nu <- 
+xi <- 
+
+# pre-computes
+ZtZ <- t(Z)%*%Z
+Gamma_inv_mu <- solve(Gamma)%*%mu
+```
+
+
+```{r}
+#| eval: false
+
+tic()
+for (iter in 1:niter){
+  
+  # sample beta
+  M     <- kronecker(t(Z), Omega_inv)%*%(c(t(Delta)) - c(t(Phi)))
+  V_inv <- solve(ZtZ%*%Omega_inv + Gamma_inv)
+  beta  <- V_inv%*%M + t(chol(V_inv))%*%rnorm(q*p) 
+  B     <- matrix(c(beta), nrow = p)
+  
+  # sample phi
+  for (i in 1:n){
+    M       <- Omega_inv%*%(Delta[i,] - B%*%Z[i,]) + rho*Lambda_inv%*%t(Phi)%*%W[i,]
+    V_inv   <- solve(Omega_inv + D[i,i]*Lambda_inv)
+    Phi[i,] <- V_inv%*%M + t(chol(V_inv))%*%rnorm(p)
+  }
+  
+  # sample Omega
+  H <- 
+  Omega <- rinvwishart(1, n + nu, G + H)
+  
+  # sample Lambda
+  S <- t(Phi)%*%(D - rho*W)%*%Phi
+  Lambda <- rinvwishart(1, n + xi, R + S)
+  
+  # sample rho
+  # TODO
+  # tune rho sampler
+  # TODO
+  
+  # store results
+  
+}
+
+
+toc()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
