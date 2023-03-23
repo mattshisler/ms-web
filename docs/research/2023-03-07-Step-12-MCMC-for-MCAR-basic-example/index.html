@@ -178,23 +178,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
    
   <ul>
   <li><a href="#intro" id="toc-intro" class="nav-link active" data-scroll-target="#intro">Intro</a></li>
-  <li><a href="#fc-for-fixed-effects---boldsymbolbeta" id="toc-fc-for-fixed-effects---boldsymbolbeta" class="nav-link" data-scroll-target="#fc-for-fixed-effects---boldsymbolbeta">FC for Fixed effects - <span class="math inline">\(\boldsymbol\beta\)</span></a></li>
-  <li><a href="#fc-for-spatial-random-vector---boldsymbolphi_i-or-boldsymbolphi" id="toc-fc-for-spatial-random-vector---boldsymbolphi_i-or-boldsymbolphi" class="nav-link" data-scroll-target="#fc-for-spatial-random-vector---boldsymbolphi_i-or-boldsymbolphi">FC for Spatial Random Vector - <span class="math inline">\(\boldsymbol\phi_i\)</span> or <span class="math inline">\(\boldsymbol\phi'\)</span></a>
-  <ul class="collapse">
-  <li><a href="#joint-fc-approach---boldsymbolphi" id="toc-joint-fc-approach---boldsymbolphi" class="nav-link" data-scroll-target="#joint-fc-approach---boldsymbolphi">Joint FC approach - <span class="math inline">\(\boldsymbol\phi'\)</span></a></li>
-  <li><a href="#marginal-site-by-site-fc-approach---boldsymbolphi_i" id="toc-marginal-site-by-site-fc-approach---boldsymbolphi_i" class="nav-link" data-scroll-target="#marginal-site-by-site-fc-approach---boldsymbolphi_i">Marginal (site-by-site) FC approach - <span class="math inline">\(\boldsymbol\phi_i\)</span></a></li>
-  </ul></li>
-  <li><a href="#fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" id="toc-fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" class="nav-link" data-scroll-target="#fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda">FC for Covariance of the Spatial Random Vector - <span class="math inline">\(\boldsymbol\Lambda\)</span></a>
-  <ul class="collapse">
-  <li><a href="#using-joint-distribution-for-boldsymbolphi" id="toc-using-joint-distribution-for-boldsymbolphi" class="nav-link" data-scroll-target="#using-joint-distribution-for-boldsymbolphi">Using joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span></a></li>
-  <li><a href="#using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma" id="toc-using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma" class="nav-link" data-scroll-target="#using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma">Using conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span> and Brook’s Lemma</a></li>
-  </ul></li>
-  <li><a href="#fc-for-boldsymbolomega" id="toc-fc-for-boldsymbolomega" class="nav-link" data-scroll-target="#fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></a>
-  <ul class="collapse">
-  <li><a href="#general-boldsymbolomega" id="toc-general-boldsymbolomega" class="nav-link" data-scroll-target="#general-boldsymbolomega">General <span class="math inline">\(\boldsymbol\Omega\)</span></a></li>
-  <li><a href="#diagonal-boldsymbolomega" id="toc-diagonal-boldsymbolomega" class="nav-link" data-scroll-target="#diagonal-boldsymbolomega">Diagonal <span class="math inline">\(\boldsymbol\Omega\)</span></a></li>
-  </ul></li>
-  <li><a href="#metropolis-hastings-step-for-spatial-stength-parameter---rho" id="toc-metropolis-hastings-step-for-spatial-stength-parameter---rho" class="nav-link" data-scroll-target="#metropolis-hastings-step-for-spatial-stength-parameter---rho">Metropolis-Hastings Step for Spatial Stength parameter - <span class="math inline">\(\rho\)</span></a></li>
   </ul>
 </nav>
     </div>
@@ -255,7 +238,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <summary>Code: Load the packages</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(igraph)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(viridis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(viridis)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(matrixsampling)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <section id="intro" class="level2">
@@ -312,7 +296,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 \phi_{n1} &amp; \phi_{n2} &amp; \dots &amp; \phi_{np}\\
 \end{pmatrix}
 \]</span></p>
-<p>Frequently we will work with vectorizations of these matrices. An bold lowercase symbol without index will represent the vectorization (by column) of the corresponding matrix, i.e.&nbsp;<span class="math inline">\(\boldsymbol\phi = \text{vec}(\boldsymbol\Phi)\)</span>. Vectorization of the transpose of the corresponding matrix will be indicated with a ``prime”, <span class="math inline">\('\)</span>, i.e.&nbsp;<span class="math inline">\(\boldsymbol\phi' = \text{vec}(\boldsymbol\Phi^T)\)</span></p>
+<p>Frequently we will work with vectorizations of these matrices. An bold lowercase symbol without index will represent the vectorization (by column) of the corresponding matrix, i.e.&nbsp;<span class="math inline">\(\boldsymbol\phi = \text{vec}(\boldsymbol\Phi)\)</span>. Vectorization of the transpose of the corresponding matrix will be indicated with a “prime”, <span class="math inline">\('\)</span>, i.e.&nbsp;<span class="math inline">\(\boldsymbol\phi' = \text{vec}(\boldsymbol\Phi^T)\)</span></p>
 <p>Breaking from the row-by-row convention, we will arrange fixed effects vectors in a matrix column-by-column <span class="math display">\[
 \mathbf{B} =
 \begin{pmatrix}
@@ -355,479 +339,95 @@ n &amp;= \text{number of areal units}\\
 \end{align*}
 \]</span></p>
 <p>First, we need to simulate some data.</p>
+<p>First, define and partition the spatial domain.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">831</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># specify spatial domain</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span><span class="sc">^</span><span class="dv">2</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">0</span>)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># specify parameters</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>p <span class="ot">&lt;-</span> <span class="dv">2</span></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.9</span>,</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.9</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="co"># construct precision matrix for join dist of phi</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>inv_Sigma <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho<span class="sc">*</span>W), <span class="fu">solve</span>(Lambda))</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co"># sample from joint dist of phi (technique borrowed for precision matrices)</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>spat_phi <span class="ot">&lt;-</span> <span class="fu">backsolve</span>(<span class="fu">chol</span>(inv_Sigma), <span class="fu">rnorm</span>(n<span class="sc">*</span>p))</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="co"># inverse vectorize phi  </span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>spat_phi <span class="ot">&lt;-</span> <span class="fu">matrix</span>(spat_phi, <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co"># assign values to spatial data set</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi1 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">1</span>]</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>phi2 <span class="ot">&lt;-</span> spat_phi[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># specify spatial domain</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">0</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Let <span class="math inline">\(\mathcal{D}\)</span> be a spatial domain partitioned into <span class="math inline">\(n\)</span> areal units indexed by <span class="math inline">\(i\)</span>. Following the notation of Step 3 (link), let <span class="math inline">\(\boldsymbol\delta_i\)</span> be a multivariate (<span class="math inline">\(p \times 1\)</span>) response vector with conditional expectation <span class="math display">\[
-\text{E}(\boldsymbol\delta_i \,|\,\boldsymbol\phi_i)  = \boldsymbol{\mathcal{Z}}_i \boldsymbol\beta + \boldsymbol\phi_i
-\]</span> and covariance <span class="math display">\[
-\text{Cov}(\boldsymbol\delta_i \,|\, \boldsymbol\phi_i) = \text{Cov}(\boldsymbol\epsilon_i) = \boldsymbol\Omega
-\]</span></p>
-<p><span class="math display">\[
-\boldsymbol\delta_i = \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i + \boldsymbol\epsilon_i
-\]</span> where <span class="math inline">\(\boldsymbol\epsilon_i \sim \text{N}\left(\boldsymbol 0, \boldsymbol\Omega\right)\)</span> is a random noise vector.</p>
-<p>We can specify the model with conditional priors on <span class="math inline">\(\boldsymbol\phi{i}\)</span></p>
-<p><span class="math display">\[
-\begin{align*}
-\boldsymbol\delta_i &amp;\sim \text{Normal}_{p}\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \,  \boldsymbol\Omega\right)\\
-\boldsymbol\beta &amp;\sim \text{Normal}_{qp}(\boldsymbol\mu, \, \boldsymbol\Gamma)\\
-\boldsymbol\phi_i|\boldsymbol\phi_{j\ne i},\boldsymbol\Lambda &amp;\sim \text{Normal}_p\left(\rho\sum_{i \sim j}\mathbf{B}_{ij}\boldsymbol\phi_j, \, w^{-1}_{i+}\boldsymbol\Lambda\right)\\
-\omega_{kk} &amp;\sim \text{InvGamm}(a_k, \, b_k) \quad \text{OR} \quad \boldsymbol\Omega \sim \text{InvWish}(\psi,\mathbf{G})\\
-\boldsymbol\Lambda &amp;\sim \text{InvWish}(\nu, \mathbf{R})\\
-\rho &amp;\sim \text{Unif}(0, \,1)
-\end{align*}
-\]</span></p>
-<p>Or we can write the model in another way, with the joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span>, the vector formed by stacking <span class="math inline">\(\boldsymbol\phi_i\)</span>, <span class="math inline">\(i = 1,\dots,n\)</span>.</p>
-<p><span class="math display">\[
-\begin{align*}
-\boldsymbol\delta_i &amp;\sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i, \;  \boldsymbol\Omega\right)\\
-\boldsymbol\beta &amp;\sim \text{Normal}_{qp}\left(\boldsymbol\mu, \boldsymbol\Gamma\right)\\
-\boldsymbol\phi' &amp;\sim \text{Normal}_{np}\left(\boldsymbol 0, (\mathbf{D-\rho\mathbf{W}})^{-1} \otimes \boldsymbol\Lambda\right)\\
-\omega_{kk} &amp;\sim \text{InvGamm}(a_k, b_k) \quad \text{OR} \quad \boldsymbol\Omega \sim \text{InvWish}(\psi,\mathbf{G})\\
-\boldsymbol\Lambda &amp;\sim \text{InvWish}(\nu, \mathbf{R})\\
-\rho &amp;\sim \text{Unif}(0,1)
-\end{align*}
-\]</span></p>
-<p>In this specification we take elements of <span class="math inline">\(\boldsymbol\delta_i\)</span> to be conditionally independent (i.e.&nbsp;<span class="math inline">\(\boldsymbol\Omega\)</span> is a diagonal matrix) which in general need not be the case.</p>
-</section>
-<section id="fc-for-fixed-effects---boldsymbolbeta" class="level2">
-<h2 class="anchored" data-anchor-id="fc-for-fixed-effects---boldsymbolbeta">FC for Fixed effects - <span class="math inline">\(\boldsymbol\beta\)</span></h2>
-<p>Start with the full conditional for <span class="math inline">\(\boldsymbol\beta\)</span>. <span class="math display">\[
-\begin{align*}
-p(\boldsymbol\beta \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\beta)\\
-&amp;= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\beta)\\
-&amp;\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
-&amp;\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta-\boldsymbol\mu\right]^T\boldsymbol\Gamma^{-1}\left[\boldsymbol\beta-\boldsymbol\mu\right]\right\}\\
-&amp;\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i\right)\boldsymbol\beta\right]\right\}\\
-&amp;\quad \, \times \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\boldsymbol\Gamma^{-1}\boldsymbol\beta - 2\boldsymbol\mu^T\boldsymbol\Gamma^{-1}\boldsymbol\beta\right]\right\}\\
-&amp;\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\beta^T\left(\sum_{i=1}^n\boldsymbol{\mathcal{Z}}_i^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i + \boldsymbol\Gamma^{-1}\right)\boldsymbol\beta - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i + \boldsymbol\mu^T\boldsymbol\Gamma^{-1}\right)\boldsymbol\beta\right]\right\}
-\end{align*}
-\]</span> Thus, <span class="math display">\[
-\begin{align*}
-\boldsymbol\beta\,|\,\text{rest} &amp;\sim \text{Normal}_{qp}(\mathbf{V}_\beta^{-1}\mathbf{M}_\beta, \mathbf{V}_\beta^{-1})\\
-\mathbf{V}_\beta &amp;= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol{\mathcal{Z}}_i + \mathbf{\Gamma}^{-1}\\
-\mathbf{M}_\beta &amp;= \sum_{i=1}^n\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol\phi_i) + \mathbf{\Gamma}^{-1}\boldsymbol\mu
-\end{align*}
-\]</span></p>
-</section>
-<section id="fc-for-spatial-random-vector---boldsymbolphi_i-or-boldsymbolphi" class="level2">
-<h2 class="anchored" data-anchor-id="fc-for-spatial-random-vector---boldsymbolphi_i-or-boldsymbolphi">FC for Spatial Random Vector - <span class="math inline">\(\boldsymbol\phi_i\)</span> or <span class="math inline">\(\boldsymbol\phi'\)</span></h2>
-<p>Next we must determine the full conditional distribution for the spatial random vector. There are two approaches here, we could either derive full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span> and draw samples in <span class="math inline">\(n\)</span> sub-blocks of parameters, or we could derive the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span> and update all <span class="math inline">\(\boldsymbol\phi_i\)</span> in a single block. It is hard to say which would be computationally preferable. The latter seems more interesting, though, so let’s try to tackle that first, then derive the full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
-<section id="joint-fc-approach---boldsymbolphi" class="level3">
-<h3 class="anchored" data-anchor-id="joint-fc-approach---boldsymbolphi">Joint FC approach - <span class="math inline">\(\boldsymbol\phi'\)</span></h3>
-<p>The trickiness of updating <span class="math inline">\(\boldsymbol\phi'\)</span> as a single block is due to our model specification for <span class="math inline">\(\boldsymbol\delta_i\)</span>. The likelihood for <span class="math inline">\(\boldsymbol\delta_i\)</span> is not compatible with the prior on <span class="math inline">\(\boldsymbol\phi'\)</span> because the spatial term in the former is specified in terms of <span class="math inline">\(p \times 1\)</span> vectors while in the latter spatial term is a <span class="math inline">\(np \times 1\)</span> vector.</p>
-<p>We could either construct the joint distribution of the <span class="math inline">\(\boldsymbol\delta_i\)</span> vectors or we could try to write <span class="math inline">\(\boldsymbol\phi_i\)</span> in terms of <span class="math inline">\(\boldsymbol\phi'\)</span> and substitute into the corresponding <span class="math inline">\(\boldsymbol\delta_i\)</span> distributions.</p>
-<p>Let, <span class="math display">\[
-\boldsymbol\Delta =
-\begin{pmatrix}
-\delta_{11} &amp; \dots &amp; \delta_{1p}\\
-\delta_{21} &amp; \dots &amp; \delta_{2p}\\
-\vdots &amp; \vdots &amp; \vdots\\
-\delta_{n1} &amp; \dots &amp; \delta_{np}\\
-\end{pmatrix} =
-\begin{pmatrix}
-\boldsymbol\delta_1^T\\
-\boldsymbol\delta_2^T\\
-\vdots\\
-\boldsymbol\delta_n^T\\
-\end{pmatrix}
-\]</span></p>
-<p>Then define <span class="math inline">\(\boldsymbol\delta' = \text{vec}(\boldsymbol\Delta^T)\)</span>. Since <span class="math inline">\(\boldsymbol\delta_i\)</span> are conditionally independent, the joint distribution for <span class="math inline">\(\boldsymbol\delta'\)</span> is</p>
-<p><span class="math display">\[
-\boldsymbol\delta' \sim \text{Normal}_{np}
-\left(
-\begin{pmatrix}
-\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
-\boldsymbol{\mathcal{Z}}_2\boldsymbol\beta\\
-\vdots \\
-\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
-\end{pmatrix} + \boldsymbol\phi', \;
-\mathbf{I}_n \otimes \boldsymbol\Omega
-\right)
-\]</span> Again, the purpose of constructing the joint distribution in this way was to ensure the mean is in terms of <span class="math inline">\(\boldsymbol\phi'\)</span>. But now the fixed effects term is a bit awkward. Let’s avoid that temporarily by letting <span class="math display">\[
-\mathbf{A} =
-\begin{pmatrix}
-\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
-\boldsymbol{\mathcal{Z}}_2\boldsymbol\beta\\
-\vdots \\
-\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
-\end{pmatrix}.
-\]</span></p>
-<p>Then if we proceed in deriving the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>, we will have</p>
-<p><span class="math display">\[
-\begin{align*}
-p(\boldsymbol\phi' \,|\, \text{rest}) &amp;\propto p(\boldsymbol\delta', \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto p(\{\boldsymbol\delta' \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\phi')\\
-&amp;\propto \exp\left\{-\frac{1}{2}\left[\boldsymbol\delta'-(\mathbf{A} + \boldsymbol\phi')\right]^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\left[\boldsymbol\delta_i-(\mathbf{A} + \boldsymbol\phi')\right]\right\}\\
-&amp;\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-&amp;\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}\\
-&amp;\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-&amp;\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1} + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\right)\boldsymbol\phi' - 2\left((\boldsymbol\delta'-\mathbf{A})^T\left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}\right)\boldsymbol\phi'\right]\right\}
-\end{align*}
-\]</span> Thus,</p>
-<p><span class="math display">\[
-\begin{align*}
-\boldsymbol\phi'\,|\,\text{rest} &amp;\sim \text{Normal}_{np}(\mathbf{V}_{\phi'}^{-1}\mathbf{M}_{\phi'}, \mathbf{V}_{\phi'}^{-1})\\
-\mathbf{V}_{\phi'} &amp;= \left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1} + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\\
-\mathbf{M}_{\phi'} &amp;= \left(\mathbf{I}_n \otimes \boldsymbol\Omega\right)^{-1}(\boldsymbol\delta'-\mathbf{A})
-\end{align*}
-\]</span></p>
-<p>This full conditional looks to be pretty clean, though we will need to consider efficient ways to compute <span class="math inline">\(\mathbf{A}\)</span>. Before moving on, let’s explore an alternative derivation for the full conditional of <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
-<p>If we instead wrote <span class="math inline">\(\boldsymbol\phi_i\)</span> in terms of <span class="math inline">\(\boldsymbol\phi'\)</span> when describing the distribution of <span class="math inline">\(\boldsymbol\delta_i\)</span>? Consider the way in which one “extracts” a sub-vector of elements from a vector. We know there exists a <span class="math inline">\(p \times np\)</span> matrix <span class="math inline">\(\mathbf{U}_i\)</span> which will “extract” the <span class="math inline">\(p \times 1\)</span> dimension <span class="math inline">\(\boldsymbol\phi_i\)</span> vector from the <span class="math inline">\(np \times 1\)</span> dimenion <span class="math inline">\(\boldsymbol\phi'\)</span> vector. This <span class="math inline">\(\mathbf{U}_i\)</span> matrix will have all elements equal to <span class="math inline">\(0\)</span> except for <span class="math inline">\(p\)</span> columns forming a <span class="math inline">\(p \times p\)</span> identity matrix. The position of this <span class="math inline">\(p \times p\)</span> identity matrix in <span class="math inline">\(\mathbf{U}_i\)</span> determines which <span class="math inline">\(\boldsymbol\phi_i\)</span> to “extract” from <span class="math inline">\(\boldsymbol\phi'\)</span>. In order to extract <span class="math inline">\(\boldsymbol\phi_i\)</span>, then the <span class="math inline">\(p \times p\)</span> identity matrix must begin at column <span class="math inline">\((i-1)p + 1\)</span> in <span class="math inline">\(\mathbf{U}_i\)</span></p>
-<p><span class="math display">\[
-\begin{align*}
-\boldsymbol\phi_i &amp;=
-\mathbf{U}_i\boldsymbol\phi'\\
-&amp;= \begin{pmatrix}
-\boldsymbol{0}_p &amp; \dots &amp; \boldsymbol{0}_p &amp; \mathbf{I}_p &amp; \boldsymbol{0}_p &amp; \dots &amp; \boldsymbol{0}_p
-\end{pmatrix}
-\boldsymbol\phi'
-\end{align*}
-\]</span> where <span class="math inline">\(\boldsymbol 0_p\)</span> is a <span class="math inline">\(p \times p\)</span> matrix of <span class="math inline">\(0\)</span>’s. Now we can write</p>
-<p><span class="math display">\[
-\boldsymbol\delta_i \sim \text{Normal}_p\left(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi', \;  \boldsymbol\Omega\right)
-\]</span> which will facilitate the derivation of the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
-<p><span class="math display">\[
-\begin{align*}
-p(\boldsymbol\phi' \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto p(\{\boldsymbol\delta_i\} \,|\, \boldsymbol\beta, \boldsymbol\phi', \boldsymbol\Omega)p(\boldsymbol\phi')\\
-&amp;= \left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi',\boldsymbol\Omega)\right]p(\boldsymbol\phi')\\
-&amp;\propto \exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi')\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \mathbf{U}_i\boldsymbol\phi')\right]\right\}\\
-&amp;\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-&amp;\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi' - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi'\right]\right\}\\
-&amp;\quad \, \times \exp\left\{-\frac{1}{2}(\boldsymbol\phi')^T\left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right\}\\
-&amp;\propto \exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi')^T\left(\sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\right)\boldsymbol\phi' - 2\left(\sum_{i=1}^n(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)^T\boldsymbol\Omega^{-1}\mathbf{U}_i\right)\boldsymbol\phi'\right]\right\}
-\end{align*}
-\]</span> Thus, <span class="math display">\[
-\begin{align*}
-\boldsymbol\phi'\,|\,\text{rest} &amp;\sim \text{Normal}_{np}(\mathbf{V}_{\phi'}^{-1}\mathbf{M}_{\phi'}, \mathbf{V}_{\phi'}^{-1})\\
-\mathbf{V}_{\phi'} &amp;= \sum_{i=1}^n\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i + \left((\mathbf{D-\rho\mathbf{W}}) \otimes \boldsymbol\Lambda^{-1}\right)\\
-\mathbf{M}_{\phi'} &amp;= \sum_{i=1}^n\mathbf{U}^T_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta)
-\end{align*}
-\]</span></p>
-<p>These two full conditionals for <span class="math inline">\(\boldsymbol\phi'\)</span> are equivalent. To see this we need to apply an identity previously described in Step 3 during the discussion of the full conditional for <span class="math inline">\(\boldsymbol\beta\)</span>. In Step 3, we considered an organization of the covariates <span class="math inline">\(\mathbf{z}_i\)</span>, into a matrix <span class="math inline">\(\mathbf{Z} = (\mathbf{z}_1^T, \dots,\mathbf{z}_N^T)^T\)</span> <span class="math display">\[
-\begin{equation}
-\tag{3}
-\mathbf{Z} =
-\begin{bmatrix}
-1 &amp; z_{12} &amp; \dots &amp; z_{1q}\\
-\vdots &amp; &amp; \vdots &amp;\\
-1 &amp; z_{N2} &amp; \dots &amp; z_{Nq}
-\end{bmatrix}
-=
-\begin{bmatrix}
-\mathbf{z}_1^T\\
-\vdots\\
-\mathbf{z}_N^T\\
-\end{bmatrix}.
-\end{equation}
-\]</span> Notice, <span class="math inline">\(\boldsymbol{\mathcal{Z}}_i = \mathbf{z}^T_i \otimes \mathbf{I}_p\)</span>. Then the following relate the sums to Kronecker products, (make this more general?)</p>
-<p><span class="math display">\[
-\begin{equation}
-\tag{4}
-\sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\boldsymbol\Omega^{-1}\boldsymbol{\mathcal{Z}}_i = \mathbf{Z}^T\mathbf{Z} \otimes \boldsymbol\Omega^{-1}
-\end{equation}
-\]</span></p>
-<p><span class="math display">\[
-\begin{equation}
-\tag{5}
-\sum_{i=1}^N\boldsymbol{\mathcal{Z}}^T_i\mathbf{\Omega}^{-1}\boldsymbol\delta_i =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{Z}) = (\mathbf{Z}^T \otimes \, \boldsymbol\Omega^{-1})\text{vec}(\boldsymbol\Delta).
-\end{equation}
-\]</span> In the case of the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>, we have <span class="math inline">\(\mathbf{U}_i = \mathbf{u}^T_i \otimes I_n\)</span> where <span class="math inline">\(\mathbf{u}_i\)</span> is an elementary vector with <span class="math inline">\(1\)</span> in position <span class="math inline">\(i\)</span> and <span class="math inline">\(0\)</span> elsewhere. Stacking rows of <span class="math inline">\(\mathbf{u}_i^T\)</span> into a matrix constructs the identity matrix <span class="math inline">\(\mathbf{I}_n\)</span>. So, substituting <span class="math inline">\(\mathbf{U}_i\)</span> for <span class="math inline">\(\boldsymbol{\mathcal{Z}}_i\)</span> and <span class="math inline">\(\mathbf{I}_n\)</span> for <span class="math inline">\(\mathbf{Z}\)</span> yields</p>
-<p><span class="math display">\[
-\begin{equation}
-\tag{4}
-\sum_{i=1}^N\mathbf{U}_i^T\boldsymbol\Omega^{-1}\mathbf{U}_i = \mathbf{I}_n^T\mathbf{I}_n \otimes \boldsymbol\Omega^{-1} = \mathbf{I}_n \otimes \boldsymbol\Omega^{-1}
-\end{equation}
-\]</span></p>
-<p>Also, substituting <span class="math inline">\(\mathbf{U}_i\)</span> for <span class="math inline">\(\boldsymbol{\mathcal{Z}}_i\)</span> and <span class="math inline">\(\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\)</span> for <span class="math inline">\(\boldsymbol\delta_i\)</span> yields <span class="math display">\[
-\begin{equation}
-\tag{5}
-\sum_{i=1}^N\mathbf{U}_i\mathbf{\Omega}^{-1}(\boldsymbol\delta_i - \boldsymbol{\mathcal{Z}}_i\boldsymbol\beta) =  \text{vec}(\Omega^{-1}\boldsymbol\Delta\mathbf{I}_n) = (\mathbf{I}_n^T \otimes \, \boldsymbol\Omega^{-1})(\boldsymbol\delta'-\mathbf{A}).
-\end{equation}
-\]</span> This shows that the two approaches to deriving the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span> yield the same results.</p>
-<p>Returning to <span class="math inline">\(\mathbf{A}\)</span>, which is necessary to compute in the block full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>. We recognize that</p>
-<p><span class="math display">\[
-\begin{align*}
-\mathbf{A} &amp;=
-\begin{pmatrix}
-\boldsymbol{\mathcal{Z}}_1\boldsymbol\beta\\
-\vdots \\
-\boldsymbol{\mathcal{Z}}_n\boldsymbol\beta\\
-\end{pmatrix}\\
-&amp;=
-\begin{pmatrix}
-\mathbf{B}\mathbf{z_1}\\
-\vdots \\
-\mathbf{B}\mathbf{z_n}\\
-\end{pmatrix}\\
-&amp;= \text{vec}(\mathbf{B}\mathbf{Z^T})
-\end{align*}
-\]</span> So we can substitute, <span class="math display">\[
-(\boldsymbol\delta' - \mathbf{A}) = \text{vec}(\boldsymbol\Delta-\mathbf{B}\mathbf{Z}^T)
-\]</span> in the full conditional for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
-</section>
-<section id="marginal-site-by-site-fc-approach---boldsymbolphi_i" class="level3">
-<h3 class="anchored" data-anchor-id="marginal-site-by-site-fc-approach---boldsymbolphi_i">Marginal (site-by-site) FC approach - <span class="math inline">\(\boldsymbol\phi_i\)</span></h3>
-<p>We might desire to sample full conditionals for <span class="math inline">\(\boldsymbol\phi_i\)</span> rather than the full joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span>.</p>
-<p><span class="math display">\[
-\begin{align*}
-p(\boldsymbol\phi_i \,|\, \text{rest})
-&amp;\propto
-p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto
-p(\boldsymbol\delta_i \,|\, \boldsymbol\phi_i, \boldsymbol\beta, \boldsymbol\Omega)p(\boldsymbol\phi_i \,|\, \boldsymbol\Lambda, \rho)\\
-&amp;\propto
-\exp\left\{-\frac{1}{2}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
-&amp;\quad \, \times
-\exp\left\{-\frac{w_{i+}}{2}\left(\boldsymbol\phi_i - \rho\sum_{j \in \mathcal{N}_i}\mathbf{B}_{ij}\boldsymbol\phi_j\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_i - \rho\sum_{j \in \mathcal{N}_i}\mathbf{B}_{ij}\boldsymbol\phi_j\right)\right\}\\
-&amp;\propto
-\exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi_i)^T\boldsymbol\Omega^{-1}\boldsymbol\phi_i - 2\left(\boldsymbol\delta_i^T -\boldsymbol\beta^T\boldsymbol{\mathcal{Z}}^T_i\right)\boldsymbol\Omega^{-1}\boldsymbol\phi_i\right]\right\}\\
-&amp;\quad \, \times
-\exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi_i)^Tw_{i+}\boldsymbol\Lambda^{-1}\boldsymbol\phi_i - 2\rho w_{i+}\left(\sum_{j \in \mathcal{N}_i}\boldsymbol\phi_j^T\mathbf{B}_{ij}^T\right)\boldsymbol\Lambda^{-1}\boldsymbol\phi_i\right]\right\}\\
-&amp;=
-\exp\left\{-\frac{1}{2}\left[(\boldsymbol\phi_i)^T\left(\boldsymbol\Omega^{-1} + w_{i+}\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi_i - 2\left[\left(\boldsymbol\delta_i^T -\boldsymbol\beta^T\boldsymbol{\mathcal{Z}}^T_i\right)\boldsymbol\Omega^{-1} + \rho w_{i+}\left(\sum_{j \in \mathcal{N}_i}\boldsymbol\phi_j^T\mathbf{B}_{ij}^T\right)\boldsymbol\Lambda^{-1}\right]\boldsymbol\phi_i\right]\right\}\\
-\end{align*}
-\]</span></p>
-<p>Thus,</p>
-<p><span class="math display">\[
-\begin{align*}
-\boldsymbol\phi_i\,|\,\text{rest} &amp;\sim \text{Normal}_{p}(\mathbf{V}_{\phi_i}^{-1}\mathbf{M}_{\phi_i}, \mathbf{V}_{\phi_i}^{-1})\\
-\mathbf{V}_{\phi_i} &amp;= \boldsymbol\Omega^{-1} + w_{i+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}_{\phi_i} &amp;= \boldsymbol\Omega^{-1}\left(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\right) + \rho w_{i+}\boldsymbol\Lambda^{-1}\sum_{j \in \mathcal{N}_i}\mathbf{B}_{ij}\boldsymbol\phi_j
-\end{align*}
-\]</span> taking <span class="math inline">\(\mathbf{B}_{ij} = \frac{w_{ij}}{w_{i+}}\mathbf{I}_p\)</span>, we will have <span class="math inline">\(\mathbf{M}_{\phi_i} = \boldsymbol\Omega^{-1}\left(\boldsymbol\delta_i-\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta\right) + \rho \boldsymbol\Lambda^{-1}\sum_{j \in \mathcal{N}_i}w_{ij}\boldsymbol\phi_j\)</span>.</p>
-</section>
-</section>
-<section id="fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda" class="level2">
-<h2 class="anchored" data-anchor-id="fc-for-covariance-of-the-spatial-random-vector---boldsymbollambda">FC for Covariance of the Spatial Random Vector - <span class="math inline">\(\boldsymbol\Lambda\)</span></h2>
-<section id="using-joint-distribution-for-boldsymbolphi" class="level3">
-<h3 class="anchored" data-anchor-id="using-joint-distribution-for-boldsymbolphi">Using joint distribution for <span class="math inline">\(\boldsymbol\phi'\)</span></h3>
-<p><span class="math display">\[
-\begin{align*}
-p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \boldsymbol\phi', \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto
-p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
-&amp;\propto
-\big|(\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\big|^{-1/2} \exp\left\{-\frac{1}{2}\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})^{-1}\otimes\boldsymbol\Lambda\right)^{-1}\boldsymbol\phi'\right\}\\
-&amp;\quad \;
-\times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&amp;\propto
-\big|\boldsymbol\Lambda\big|^{-n/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\left(\boldsymbol\phi'\right)^T\left((\mathbf{D} - \rho\mathbf{W})\otimes\boldsymbol\Lambda^{-1}\right)\boldsymbol\phi'\right)\right\}\\
-&amp;\quad \;
-\times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&amp;\propto
-\big|\boldsymbol\Lambda\big|^{-n/2} \exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Lambda^{-1} \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi\right)\right\}\\
-&amp;\quad \;
-\times \big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&amp;= \big|\boldsymbol\Lambda\big|^{-(n +\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi \right)\right\}
-\end{align*}
-\]</span> Thus, <span class="math display">\[
-\begin{align*}
-\boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWish}\left(n + \nu, \mathbf{R}+\mathbf{S}\right)\\
-n &amp;= \text{number of spatial locations}\\
-\mathbf{S} &amp;= \boldsymbol\Phi^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi
-\end{align*}
-\]</span></p>
-<div class="callout-note callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
+<p>Next, sample from the prior distribution for the fixed effects. Also sample values for the covariates.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="dv">2</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">=</span> <span class="dv">2</span>  </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">=</span> <span class="fu">matrix</span>(<span class="fu">rep</span>(<span class="dv">0</span>,q<span class="sc">*</span>p), <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">rnorm</span>(mu, <span class="dv">5</span><span class="sc">*</span><span class="fu">diag</span>(q<span class="sc">*</span>p)), <span class="at">ncol =</span> <span class="dv">1</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>Beta <span class="ot">&lt;-</span> <span class="fu">matrix</span>(beta, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,n), <span class="fu">rnorm</span>(n,<span class="dv">0</span>,<span class="dv">1</span>)), <span class="at">ncol=</span><span class="dv">2</span>, <span class="at">byrow =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
-<div class="callout-caption-container flex-fill">
-Note
+<p>Next, sample the spatial random vectors</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.8</span>,</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.8</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>rho <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>inv_Sigma <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho<span class="sc">*</span>W), <span class="fu">solve</span>(Lambda))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>spat_phi <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">backsolve</span>(<span class="fu">chol</span>(inv_Sigma), <span class="fu">rnorm</span>(n<span class="sc">*</span>p)), <span class="at">byrow=</span>T, <span class="at">ncol=</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Next, sample the multivariate response.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Omega <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.3</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                  <span class="fl">0.3</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>inv_Omega <span class="ot">&lt;-</span> <span class="fu">solve</span>(Omega)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>Delta <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="cn">NA</span>, <span class="at">nrow =</span> n, <span class="at">ncol =</span> p)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  Delta[i,] <span class="ot">&lt;-</span> Beta<span class="sc">%*%</span>Z[i,] <span class="sc">+</span> spat_phi[i,] <span class="sc">+</span> <span class="fu">t</span>(<span class="fu">chol</span>(inv_Omega))<span class="sc">%*%</span><span class="fu">rnorm</span>(p)</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>delta1 <span class="ot">&lt;-</span> Delta[,<span class="dv">1</span>]</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>delta2 <span class="ot">&lt;-</span> Delta[,<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Plot the simulated data.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>delta1)) <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="fu">bquote</span>(delta[i1])) <span class="sc">+</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<div class="callout-body-container callout-body">
-<p>I believe I’ve completed this derivation. The key trick is found in <em>Aspects of Multivariate Statistical Theory</em> by Robb J. Muirhead on page 76, Lemma 2.2.3. Interestingly it is not immediately obvious that it agrees with the following derivation using Brook’s Lemma. Perhaps that is something worth checking. The route using Brook’s Lemma was tedious. I would not be surprised if I made some errors there.</p>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>delta2)) <span class="sc">+</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">fill =</span> <span class="fu">bquote</span>(delta[i2])) <span class="sc">+</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-</section>
-<section id="using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma" class="level3">
-<h3 class="anchored" data-anchor-id="using-conditional-distributions-for-boldsymbolphi_i-and-brooks-lemma">Using conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span> and Brook’s Lemma</h3>
-<p>An alternative path, let’s attempt to derive the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span> using the conditional distributions for <span class="math inline">\(\boldsymbol\phi_i\)</span>.</p>
-<p><span class="math display">\[
-\begin{align*}
-p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
-&amp;= \frac{p(\boldsymbol\phi_1 \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)}{p(\boldsymbol\phi_{1,0} \,|\, \{\boldsymbol\phi_{i}\}_{i=2}^n)} \frac{p(\boldsymbol\phi_2 \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^1,\{\boldsymbol\phi_{i}\}_{i=3}^n)}{p(\boldsymbol\phi_{2,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^1,\{\boldsymbol\phi_{i}\}_{i=3}^n)}
-\times \\
-&amp;\quad \quad \vdots \\
-&amp;\quad \;\times\frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}{p(\boldsymbol\phi_{k,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)} \times\\
-&amp;\quad \quad \vdots \\
-&amp;\quad \;\times\frac{p(\boldsymbol\phi_n \,| \,
-\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})}{p(\boldsymbol\phi_{n,0} \,| \,
-\{\boldsymbol\phi_{j,0}\}_{j=1}^{n-1})} p(\boldsymbol\phi' = \boldsymbol\phi'_0 \,|\, \boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)
-\end{align*}
-\]</span> where the last line follows by application of Brook’s Lemma to <span class="math inline">\(p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)\)</span>. We’ve dropped <span class="math inline">\(\boldsymbol\Lambda\)</span> and <span class="math inline">\(\rho\)</span> from conditioning notation in the resulting product of ratios, but the conditioning is very much still present. We choose <span class="math inline">\(\boldsymbol\phi'_0 = \boldsymbol{0}\)</span> for the fixed point in the support of <span class="math inline">\(\boldsymbol\phi'\)</span>. This will simplify things later and allow us to avoid the situation we ran into ealier.</p>
-<div class="callout-note callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>Could I have derived the full conditionals incorrectly for the univariate case? I think I just used the product of the conditionals there and not Brook’s Lemma. . . this might explain why my MCMC had issues with convergence. I should go back and check.</p>
-</div>
-</div>
-<p>We have a particularly tedious product of ratios. Let’s focus on the <span class="math inline">\(k\)</span>th term first, then consider the entire product to understand the form of the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span>. Let <span class="math display">\[
-\mathbf{m}_k = \rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\mathbf{B}_{kj}\boldsymbol\phi_j
-\]</span> Note that at the <span class="math inline">\(k\)</span>th term we are considering the density as a function of some non-zero conditioned variates. The <span class="math inline">\(\boldsymbol\phi_j\)</span> for <span class="math inline">\(j &lt; k\)</span> have been set to <span class="math inline">\(\mathbf{0}\)</span>. This may affect the sum in the conditional mean, so we restrict the sum to terms that are non-zero, that is <span class="math inline">\(\boldsymbol\phi_j\)</span> where <span class="math inline">\(j \in \mathcal{N}_k\)</span> and <span class="math inline">\(j &gt; k\)</span>.</p>
-<p>Then the <span class="math inline">\(k\)</span>th term, <span class="math display">\[
-\begin{align*}
-\frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}{p(\boldsymbol\phi_{k,0} \,|\, \{\boldsymbol\phi_{j,0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n)}
-&amp;=
-\frac{\exp\left\{-\frac{w_{k+}}{2}\left(\boldsymbol\phi_k-\mathbf{m}_k\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k-\mathbf{m}_k\right)\right\}}{\exp\left\{-\frac{w_{k+}}{2}\left(\boldsymbol{0}-\mathbf{m}_k\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol{0}-\mathbf{m}_k\right)\right\}}\\
-&amp;=
-\exp\left\{-\frac{w_{k+}}{2}\left(\boldsymbol\phi_k-\mathbf{m}_k\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k-\mathbf{m}_k\right) + \frac{w_{k+}}{2}\mathbf{m}_k^T\boldsymbol\Lambda^{-1}\mathbf{m}_k\right\}\\
-&amp;=
-\exp\left\{-\frac{w_{k+}}{2}\left[\left(\boldsymbol\phi_k-\mathbf{m}_k\right)^T\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k-\mathbf{m}_k\right) -\mathbf{m}_k^T\boldsymbol\Lambda^{-1}\mathbf{m}_k\right]\right\}\\
-&amp;=
-\exp\left\{-\frac{w_{k+}}{2}\left[\boldsymbol\phi^T_k\boldsymbol\Lambda^{-1}\boldsymbol\phi_k - 2\mathbf{m}_k^T\boldsymbol\Lambda^{-1}\boldsymbol\phi^T_k\right]\right\}\\
-&amp;=
-\exp\left\{-\frac{w_{k+}}{2}\text{Tr}\left[\boldsymbol\phi^T_k\boldsymbol\Lambda^{-1}\boldsymbol\phi_k - 2\mathbf{m}_k^T\boldsymbol\Lambda^{-1}\boldsymbol\phi_k\right]\right\}\\
-&amp;=
-\exp\left\{-\frac{w_{k+}}{2}\left(\text{Tr}\left[\boldsymbol\phi^T_1\boldsymbol\Lambda^{-1}\boldsymbol\phi_k\right] - \text{Tr}\left[ 2\mathbf{m}_k^T\boldsymbol\Lambda^{-1}\boldsymbol\phi_k\right]\right)\right\}\\
-&amp;=
-\exp\left\{-\frac{w_{k+}}{2}\left(\text{Tr}\left[\boldsymbol\Lambda^{-1}\boldsymbol\phi_k\boldsymbol\phi^T_k\right] - \text{Tr}\left[ 2\boldsymbol\Lambda^{-1}\boldsymbol\phi_k\mathbf{m}_k^T\right]\right)\right\}\\
-&amp;=
-\exp\left\{-\frac{w_{k+}}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k\boldsymbol\phi^T_k -  2\boldsymbol\phi_k\mathbf{m}_k^T\right)\right]\right\}\\
-\end{align*}
-\]</span></p>
-<p>Then the entire product will be <span class="math display">\[
-\begin{align*}
-p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)
-&amp;=
-\left[\prod_{k=1}^n \frac{p(\boldsymbol\phi_k \,|\, \{\boldsymbol\phi_{j,0} = \mathbf{0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n, \boldsymbol\Lambda, \rho)}{p(\boldsymbol\phi_{k,0} = \mathbf{0} \,|\, \{\boldsymbol\phi_{j,0} = \mathbf{0}\}_{j=1}^{k-1},\{\boldsymbol\phi_{i}\}_{i={k+1}}^n, \boldsymbol\Lambda, \rho)}\right]p(\boldsymbol\phi' = \mathbf{0} \,|\, \boldsymbol\Lambda,\rho)\\
-&amp;=
-\left[\prod_{k=1}^n \exp\left\{-\frac{w_{k+}}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1}\left(\boldsymbol\phi_k\boldsymbol\phi^T_k -  2\boldsymbol\phi_k\mathbf{m}_k^T\right)\right]\right\}\right]p(\boldsymbol\phi' = \mathbf{0} \,|\, \boldsymbol\Lambda,\rho)\\
-&amp;=
-\exp\left\{-\frac{1}{2}\sum_{k=1}^n\text{Tr}\left[\boldsymbol\Lambda^{-1}w_{k+}\left(\boldsymbol\phi_k\boldsymbol\phi^T_k -  2\boldsymbol\phi_k\mathbf{m}_k^T\right)\right]\right\}p(\boldsymbol\phi' = \mathbf{0} \,|\, \boldsymbol\Lambda,\rho)\\
-&amp;=
-\exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1} \sum_{k=1}^n \mathbf{S}_k\right]\right\} \times \big|(\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\big|^{-1/2} \exp\left\{-\frac{1}{2}\left(\mathbf{0}\right)^T\left((\mathbf{D} - \rho\mathbf{W})^{-1}\otimes\boldsymbol\Lambda\right)^{-1}\mathbf{0}\right\}\\
-&amp;= \big|(\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\big|^{-1/2}
-\exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1} \sum_{k=1}^n \mathbf{S}_k\right]\right\}
-\end{align*}
-\]</span></p>
-<p>where <span class="math inline">\(\mathbf{S}_k = w_{k+}\left(\boldsymbol\phi_k\boldsymbol\phi^T_k - 2\boldsymbol\phi_k\mathbf{m}_k^T\right)\)</span>.</p>
-<p>Finally, the full conditional for <span class="math inline">\(\boldsymbol\Lambda\)</span> is <span class="math display">\[
-\begin{align*}
-p(\boldsymbol\Lambda \,|\, \text{rest}) &amp;\propto p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta, \boldsymbol\Omega, \boldsymbol\Lambda, \rho)\\
-&amp;\propto p(\boldsymbol\phi'|\boldsymbol\Lambda,\rho)p(\boldsymbol\Lambda)\\
-&amp;=
-\big|(\mathbf{D} - \rho\mathbf{W})^{-1} \otimes \boldsymbol\Lambda\big|^{-1/2}
-\exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1} \sum_{k=1}^n \mathbf{S}_k\right]\right\}\\
-&amp;\quad \;\times
-\big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}(\boldsymbol\Lambda^{-1}\mathbf{R})\right\}\\
-&amp;\propto
-\big|\boldsymbol\Lambda\big|^{-p/2}
-\exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1} \sum_{k=1}^n \mathbf{S}_k\right]\right\}\\
-&amp;\quad \;\times
-\big|\boldsymbol\Lambda\big|^{-(\nu + p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1}\mathbf{R}\right]\right\}\\
-&amp;=
-\big|\boldsymbol\Lambda\big|^{-(\nu + 2p + 1)/2} \exp\left\{-\frac{1}{2}\text{Tr}\left[\boldsymbol\Lambda^{-1}\left(\mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)\right]\right\}\\
-\end{align*}
-\]</span> and we conclude <span class="math inline">\(\boldsymbol\Lambda \,|\, \text{rest} \sim \text{InvWish}\left(p + \nu,\, \mathbf{R} + \sum_{k=1}^n \mathbf{S}_k\right)\)</span></p>
-<p>This full conditional seems reasonable, but computing <span class="math inline">\(\sum_{k=1}^n \mathbf{S}_k\)</span> may prove a bit tricky. Perhaps there are some simplifications to be made for this term in particular.</p>
-<p><span class="math display">\[
-\begin{align*}
-\sum_{k=1}^n \mathbf{S}_k &amp;= \sum_{k=1}^nw_{k+}\left(\boldsymbol\phi_k\boldsymbol\phi^T_k -  2\boldsymbol\phi_k\mathbf{m}_k^T\right)\\
-&amp;= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\mathbf{m}_k^T\\
-&amp;= \sum_{k=1}^nw_{k+}\boldsymbol\phi_k\boldsymbol\phi^T_k - \sum_{k=1}^nw_{k+}2\boldsymbol\phi_k\rho\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
-&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\boldsymbol\phi_j^T\mathbf{B}^T_{kj}\\
-&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^nw_{k+}\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}\frac{w_{kj}}{w_{k+}}\boldsymbol\phi_j^T\mathbf{I}_p \quad \quad \text{set } \mathbf{B}_{kj} = \frac{w_{kj}}{w_{k+}}\mathbf{I}_p\\
-&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\sum_{k=1}^n\boldsymbol\phi_k\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}w_{kj}\boldsymbol\phi_j^T\\
-&amp;= \mathbf{D}\boldsymbol\Phi^T\boldsymbol\Phi - 2\rho\boldsymbol\Phi^T\mathbf{W}_{U}\boldsymbol\Phi\\
-&amp;=
-\end{align*}
-\]</span> Where <span class="math inline">\(\mathbf{W}_U\)</span> is ab <span class="math inline">\(n \times n\)</span> upper triangular matrix constructed by zeroing out the lower triangle of <span class="math inline">\(\mathbf{W}\)</span>. This has the affect of setting <span class="math inline">\(\boldsymbol\phi_j = \boldsymbol 0\)</span> for <span class="math inline">\(j \le k\)</span> which defines the sum <span class="math inline">\(\sum_{\substack{j \in \mathcal{N}_k \\ j \, &gt; \, k}}w_{kj}\boldsymbol\phi_j^T\)</span>.</p>
-<p>It is important to note that <span class="math inline">\(\boldsymbol\Phi\)</span> is constructed with <em>rows</em> equal to <span class="math inline">\(\boldsymbol\phi_k\)</span> which results in flipping <span class="math inline">\(\boldsymbol\Phi\boldsymbol\Phi^T\)</span>, what we would expect, to instead be <span class="math inline">\(\boldsymbol\Phi^T\boldsymbol\Phi\)</span>.</p>
-<div class="callout-note callout callout-style-default callout-captioned">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-caption-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>This is suspiciously close to <span class="math inline">\((\mathbf{D}-\rho\mathbf{W})\boldsymbol\Phi^T\boldsymbol\Phi\)</span>. Perhaps <span class="math inline">\(2\boldsymbol\Phi^T\mathbf{W}_U\boldsymbol\Phi = \boldsymbol\Phi^T\mathbf{W}\boldsymbol\Phi\)</span>? It would be nice, but actually I don’t think this is true.</p>
-</div>
-</div>
-</section>
-</section>
-<section id="fc-for-boldsymbolomega" class="level2">
-<h2 class="anchored" data-anchor-id="fc-for-boldsymbolomega">FC for <span class="math inline">\(\boldsymbol\Omega\)</span></h2>
-<p>Next, we will consider the full conditional for <span class="math inline">\(\boldsymbol\Omega\)</span> under two cases. Either <span class="math inline">\(\boldsymbol\Omega\)</span> is diagonal, i.e.&nbsp;<span class="math inline">\(\boldsymbol\delta_i\)</span> is independent conditional on <span class="math inline">\(\boldsymbol\phi_i\)</span>, or <span class="math inline">\(\boldsymbol\Omega\)</span> is symmetric positive-definite matrix, i.e.&nbsp;no assumed structure.</p>
-<section id="general-boldsymbolomega" class="level3">
-<h3 class="anchored" data-anchor-id="general-boldsymbolomega">General <span class="math inline">\(\boldsymbol\Omega\)</span></h3>
-<p>We’ll get right into it</p>
-<p><span class="math display">\[
-\begin{align*}
-p(\boldsymbol\Omega \,|\, \text{rest})
-&amp;\propto
-p(\{\boldsymbol\delta_i\}, \{\boldsymbol\phi_i\}, \boldsymbol\beta,\boldsymbol\Omega, \boldsymbol\Lambda,\rho)\\
-&amp;\propto
-\left[\prod_{i=1}^n p(\boldsymbol\delta_i \,|\, \boldsymbol\beta,\boldsymbol\phi_i,\boldsymbol\Omega)\right]p(\boldsymbol\Omega)\\
-&amp;\propto
-|\boldsymbol\Omega|^{n/2}\exp\left\{-\frac{1}{2}\sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\boldsymbol\Omega^{-1}\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\right\}\\
-&amp;\quad \; \times |\boldsymbol\Omega|^{-(\xi + p + 1)/2}\exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Omega^{-1}\mathbf{G}\right)\right\}\\
-&amp;= |\boldsymbol\Omega|^{-(n + \xi + p + 1)/2}\exp\left\{-\frac{1}{2}\text{Tr}\left(\boldsymbol\Omega^{-1}(\mathbf{H} + \mathbf{G})\right)\right\}\\
-\end{align*}
-\]</span></p>
-<p>where <span class="math inline">\(\mathbf{H} = \sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T\)</span></p>
-<p>Thus, <span class="math display">\[
-\begin{align*}
-\boldsymbol\Omega \,|\, \text{rest} &amp;\sim \text{InvWish}\left(n+\xi, \mathbf{H}+\mathbf{G}\right)\\
-n &amp;= \text{number of spatial locations}\\
-\mathbf{H} &amp;= \sum_{i=1}^n\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]\left[\boldsymbol\delta_i-(\boldsymbol{\mathcal{Z}}_i\boldsymbol\beta + \boldsymbol\phi_i)\right]^T
-\end{align*}
-\]</span></p>
-</section>
-<section id="diagonal-boldsymbolomega" class="level3">
-<h3 class="anchored" data-anchor-id="diagonal-boldsymbolomega">Diagonal <span class="math inline">\(\boldsymbol\Omega\)</span></h3>
-<p>TODO</p>
-</section>
-</section>
-<section id="metropolis-hastings-step-for-spatial-stength-parameter---rho" class="level2">
-<h2 class="anchored" data-anchor-id="metropolis-hastings-step-for-spatial-stength-parameter---rho">Metropolis-Hastings Step for Spatial Stength parameter - <span class="math inline">\(\rho\)</span></h2>
-<p>TODO</p>
 
 
 </section>
