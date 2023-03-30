@@ -5,7 +5,7 @@ author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
     affiliation-url: https://statistics.sciences.ncsu.edu/ 
-date: "3/23/2023"
+date: "3/29/2023"
 categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
 draft: false 
 format:
