@@ -99,11 +99,34 @@ $$
 $$
 where $\text{MCAR}(\rho, \boldsymbol\Lambda)$ represent the typical proper MCAR prior,
 $$
-\boldsymbol\beta_s \,|\, \boldsymbol\beta_{s' \ne s}, \boldsymbol\Lambda, \rho \sim \text{Normal}\left(\rho\sum_{s' \sim s}\frac{w_{s,s'}}{w_{s+}}\boldsymbol\beta_s, \frac{\boldsymbol\Lambda}{w_{s+}}\right)
+\boldsymbol\beta_s \,|\, \boldsymbol\beta_{s' \ne s}, \boldsymbol\Lambda, \rho \sim \text{Normal}\left(\rho\sum_{s' \in \mathcal{N}(s)}\frac{w_{s,s'}}{w_{s+}}\boldsymbol\beta_s, \frac{\boldsymbol\Lambda}{w_{s+}}\right)
 $$
 
 
 The full conditionals for this model are:
+
+$$
+\begin{align*}
+\boldsymbol\beta_s \,|\, \text{rest} &\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
+\mathbf{V}_{\beta_s} &= \frac{1}{\sigma^2}\sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
+\mathbf{M}_{\beta_s} &= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\widehat{\boldsymbol\delta}_{s,t} + \rho\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_s
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
+n &= \text{number of pixels}\\
+\mathbf{H} &= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}
+\end{align*}
+$$
+where $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$. (Note that this is different than how we defined $\mathbf{B}$ in previous posts!).
+
+$$
+\begin{align*}
+\sigma^2 \,|\, \text{rest} &\sim 
+\end{align*}
+$$
 
 Alternatively, we may consider replacing $\boldsymbol{\mathcal{X}}_{s,t} = \mathbf{X}^T_{t,s}\mathbf{X}_{t,s}$ with $\boldsymbol{\mathcal{X}}_0 = \mathbf{X}_0^T\mathbf{X}_0$ which will simplify the full conditionals accordingly:
 

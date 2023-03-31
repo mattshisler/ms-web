@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.2.280">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -284,9 +284,28 @@ X_0(d) &amp;=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\
 \rho &amp;\sim \text{Unif}(0,1)
 \end{align*}
 \]</span> where <span class="math inline">\(\text{MCAR}(\rho, \boldsymbol\Lambda)\)</span> represent the typical proper MCAR prior, <span class="math display">\[
-\boldsymbol\beta_s \,|\, \boldsymbol\beta_{s' \ne s}, \boldsymbol\Lambda, \rho \sim \text{Normal}\left(\rho\sum_{s' \sim s}\frac{w_{s,s'}}{w_{s+}}\boldsymbol\beta_s, \frac{\boldsymbol\Lambda}{w_{s+}}\right)
+\boldsymbol\beta_s \,|\, \boldsymbol\beta_{s' \ne s}, \boldsymbol\Lambda, \rho \sim \text{Normal}\left(\rho\sum_{s' \in \mathcal{N}(s)}\frac{w_{s,s'}}{w_{s+}}\boldsymbol\beta_s, \frac{\boldsymbol\Lambda}{w_{s+}}\right)
 \]</span></p>
 <p>The full conditionals for this model are:</p>
+<p><span class="math display">\[
+\begin{align*}
+\boldsymbol\beta_s \,|\, \text{rest} &amp;\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
+\mathbf{V}_{\beta_s} &amp;= \frac{1}{\sigma^2}\sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
+\mathbf{M}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\widehat{\boldsymbol\delta}_{s,t} + \rho\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_s
+\end{align*}
+\]</span></p>
+<p><span class="math display">\[
+\begin{align*}
+\boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
+n &amp;= \text{number of pixels}\\
+\mathbf{H} &amp;= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}
+\end{align*}
+\]</span> where <span class="math inline">\(\mathbf{B}\)</span> is a matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span>. (Note that this is different than how we defined <span class="math inline">\(\mathbf{B}\)</span> in previous posts!).</p>
+<p><span class="math display">\[
+\begin{align*}
+\sigma^2 \,|\, \text{rest} &amp;\sim
+\end{align*}
+\]</span></p>
 <p>Alternatively, we may consider replacing <span class="math inline">\(\boldsymbol{\mathcal{X}}_{s,t} = \mathbf{X}^T_{t,s}\mathbf{X}_{t,s}\)</span> with <span class="math inline">\(\boldsymbol{\mathcal{X}}_0 = \mathbf{X}_0^T\mathbf{X}_0\)</span> which will simplify the full conditionals accordingly:</p>
 
 
