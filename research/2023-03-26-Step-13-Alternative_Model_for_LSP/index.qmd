@@ -113,16 +113,17 @@ $$
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &= \text{number of pixels}\\
-\mathbf{H} &= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}
+\mathbf{H} &= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}\\
+\\\\
+\sigma^2 \,|\, \text{rest} &\sim \text{InvGamma}\left(A_{\sigma}, B_\sigma\right)\\
+A_\sigma &= \frac{nkp}{2} + a\\
+B_\sigma &= \frac{1}{2}\sum_{s\in S}\sum_{t \in T}(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})^T(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})
 \end{align*}
 $$
-where $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$ (different than how it was defined $\mathbf{B}$ in previous posts) and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$. 
+Here $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$ (different than how it was defined $\mathbf{B}$ in previous posts) and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$. 
 
-$$
-\begin{align*}
-\sigma^2 \,|\, \text{rest} &\sim 
-\end{align*}
-$$
+Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
+
 
 Alternatively, we may consider replacing $\boldsymbol{\mathcal{X}}_{s,t} = \mathbf{X}^T_{t,s}\mathbf{X}_{t,s}$ with $\boldsymbol{\mathcal{X}}_0 = \mathbf{X}_0^T\mathbf{X}_0$ which will simplify the full conditionals accordingly:
 
