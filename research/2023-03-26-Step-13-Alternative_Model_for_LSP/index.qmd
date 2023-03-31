@@ -117,7 +117,7 @@ n &= \text{number of pixels}\\
 \\\\
 \sigma^2 \,|\, \text{rest} &\sim \text{InvGamma}\left(A_{\sigma}, B_\sigma\right)\\
 A_\sigma &= \frac{nkp}{2} + a\\
-B_\sigma &= \frac{1}{2}\sum_{s\in S}\sum_{t \in T}(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})^T(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})
+B_\sigma &= \frac{1}{2}\sum_{s\in S}\sum_{t \in T}(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})^T(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s}) + b
 \end{align*}
 $$
 Here $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$ (different than how it was defined $\mathbf{B}$ in previous posts) and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$. 

@@ -299,7 +299,7 @@ n &amp;= \text{number of pixels}\\
 \\\\
 \sigma^2 \,|\, \text{rest} &amp;\sim \text{InvGamma}\left(A_{\sigma}, B_\sigma\right)\\
 A_\sigma &amp;= \frac{nkp}{2} + a\\
-B_\sigma &amp;= \frac{1}{2}\sum_{s\in S}\sum_{t \in T}(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})^T(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})
+B_\sigma &amp;= \frac{1}{2}\sum_{s\in S}\sum_{t \in T}(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})^T(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s}) + b
 \end{align*}
 \]</span> Here <span class="math inline">\(\mathbf{B}\)</span> is a matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span> (different than how it was defined <span class="math inline">\(\mathbf{B}\)</span> in previous posts) and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix of the row sums from <span class="math inline">\(\mathbf{W}\)</span>.</p>
 <p>Further, <span class="math inline">\(n = |S|\)</span>, the number of pixels, and <span class="math inline">\(k = |T|\)</span>, the number of years.</p>
