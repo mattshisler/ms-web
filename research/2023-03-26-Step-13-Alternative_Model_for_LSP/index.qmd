@@ -30,65 +30,72 @@ library(matrixsampling)
 
 ## Intro
 
-Here we will attempt to develop the the full analysis workflow for a spatial analysis of land-surface phenology using a remoted-sensed vegetatation index.
+Here we will develop the the full workflow for a spatial analysis of land-surface phenology using a vegetation index constructed from remotely-sensed surface reflectance and emmitance.
 
-Let $\mathcal{D}$ be a spatial domain partioned into $n$ areal units which we will refer to as "locations" or "pixels". Index these units by $s \in S,\, S = \{1,2,\dots,n\}$.
+Let $\mathcal{D}$ be a spatial domain partitioned into a regular lattice of $n$ areal units which we will refer to as "locations" or "pixels". Index these units by $s \in S,\, S = \{1,2,\dots,n\}$. 
 
-Let $Y_{s,t,j} \in (0,1)$ be the vegetation index (VI) observed on day $j$ of year $t$ at pixel $s$. Though the VI is restricted to the interval $(0,1)$, one option is to apply a Gaussian model with mean function $v(j;\boldsymbol\theta)$ and variance $\sigma^2$ which represents the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of $0$ and $1$ and the random noise is sufficiently small so that there is practically no scenario in which we will be required to model values of $0$ or $1$. Notationally,
+In year $t$, a satellite captures imagery from the earth's surface for a subset of days $\mathbf{d}_t \subset \{1, 2, \dots, m\}$ where $m$ may take on a value of 365 or 366, either choice does not appear to be consequential. 
+
+
+Let $Y_{s,t,j} \in (0,1)$ be the vegetation index (VI) observed on day $d_{t,j}$ of year $t$ at pixel $s$. Though the VI is restricted to the interval $(0,1)$, we nevertheless adopt a Gaussian model with mean function $v(d;\boldsymbol\theta)$, parameterized by the $p \times 1$ vector $\boldsymbol\theta$, and variance $\sigma^2$ which represents the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of $0$ and $1$ and the random noise is small so that there is practically no scenario in which we will be required to model values of $0$ or $1$. Notationally,
 
 $$
-Y_{s,t,j} \sim \text{Normal}\left(v(j;\boldsymbol\theta_{s,t}), \sigma^2\right)
+Y_{s,t,j} \sim \text{Normal}\left(v(d_{t,j};\boldsymbol\theta_{s,t}), \sigma^2\right)
 $$
-where $v(j;\boldsymbol{\theta}) : \mathbb{R} \rightarrow \mathbb{R}$ is the double logistic function,
+where $v(d;\boldsymbol{\theta}) : \mathbb{R} \rightarrow \mathbb{R}$ is the so-called double logistic function, $v(d;\boldsymbol\theta) : \mathbb{R} \rightarrow \mathbb{R}$,
 $$
-v(j, \boldsymbol{\theta}) = \theta_1 + (\theta_2 - \theta_7j)\left(\exp\left\{\frac{j - \theta_3}{\theta_5}\right\} - \exp\left\{\frac{j - \theta_4}{\theta_6}\right\}\right)
+v(d, \boldsymbol{\theta}) = \theta_1 + (\theta_2 - \theta_7d)\left(\frac{1}{1 +\exp\left\{\frac{d - \theta_3}{\theta_5}\right\}} - \frac{1}{1 +\exp\left\{\frac{d - \theta_4}{\theta_6}\right\}}\right)
 $$
-At the first step in the analysis we aggregate the data over some pre-defined space and time domain and estimate its "average" phenological behavior using a frequentist non-linear least squares regression. Denote the produced estimate as $\widehat{\boldsymbol\theta}_{0}$. We then linearize the double-logistic function centered on $\widehat{\boldsymbol\theta}_{0}$,
+The parameters of the double-logistic function are readily interpretable in a way that will be explained later.
+
+At the first step in the analysis we aggregate the data over some pre-defined space and time domain whose "typical" or "average" phenological characteristics are to be estimated using a frequentist non-linear least squares regression. This amounts to estimating $\boldsymbol\theta$ for the aggregated data. Denote the estimate as $\widehat{\boldsymbol\theta}_{0}$. We then linearize the double-logistic function centered on $\widehat{\boldsymbol\theta}_{0}$,
 $$
-v(j;\boldsymbol\theta) \approx v(j; \widehat{\boldsymbol\theta}_0) + \nabla_{\boldsymbol\theta} v(j; \boldsymbol\theta)|_{\boldsymbol\theta = \widehat{\boldsymbol\theta}_0}(\boldsymbol\theta -\widehat{\boldsymbol\theta}_0)
+v(d;\boldsymbol\theta) \approx v(d; \widehat{\boldsymbol\theta}_0) + \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\theta = \widehat{\boldsymbol\theta}_0}(\boldsymbol\theta -\widehat{\boldsymbol\theta}_0)
 $$
 
 From this linearization we define the following,
 $$
 \begin{align*}
-r_{s,t,j} &= Y_{s,t,j} - v(t, \widehat{\boldsymbol\theta}_0),\\
-X_0(j) &=  \nabla_{\boldsymbol\theta} v(j; \boldsymbol\theta)|_{\boldsymbol\theta = \widehat{\boldsymbol\theta}_0},\\
+r_{s,t,j} &= Y_{s,t,j} - v(d_{t,j}, \widehat{\boldsymbol\theta}_0),\\
+X_0(d) &=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\theta = \widehat{\boldsymbol\theta}_0},\\
 \boldsymbol\delta_{s,t} &= \boldsymbol\theta_{s,t} - \widehat{\boldsymbol\theta}_0.
 \end{align*}
 $$
-Here, $r_{s,t,j}$ are the residuals from the model of the domain's average phenological behavior, the gradient $X_0(j)$ are basis functions, and $\boldsymbol\delta_{s,t}$ represents the deviation in phenological behavior in pixel $s$ and year $t$ from the estimate of the domain's average behavior, $\widehat{\boldsymbol\theta}_0$.
+Here, $r_{s,t,j}$ are the residuals from the model of the domain's typical phenological characteristics, the gradient $X_0(d)$ is regarded as a set of basis functions, and $\boldsymbol\delta_{s,t}$ represents the deviation in phenological characteristics for pixel $s$ in year $t$ from the domain's typical characteristics, $\widehat{\boldsymbol\theta}_0$.
 
-Next, we construct the $m \times p$ "parent" design matrix $\mathbf{X}_0$ with rows $X_0(j)$, $j = 1,2,\dots,m$. Then for each pixel-year pair construct the "child" matrix $\mathbf{X}_{s,t}$ using the rows of the "parent" matrix $\mathbf{X}_0$ that correspond to the days in year $t$ for which VI observations were collected at pixel $s$.
+Next, we construct the $m \times p$ "parent" design matrix $\mathbf{X}_0$ with rows $X_0(d)$, $d = 1,2,\dots,m$. Then define the "child" design matrix $\mathbf{X}_{s,t}$ for each pixel-year pair $(s,t)$ by sub-setting the rows of $\mathbf{X}_0$ that correspond to the days $\mathbf{d}_t$ for which VI measurements were collected for $(s,t)$.
 
 This facilitates modeling through the residuals,
 $$
 \mathbf{r}_{s,t} \sim \text{Normal}\left(\mathbf{X}_{s,t}\boldsymbol\delta_{s,t}, \sigma^2\mathbf{I}\right)
 $$
-where $\mathbf{r}_{s,t}$ is the vector of residuals at pixel-year pair $(s,t)$ and $\mathbf{I}$ is an identity matrix of sufficient dimension, unspecified because the number of obsersations varies across pixel-year pairs.
+where $\mathbf{r}_{s,t}$ is the vector of residuals at pixel-year pair $(s,t)$ and $\mathbf{I}$ is an identity matrix of sufficient dimension, unspecified because the number of VI measurements vary across pixel-year pairs.
 
-As a result of this process we have transformed the task of modeling a non-linear mean function, $v(j;\boldsymbol\theta)$, to a linear mean function $\mathbf{X}\boldsymbol\delta$. A key assumption is that any specific pixel-year does not deviate substantially from the domain's average phenological behavior. Otherwise the linearization will produce a poor approximation of the non-linear mean function.
+We have transformed the task of modeling a non-linear mean function, $v(d;\boldsymbol\theta)$, to modeling a linear mean function $\mathbf{X}\boldsymbol\delta$. A key assumption is that any specific pixel-year pair does not deviate substantially from the domain's typical phenological characteristics. Otherwise the linearization will produce a poor approximation to the original non-linear mean function.
 
-If the goal of the analysis is to identify climate trends at a particular pixel as a function of other climatological factors, then we may consider collapsing this model into a more computationally manageable scheme.
+If the goal of the analysis is to identify climate trends across pixels in the spatial domain as a function of other climatological factors, then we may consider collapsing this model into a more computationally manageable scheme.
 
-Using the sufficient statistics from the model for the residuals, we can construct estimates for $\boldsymbol\delta_{s,t}$ and their corresponding variance, $\text{Var}(\widehat{\boldsymbol\delta}_{s,t})$. These are of course,
+We can construct the usual estimates for $\boldsymbol\delta_{s,t}$ and their corresponding variance, $\text{Var}(\widehat{\boldsymbol\delta}_{s,t})$, from our model of the residuals. These are of course,
 $$
-\widehat{\boldsymbol\delta}_{s,t} = \left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1}\mathbf{X}^T_{s,t}\mathbf{r}_{s,t} \quad \text{and} \quad \text{Var}(\widehat{\boldsymbol\delta}_{s,t}) = \sigma^2\left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1} = \sigma^2\boldsymbol{\mathcal{X}}_{s,t}
+\widehat{\boldsymbol\delta}_{s,t} = \left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1}\mathbf{X}^T_{s,t}\mathbf{r}_{s,t} \quad \text{and} \quad \text{Var}(\widehat{\boldsymbol\delta}_{s,t}) = \sigma^2\left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1} = \sigma^2\boldsymbol{\mathcal{X}}^{-1}_{s,t}
 $$
 leaving $\sigma^2$ to be estimated later.
 
-Then we will consider constructing a Bayesian heirarchical model incorporating a multivariate conditionally autoregressive prior on $\boldsymbol\beta_{s}$ which will allow us to model spatial dependence across the domain. The model is,
+As a parenthetical note, we could go so far as to consider $\sigma^2$ fixed by using the results of research on the measurement noise associated with collection apparatus.
+
+Then we will consider a Bayesian hierarchical model incorporating climatological covariates, $\boldsymbol{\mathcal{Z}}_{s,t}$ for year $t$ at pixel $s$, and the associated spatial effects $\boldsymbol\beta_s$ on which we place a multivariate conditionally autoregressive (MCAR) prior with common propriety parameter $\rho$. The model is,
 $$
 \begin{align*}
-\widehat{\boldsymbol\delta}_{s,t} &\sim \text{Normal}(\mathcal{Z}_{s,t}\boldsymbol\beta_{s}, \sigma^2\boldsymbol{\mathcal{X}}_{s,t}),\\
-\boldsymbol\beta_{s} &\sim \text{MCAR}(\rho, \boldsymbol\Lambda),\\
-\sigma^2 &\sim \text{InvGamma}(a,b),
+\widehat{\boldsymbol\delta}_{s,t} &\sim \text{Normal}(\mathcal{Z}_{s,t}\boldsymbol\beta_{s}, \sigma^2\boldsymbol{\mathcal{X}}^{-1}_{s,t})\\
+\boldsymbol\beta_{s} &\sim \text{MCAR}(\rho, \boldsymbol\Lambda)\\
+\sigma^2 &\sim \text{InvGamma}(a,b)\\
+\boldsymbol\Lambda &\sim \text{InvWishart}(\nu, \mathbf{G})
 \end{align*}
 $$
-where $\boldsymbol{\mathcal{Z}}_{s,t}$ contains climatological covariate information for year $t$ at pixel $s$.
 
 The full conditionals for this model are:
 
-
+Alternatively, we may consider replacing $\boldsymbol{\mathcal{X}}_{s,t} = \mathbf{X}^T_{t,s}\mathbf{X}_{t,s}$ with $\boldsymbol{\mathcal{X}}_0 = \mathbf{X}_0^T\mathbf{X}_0$ which will simplify the full conditionals accordingly:
 
 
 
