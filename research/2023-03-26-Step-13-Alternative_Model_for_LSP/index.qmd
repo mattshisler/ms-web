@@ -124,7 +124,6 @@ Here $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$ (differe
 
 Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
 
-
 Alternatively, we may consider replacing $\boldsymbol{\mathcal{X}}_{s,t} = \mathbf{X}^T_{t,s}\mathbf{X}_{t,s}$ with $\boldsymbol{\mathcal{X}}_0 = \mathbf{X}_0^T\mathbf{X}_0$ which will simplify the full conditionals accordingly:
 
 

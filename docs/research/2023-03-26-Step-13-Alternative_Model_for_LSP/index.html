@@ -246,7 +246,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2 class="anchored" data-anchor-id="intro">Intro</h2>
 <p>Here we will develop the the full workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.</p>
 <p>Let <span class="math inline">\(\mathcal{D}\)</span> be a spatial domain partitioned into a regular lattice of <span class="math inline">\(n\)</span> areal units which we will refer to as “locations” or “pixels”. Index these units by <span class="math inline">\(s \in S,\, S = \{1,2,\dots,n\}\)</span>.</p>
-<p>In year <span class="math inline">\(t\)</span>, a satellite captures imagery from the earth’s surface for a subset of days <span class="math inline">\(\mathbf{d}_t \subset \{1, 2, \dots, m\}\)</span> where <span class="math inline">\(m\)</span> may take on a value of 365 or 366. The choice of either does not appear to be consequential.</p>
+<p>For year <span class="math inline">\(t \in T\)</span>, a satellite captures imagery from the earth’s surface on a subset of days <span class="math inline">\(\mathbf{d}_t \subset \{1, 2, \dots, m\}\)</span> where <span class="math inline">\(m\)</span> may take on a value of 365 or 366. The choice of either does not appear to be consequential.</p>
 <p>Let <span class="math inline">\(Y_{s,t,j} \in (0,1)\)</span> be the vegetation index observed on day <span class="math inline">\(d_{t,j}\)</span> of year <span class="math inline">\(t\)</span> at pixel <span class="math inline">\(s\)</span>. Though the VI is restricted to the interval <span class="math inline">\((0,1)\)</span>, we nevertheless adopt a Gaussian model with mean function <span class="math inline">\(v(d;\boldsymbol\theta)\)</span>, parameterized by the <span class="math inline">\(p \times 1\)</span> vector <span class="math inline">\(\boldsymbol\theta\)</span>, and variance <span class="math inline">\(\sigma^2\)</span> which corresponds to the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span> and the random noise is small so that there is practically no scenario in which we would be required to model values of <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>. Notationally,</p>
 <p><span class="math display">\[
 Y_{s,t,j} \sim \text{Normal}\left(v(d_{t,j};\boldsymbol\theta_{s,t}), \sigma^2\right)
@@ -291,21 +291,18 @@ X_0(d) &amp;=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &amp;\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &amp;= \frac{1}{\sigma^2}\sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\widehat{\boldsymbol\delta}_{s,t} + \rho\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_s
-\end{align*}
-\]</span></p>
-<p><span class="math display">\[
-\begin{align*}
+\mathbf{M}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\widehat{\boldsymbol\delta}_{s,t} + \rho\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_s\\
+\\\\
 \boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &amp;= \text{number of pixels}\\
-\mathbf{H} &amp;= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}
+\mathbf{H} &amp;= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}\\
+\\\\
+\sigma^2 \,|\, \text{rest} &amp;\sim \text{InvGamma}\left(A_{\sigma}, B_\sigma\right)\\
+A_\sigma &amp;= \frac{nkp}{2} + a\\
+B_\sigma &amp;= \frac{1}{2}\sum_{s\in S}\sum_{t \in T}(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})^T(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})
 \end{align*}
-\]</span> where <span class="math inline">\(\mathbf{B}\)</span> is a matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span>. (Note that this is different than how we defined <span class="math inline">\(\mathbf{B}\)</span> in previous posts!).</p>
-<p><span class="math display">\[
-\begin{align*}
-\sigma^2 \,|\, \text{rest} &amp;\sim
-\end{align*}
-\]</span></p>
+\]</span> Here <span class="math inline">\(\mathbf{B}\)</span> is a matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span> (different than how it was defined <span class="math inline">\(\mathbf{B}\)</span> in previous posts) and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix of the row sums from <span class="math inline">\(\mathbf{W}\)</span>.</p>
+<p>Further, <span class="math inline">\(n = |S|\)</span>, the number of pixels, and <span class="math inline">\(k = |T|\)</span>, the number of years.</p>
 <p>Alternatively, we may consider replacing <span class="math inline">\(\boldsymbol{\mathcal{X}}_{s,t} = \mathbf{X}^T_{t,s}\mathbf{X}_{t,s}\)</span> with <span class="math inline">\(\boldsymbol{\mathcal{X}}_0 = \mathbf{X}_0^T\mathbf{X}_0\)</span> which will simplify the full conditionals accordingly:</p>
 
 
