@@ -30,21 +30,21 @@ library(matrixsampling)
 
 ## Intro
 
-Here we will develop the the full workflow for a spatial analysis of land-surface phenology using a vegetation index constructed from remotely-sensed surface reflectance and emmitance.
+Here we will develop the the full workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.
 
 Let $\mathcal{D}$ be a spatial domain partitioned into a regular lattice of $n$ areal units which we will refer to as "locations" or "pixels". Index these units by $s \in S,\, S = \{1,2,\dots,n\}$. 
 
-In year $t$, a satellite captures imagery from the earth's surface for a subset of days $\mathbf{d}_t \subset \{1, 2, \dots, m\}$ where $m$ may take on a value of 365 or 366, either choice does not appear to be consequential. 
+In year $t$, a satellite captures imagery from the earth's surface for a subset of days $\mathbf{d}_t \subset \{1, 2, \dots, m\}$ where $m$ may take on a value of 365 or 366. The choice of either does not appear to be consequential. 
 
 
-Let $Y_{s,t,j} \in (0,1)$ be the vegetation index (VI) observed on day $d_{t,j}$ of year $t$ at pixel $s$. Though the VI is restricted to the interval $(0,1)$, we nevertheless adopt a Gaussian model with mean function $v(d;\boldsymbol\theta)$, parameterized by the $p \times 1$ vector $\boldsymbol\theta$, and variance $\sigma^2$ which represents the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of $0$ and $1$ and the random noise is small so that there is practically no scenario in which we will be required to model values of $0$ or $1$. Notationally,
+Let $Y_{s,t,j} \in (0,1)$ be the vegetation index observed on day $d_{t,j}$ of year $t$ at pixel $s$. Though the VI is restricted to the interval $(0,1)$, we nevertheless adopt a Gaussian model with mean function $v(d;\boldsymbol\theta)$, parameterized by the $p \times 1$ vector $\boldsymbol\theta$, and variance $\sigma^2$ which corresponds to the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of $0$ and $1$ and the random noise is small so that there is practically no scenario in which we would be required to model values of $0$ or $1$. Notationally,
 
 $$
 Y_{s,t,j} \sim \text{Normal}\left(v(d_{t,j};\boldsymbol\theta_{s,t}), \sigma^2\right)
 $$
-where $v(d;\boldsymbol{\theta}) : \mathbb{R} \rightarrow \mathbb{R}$ is the so-called double logistic function, $v(d;\boldsymbol\theta) : \mathbb{R} \rightarrow \mathbb{R}$,
+where $v(d;\boldsymbol{\theta}) : \mathbb{R} \rightarrow \mathbb{R}$ is the so-called double-logistic function,
 $$
-v(d, \boldsymbol{\theta}) = \theta_1 + (\theta_2 - \theta_7d)\left(\frac{1}{1 +\exp\left\{\frac{d - \theta_3}{\theta_5}\right\}} - \frac{1}{1 +\exp\left\{\frac{d - \theta_4}{\theta_6}\right\}}\right)
+v(d; \boldsymbol{\theta}) = \theta_1 + (\theta_2 - \theta_7d)\left(\frac{1}{1 +\exp\left\{\frac{d - \theta_3}{\theta_5}\right\}} - \frac{1}{1 +\exp\left\{\frac{d - \theta_4}{\theta_6}\right\}}\right)
 $$
 The parameters of the double-logistic function are readily interpretable in a way that will be explained later.
 
@@ -61,9 +61,9 @@ X_0(d) &=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\thet
 \boldsymbol\delta_{s,t} &= \boldsymbol\theta_{s,t} - \widehat{\boldsymbol\theta}_0.
 \end{align*}
 $$
-Here, $r_{s,t,j}$ are the residuals from the model of the domain's typical phenological characteristics, the gradient $X_0(d)$ is regarded as a set of basis functions, and $\boldsymbol\delta_{s,t}$ represents the deviation in phenological characteristics for pixel $s$ in year $t$ from the domain's typical characteristics, $\widehat{\boldsymbol\theta}_0$.
+Here, $r_{s,t,j}$ are the residuals from the model of the domain's typical phenological characteristics, the gradient $X_0(d) : \mathbb{R} \rightarrow \mathbb{R}^p$ is regarded as a set of basis functions, and $\boldsymbol\delta_{s,t}$ represents the deviation in the phenological characteristics of pixel $s$ in year $t$ from the domain's typical characteristics, $\widehat{\boldsymbol\theta}_0$.
 
-Next, we construct the $m \times p$ "parent" design matrix $\mathbf{X}_0$ with rows $X_0(d)$, $d = 1,2,\dots,m$. Then define the "child" design matrix $\mathbf{X}_{s,t}$ for each pixel-year pair $(s,t)$ by sub-setting the rows of $\mathbf{X}_0$ that correspond to the days $\mathbf{d}_t$ for which VI measurements were collected for $(s,t)$.
+Next, we construct the $m \times p$ "parent" design matrix $\mathbf{X}_0$ with rows $X_0(d)$, $d = 1,2,\dots,m$. Then define the "child" design matrix $\mathbf{X}_{s,t}$ for each pixel-year pair $(s,t)$ by sub-setting the rows of $\mathbf{X}_0$ that correspond to the days $\mathbf{d}_t$ for which VI measurements were collected at pixel $s$.
 
 This facilitates modeling through the residuals,
 $$
@@ -81,17 +81,27 @@ $$
 $$
 leaving $\sigma^2$ to be estimated later.
 
-As a parenthetical note, we could go so far as to consider $\sigma^2$ fixed by using the results of research on the measurement noise associated with collection apparatus.
+As a parenthetical note, we could go so far as to consider $\sigma^2$ fixed by using the results of research on the measurement noise associated with satellite sensors and atmospheric attenuation.
 
-Then we will consider a Bayesian hierarchical model incorporating climatological covariates, $\boldsymbol{\mathcal{Z}}_{s,t}$ for year $t$ at pixel $s$, and the associated spatial effects $\boldsymbol\beta_s$ on which we place a multivariate conditionally autoregressive (MCAR) prior with common propriety parameter $\rho$. The model is,
+From here we will consider a Bayesian hierarchical model incorporating climatological covariates, $\boldsymbol{\mathcal{Z}}_{s,t}$ for pixel-year pair $(s,t)$, and the associated spatial effects $\boldsymbol\beta_s$ on which we place a multivariate conditionally autoregressive (MCAR) prior with common propriety parameter $\rho$. 
+
+We define $\mathbf{W}$ as the first-order neighborhood matrix for the spatial domain $\mathcal{D}$. The $s,s'$ entry of $\mathbf{W}$, $w_{s,s'}$ is $1$ if spatial locations $s$ and $s'$ are adjacent to one another and $0$ otherwise. The number of neighbors for location $s$ is the corresponding row sum of $\mathbf{W}$, $w_{s+}$.
+
+The model is,
 $$
 \begin{align*}
 \widehat{\boldsymbol\delta}_{s,t} &\sim \text{Normal}(\mathcal{Z}_{s,t}\boldsymbol\beta_{s}, \sigma^2\boldsymbol{\mathcal{X}}^{-1}_{s,t})\\
 \boldsymbol\beta_{s} &\sim \text{MCAR}(\rho, \boldsymbol\Lambda)\\
 \sigma^2 &\sim \text{InvGamma}(a,b)\\
-\boldsymbol\Lambda &\sim \text{InvWishart}(\nu, \mathbf{G})
+\boldsymbol\Lambda &\sim \text{InvWishart}(\nu, \mathbf{G})\\
+\rho &\sim \text{Unif}(0,1)
 \end{align*}
 $$
+where $\text{MCAR}(\rho, \boldsymbol\Lambda)$ represent the typical proper MCAR prior,
+$$
+\boldsymbol\beta_s \,|\, \boldsymbol\beta_{s' \ne s}, \boldsymbol\Lambda, \rho \sim \text{Normal}\left(\rho\sum_{s' \sim s}\frac{w_{s,s'}}{w_{s+}}\boldsymbol\beta_s, \frac{\boldsymbol\Lambda}{w_{s+}}\right)
+$$
+
 
 The full conditionals for this model are:
 
