@@ -34,7 +34,7 @@ Here we will develop the the full workflow for a spatial analysis of land-surfac
 
 Let $\mathcal{D}$ be a spatial domain partitioned into a regular lattice of $n$ areal units which we will refer to as "locations" or "pixels". Index these units by $s \in S,\, S = \{1,2,\dots,n\}$. 
 
-In year $t$, a satellite captures imagery from the earth's surface for a subset of days $\mathbf{d}_t \subset \{1, 2, \dots, m\}$ where $m$ may take on a value of 365 or 366. The choice of either does not appear to be consequential. 
+For year $t \in T$, a satellite captures imagery from the earth's surface on a subset of days $\mathbf{d}_t \subset \{1, 2, \dots, m\}$ where $m$ may take on a value of 365 or 366. The choice of either does not appear to be consequential. 
 
 
 Let $Y_{s,t,j} \in (0,1)$ be the vegetation index observed on day $d_{t,j}$ of year $t$ at pixel $s$. Though the VI is restricted to the interval $(0,1)$, we nevertheless adopt a Gaussian model with mean function $v(d;\boldsymbol\theta)$, parameterized by the $p \times 1$ vector $\boldsymbol\theta$, and variance $\sigma^2$ which corresponds to the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of $0$ and $1$ and the random noise is small so that there is practically no scenario in which we would be required to model values of $0$ or $1$. Notationally,
@@ -109,18 +109,14 @@ $$
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &= \frac{1}{\sigma^2}\sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}_{\beta_s} &= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\widehat{\boldsymbol\delta}_{s,t} + \rho\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_s
-\end{align*}
-$$
-
-$$
-\begin{align*}
+\mathbf{M}_{\beta_s} &= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\widehat{\boldsymbol\delta}_{s,t} + \rho\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_s\\
+\\\\
 \boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &= \text{number of pixels}\\
 \mathbf{H} &= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}
 \end{align*}
 $$
-where $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$. (Note that this is different than how we defined $\mathbf{B}$ in previous posts!).
+where $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$ (different than how it was defined $\mathbf{B}$ in previous posts) and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$. 
 
 $$
 \begin{align*}
