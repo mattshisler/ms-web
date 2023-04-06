@@ -273,25 +273,29 @@ X_0(d) &amp;=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\
 \widehat{\boldsymbol\delta}_{s,t} = \left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1}\mathbf{X}^T_{s,t}\mathbf{r}_{s,t} \quad \text{and} \quad \text{Var}(\widehat{\boldsymbol\delta}_{s,t}) = \sigma^2\left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1} = \sigma^2\boldsymbol{\mathcal{X}}^{-1}_{s,t}
 \]</span> leaving <span class="math inline">\(\sigma^2\)</span> to be estimated later.</p>
 <p>As a parenthetical note, we could go so far as to consider <span class="math inline">\(\sigma^2\)</span> fixed by using the results of research on the measurement noise associated with satellite sensors and atmospheric attenuation.</p>
+<p>We may from time to time use an emperical estimate for the covariance of the deviation vectors. We construct these by collecting <span class="math inline">\(\widehat{\boldsymbol\delta}_{s,t}\)</span> over all spatial locations <span class="math inline">\(s \in \mathcal{D}\)</span> for each year <span class="math inline">\(t \in T\)</span>, then computing the sample covariance matrix <span class="math display">\[
+\widehat{\boldsymbol\Omega}_t = \frac{1}{n-1}\sum_{s=1}^n(\widehat{\boldsymbol\delta}_{s,t} - \bar{\widehat{\boldsymbol\delta}}_{\cdot,t})(\widehat{\boldsymbol\delta}_{s,t} - \bar{\widehat{\boldsymbol\delta}}_{\cdot,t})^T
+\]</span> note: but we only assume conditional independence of <span class="math inline">\(\widehat{\boldsymbol\delta}_{s,t}\)</span>, is this still okay to do?</p>
 <p>From here we will consider a Bayesian hierarchical model incorporating climatological covariates, <span class="math inline">\(\boldsymbol{\mathcal{Z}}_{s,t}\)</span> for pixel-year pair <span class="math inline">\((s,t)\)</span>, and the associated spatial effects <span class="math inline">\(\boldsymbol\beta_s\)</span> on which we place a multivariate conditionally autoregressive (MCAR) prior with common propriety parameter <span class="math inline">\(\rho\)</span>.</p>
 <p>We define <span class="math inline">\(\mathbf{W}\)</span> as the first-order neighborhood matrix for the spatial domain <span class="math inline">\(\mathcal{D}\)</span>. The <span class="math inline">\(s,s'\)</span> entry of <span class="math inline">\(\mathbf{W}\)</span>, <span class="math inline">\(w_{s,s'}\)</span> is <span class="math inline">\(1\)</span> if spatial locations <span class="math inline">\(s\)</span> and <span class="math inline">\(s'\)</span> are adjacent to one another and <span class="math inline">\(0\)</span> otherwise. The number of neighbors for location <span class="math inline">\(s\)</span> is the corresponding row sum of <span class="math inline">\(\mathbf{W}\)</span>, <span class="math inline">\(w_{s+}\)</span>.</p>
-<p>The model is, <span class="math display">\[
-\begin{align*}
-\widehat{\boldsymbol\delta}_{s,t} &amp;\sim \text{Normal}(\mathcal{Z}_{s,t}\boldsymbol\beta_{s}, \sigma^2\boldsymbol{\mathcal{X}}^{-1}_{s,t})\\
-\boldsymbol\beta_{s} &amp;\sim \text{MCAR}(\rho, \boldsymbol\Lambda)\\
-\sigma^2 &amp;\sim \text{InvGamma}(a,b)\\
+<p>The model is, $$ <span class="math display">\[\begin{align*}
+\widehat{\boldsymbol{\delta}}_{s,t} &amp;= \mathcal{Z}_{s,t}\boldsymbol\beta_{s} + \boldsymbol\epsilon_{s,t}\\
+\boldsymbol\epsilon_{s,t} &amp;\sim \text{MCAR}(\rho_\epsilon, \widehat{\boldsymbol\Omega}_t)\\\\
+
+\boldsymbol\beta_{s} &amp;\sim \text{MCAR}(\rho_\beta, \boldsymbol\Lambda)\\
 \boldsymbol\Lambda &amp;\sim \text{InvWishart}(\nu, \mathbf{G})\\
-\rho &amp;\sim \text{Unif}(0,1)
-\end{align*}
-\]</span> where <span class="math inline">\(\text{MCAR}(\rho, \boldsymbol\Lambda)\)</span> represent the typical proper MCAR prior, <span class="math display">\[
-\boldsymbol\beta_s \,|\, \boldsymbol\beta_{s' \ne s}, \boldsymbol\Lambda, \rho \sim \text{Normal}\left(\rho\sum_{s' \in \mathcal{N}(s)}\frac{w_{s,s'}}{w_{s+}}\boldsymbol\beta_s, \frac{\boldsymbol\Lambda}{w_{s+}}\right)
-\]</span></p>
+\rho_\beta &amp;\sim \text{Unif}(0,1)\\
+\rho_\epsilon &amp;\sim \text{Unif}(0,1)
+\end{align*}\]</span> <span class="math display">\[
+where $\text{MCAR}(\rho, \boldsymbol\Lambda)$ represents the typical proper MCAR prior,
+\]</span> <em>s ,|, </em>{s’ s}, , <em>(</em><em>{s’ (s)}</em>{s’}, ) <span class="math display">\[
+\]</span> <em>{s,t} ,|, </em>{s’ s,t}, , <em>t, </em>{} (<em>{s,t}<em>s +</em>{}</em>{s’ (s)} (<em>{s’,t} - </em>{s’,t}_{s’}), ) $$</p>
 <p>The full conditionals for this model are:</p>
 <p><span class="math display">\[
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &amp;\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
-\mathbf{V}_{\beta_s} &amp;= \frac{1}{\sigma^2}\sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\boldsymbol{\mathcal{X}}_{s,t}\widehat{\boldsymbol\delta}_{s,t} + \rho\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_s\\
+\mathbf{V}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
+\mathbf{M}^T_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}^T_{s',t} - \boldsymbol\beta^T_{s'}\boldsymbol{\mathcal{Z}}^T_{s',t}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\widehat{\boldsymbol\Omega}^{-1}_t \boldsymbol{\mathcal{Z}}^T_{s,t}\right] + \rho_{\beta}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta^T_{s'}\boldsymbol\Lambda^{-1}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &amp;= \text{number of pixels}\\
