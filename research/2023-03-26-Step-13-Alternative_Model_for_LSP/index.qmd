@@ -144,7 +144,7 @@ We will simulate data from this model, then try to fit the model using MCMC.
 ```{r}
 # specify spatial domain
 
-n <- 20^2
+n <- 50^2
 spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
 spat_domain$label <- 1:n
 
@@ -159,9 +159,11 @@ Sample beta for each site. Here we set $p = 2$, $q = 2$, and assume the elements
 Should I actually sample these from an MCAR distribution? Not sure.
 
 ```{r}
+#| eval: false
+
 p = 2 
 q = 2  
-k = 10
+k = 1
 
 # propriety parameter for epsilon MCAR
 rho_eps <- 0.99
@@ -187,7 +189,7 @@ rho_beta <- 0.99
 # Conditional Covariance Matrix
 # beta_s is regarded as a vector of stacked beta_1, beta_2 vectors
 # Assume beta_1 and beta_2 vectors are independent for now.
-Lambda <- matrix(c(  1, 0.9,   0,   0,
+Lambda <- 10*matrix(c(  1, 0.9,   0,   0,
                    0.9,   1,   0,   0,
                      0,   0,   1, 0.9,
                      0,   0, 0.9,   1 ), byrow = T, ncol = p*q)
@@ -228,11 +230,14 @@ for (s in 1:n){
 Add the data to the spatial domain data frame.
 
 ```{r}
+#| eval: false
 # For now, column by column
 spat_domain_temp <- spat_domain
 
-spat_domain <- cbind(spat_domain_temp, t(delta[1,,]), t(delta[2,,]))
-colnames(spat_domain)[4:23] <- c(paste0("delta_1_s_",seq(1:10)),paste0("delta_2_s_",seq(1:10)))
+spat_domain <- cbind(spat_domain_temp, matrix(t(delta[1,,]),ncol=k), matrix(t(delta[2,,]),ncol=k))
+
+
+colnames(spat_domain)[4:(3+2*k)] <- c(paste0("delta_1_s_",seq(1:k)),paste0("delta_2_s_",seq(1:k)))
 
 test <- pivot_longer(spat_domain, cols = starts_with("delta"), names_to = "delta_i_t", values_to = "response")
 ```
@@ -240,6 +245,14 @@ test <- pivot_longer(spat_domain, cols = starts_with("delta"), names_to = "delta
 Let's observe some plots:
 
 ```{r}
+#| eval: false
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=delta_2_s_1)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
 ggplot(test) +
   geom_tile(aes(x, y, fill=response)) +
   scale_y_reverse() +
@@ -251,7 +264,7 @@ ggplot(test) +
 ```
 
 Okay, we have the data. Now we want to code the MCMC sampler.
-We'll begin with $\rho_\epsilon$ and $\rho_beta$ fixed. This way we can focus
+We'll begin with $\rho_\epsilon$ and $\rho_\beta$ fixed. This way we can focus
 on the full conditionals for $\beta_s$ and $\Lambda$.
 
 
