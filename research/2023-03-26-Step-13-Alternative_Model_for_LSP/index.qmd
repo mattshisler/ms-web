@@ -10,7 +10,7 @@ categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
 draft: false 
 format:
   html: 
-    code-fold: true
+    code-fold: false
 execute: 
   cache: false
   freeze: false
@@ -126,6 +126,8 @@ $$
 \\\\
 \mathbf{M}_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
 \\\\
+\mathbf{M}_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} \boldsymbol\beta_{s'}\\
+\\\\
 \boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &= \text{number of pixels}\\
 \mathbf{H} &= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}\\
@@ -137,23 +139,120 @@ Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
 
 Though we defined the elements of the neighborhood matrix, $\mathbf{W}$, to be either $0$ or $1$, we've elected to keep them in the derivation of the full conditional
 
+We will simulate data from this model, then try to fit the model using MCMC.
+
 ```{r}
+# specify spatial domain
 
+n <- 20^2
+spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
+spat_domain$label <- 1:n
 
+spat_domain_g <- make_lattice(c(sqrt(n),sqrt(n)), mutual = TRUE)
+W <- as_adjacency_matrix(spat_domain_g, sparse=0)
+D <- diag(rowSums(W))
 ```
 
 
+Sample beta for each site. Here we set $p = 2$, $q = 2$, and assume the elements of $\boldsymbol\beta_s$ to be independent normal with mean $\mu=0$ and constant variance $\sigma^2 = 3$. Finally, we will set $k=10$ years.
+
+Should I actually sample these from an MCAR distribution? Not sure.
+
+```{r}
+p = 2 
+q = 2  
+k = 10
+
+# propriety parameter for epsilon MCAR
+rho_eps <- 0.95
+
+# Conditional Covariance Matrix.
+# Assume Omega_t is constant across time for now.
+Omega <- matrix(c(1, 0.5,
+                   0.5, 1), byrow = T, ncol = p)
+
+# Construct MCAR joint distribution covariance
+inv_Sigma_eps <- kronecker((D-rho_eps*W), solve(Omega))
+
+# Draw from eps ~ MCAR(rho_eps, Omega_t = Omega)
+# eps array is 3-dim - left to right: response length, time, spatial index.
+eps <- array(NA, dim = c(p,k,n))
+for (t in 1:k){  
+  eps[,t,] <- t(matrix(backsolve(chol(inv_Sigma_eps), rnorm(n*p)), byrow=T, ncol=p))
+}
+
+# propriety parameter for beta MCAR
+rho_beta <- 0.95
+
+# Conditional Covariance Matrix
+# beta_s is regarded as a vector of stacked beta_1, beta_2 vectors
+# Assume beta_1 and beta_2 vectors are independent for now.
+Lambda <- matrix(c(  1, 0.8,   0,   0,
+                   0.8,   1,   0,   0,
+                     0,   0,   1, 0.6,
+                     0,   0, 0.6,   1 ), byrow = T, ncol = p*q)
+
+# Construct MCAR joint distribution covariance
+inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))
+
+# Draw from beta ~ MCAR(rho_beta, Lambda)
+# beta array is 3-dim - left to right: p, q, spatial index
+# note: the beta_s vectors are drawn in joint vectorized form.
+#       first, split the joint vector according to spatial index
+#       second, collapse the (p*q x 1) vectors into (p x q) matrices
+beta_temp <- t(matrix(backsolve(chol(inv_Sigma_eps), rnorm(n*p*q)), byrow=T, ncol=p*q))
+beta <- array(NA, dim = c(p,q,n))
+beta[1:p,1:q,] <- beta_temp
+rm(beta_temp)
 
 
+# sample covariates
+# For now, sample covariates from a normal distribution.
+# Consider changing in the future.
+# Z array is 3 dim - left to right: time, covariate vector length, spatial index
+Z <- array(NA, dim=c(k,q,n))
+for (s in 1:n){
+  Z[,,s] <- matrix(c(rep(1,k),rnorm(k,0,1)), ncol = q)
+}
 
+# Now draw delta (naively via loops)
+# delta array is 3-dim - left to right: response vector length, time, space
+delta <- array(NA, dim = c(p,k,n))
+for (s in 1:n){
+  for (t in 1:k){
+    delta[,t,s] <- Z[t,,s]%*%beta[,,s] + eps[,t,s]
+  }
+}
+```
 
+Add the data to the spatial domain data frame.
 
+```{r}
+# For now, column by column
+spat_domain_temp <- spat_domain
 
+spat_domain <- cbind(spat_domain_temp, t(delta[1,,]), t(delta[2,,]))
+colnames(spat_domain)[4:23] <- c(paste0("delta_1_s_",seq(1:10)),paste0("delta_2_s_",seq(1:10)))
 
+test <- pivot_longer(spat_domain, cols = starts_with("delta"), names_to = "delta_i_t", values_to = "response")
+```
 
+Let's observe some plots:
 
+```{r}
+ggplot(test) +
+  geom_tile(aes(x, y, fill=response)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void() + 
+  facet_wrap(vars(delta_i_t))
 
+```
 
+Okay, we have the data. Now we want to code the MCMC sampler.
+We'll begin with $\rho_\epsilon$ and $\rho_beta$ fixed. This way we can focus
+on the full conditionals for $\beta_s$ and $\Lambda$.
 
 
 

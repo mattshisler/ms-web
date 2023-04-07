@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.280">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -234,13 +234,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </header>
 
 <div class="cell">
-<details>
-<summary>Code: Load the packages</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(igraph)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(viridis)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(matrixsampling)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 <section id="intro" class="level2">
 <h2 class="anchored" data-anchor-id="intro">Intro</h2>
@@ -295,19 +292,123 @@ where $\text{MCAR}(\rho, \boldsymbol\Lambda)$ represents the typical proper MCAR
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &amp;\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}^T_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}^T_{s',t} - \boldsymbol\beta^T_{s'}\boldsymbol{\mathcal{Z}}^T_{s',t}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\widehat{\boldsymbol\Omega}^{-1}_t \boldsymbol{\mathcal{Z}}^T_{s,t}\right] + \rho_{\beta}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta^T_{s'}\boldsymbol\Lambda^{-1}\\
+\mathbf{M}^T_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}^T_{s',t} - \boldsymbol\beta^T_{s'}\boldsymbol{\mathcal{Z}}^T_{s',t}\right) + w_{s+}\widehat{\boldsymbol\delta}^T_{s,t}\right)\widehat{\boldsymbol\Omega}^{-1}_t \boldsymbol{\mathcal{Z}}^T_{s,t}\right] + \rho_{\beta}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta^T_{s'}\boldsymbol\Lambda^{-1}\\
+\\\\
+\mathbf{M}_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
+\\\\
+\mathbf{M}_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} \boldsymbol\beta_{s'}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &amp;= \text{number of pixels}\\
 \mathbf{H} &amp;= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}\\
-\\\\
-\sigma^2 \,|\, \text{rest} &amp;\sim \text{InvGamma}\left(A_{\sigma}, B_\sigma\right)\\
-A_\sigma &amp;= \frac{nkp}{2} + a\\
-B_\sigma &amp;= \frac{1}{2}\sum_{s\in S}\sum_{t \in T}(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s})^T(\widehat{\boldsymbol\delta}_{s,t} - \boldsymbol{\mathcal{Z}_{s,t}\boldsymbol\beta_s}) + b
 \end{align*}
 \]</span> Here <span class="math inline">\(\mathbf{B}\)</span> is a matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span> (different than how it was defined <span class="math inline">\(\mathbf{B}\)</span> in previous posts) and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix of the row sums from <span class="math inline">\(\mathbf{W}\)</span>.</p>
 <p>Further, <span class="math inline">\(n = |S|\)</span>, the number of pixels, and <span class="math inline">\(k = |T|\)</span>, the number of years.</p>
-<p>Alternatively, we may consider replacing <span class="math inline">\(\boldsymbol{\mathcal{X}}_{s,t} = \mathbf{X}^T_{t,s}\mathbf{X}_{t,s}\)</span> with <span class="math inline">\(\boldsymbol{\mathcal{X}}_0 = \mathbf{X}_0^T\mathbf{X}_0\)</span> which will simplify the full conditionals accordingly:</p>
+<p>Though we defined the elements of the neighborhood matrix, <span class="math inline">\(\mathbf{W}\)</span>, to be either <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>, we’ve elected to keep them in the derivation of the full conditional</p>
+<p>We will simulate data from this model, then try to fit the model using MCMC.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># specify spatial domain</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span><span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">x =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n), <span class="at">y =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">sqrt</span>(n))</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spat_domain<span class="sc">$</span>label <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span>n</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>spat_domain_g <span class="ot">&lt;-</span> <span class="fu">make_lattice</span>(<span class="fu">c</span>(<span class="fu">sqrt</span>(n),<span class="fu">sqrt</span>(n)), <span class="at">mutual =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">0</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Sample beta for each site. Here we set <span class="math inline">\(p = 2\)</span>, <span class="math inline">\(q = 2\)</span>, and assume the elements of <span class="math inline">\(\boldsymbol\beta_s\)</span> to be independent normal with mean <span class="math inline">\(\mu=0\)</span> and constant variance <span class="math inline">\(\sigma^2 = 3\)</span>. Finally, we will set <span class="math inline">\(k=10\)</span> years.</p>
+<p>Should I actually sample these from an MCAR distribution? Not sure.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="dv">2</span> </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">=</span> <span class="dv">2</span>  </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># propriety parameter for epsilon MCAR</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rho_eps <span class="ot">&lt;-</span> <span class="fl">0.95</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional Covariance Matrix.</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume Omega_t is constant across time for now.</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>Omega <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.5</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.5</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct MCAR joint distribution covariance</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>inv_Sigma_eps <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho_eps<span class="sc">*</span>W), <span class="fu">solve</span>(Omega))</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw from eps ~ MCAR(rho_eps, Omega_t = Omega)</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="co"># eps array is 3-dim - left to right: response length, time, spatial index.</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>eps <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim =</span> <span class="fu">c</span>(p,k,n))</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){  </span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  eps[,t,] <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">matrix</span>(<span class="fu">backsolve</span>(<span class="fu">chol</span>(inv_Sigma_eps), <span class="fu">rnorm</span>(n<span class="sc">*</span>p)), <span class="at">byrow=</span>T, <span class="at">ncol=</span>p))</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># propriety parameter for beta MCAR</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>rho_beta <span class="ot">&lt;-</span> <span class="fl">0.95</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional Covariance Matrix</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co"># beta_s is regarded as a vector of stacked beta_1, beta_2 vectors</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume beta_1 and beta_2 vectors are independent for now.</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(  <span class="dv">1</span>, <span class="fl">0.8</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.8</span>,   <span class="dv">1</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                     <span class="dv">0</span>,   <span class="dv">0</span>,   <span class="dv">1</span>, <span class="fl">0.6</span>,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                     <span class="dv">0</span>,   <span class="dv">0</span>, <span class="fl">0.6</span>,   <span class="dv">1</span> ), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p<span class="sc">*</span>q)</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct MCAR joint distribution covariance</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>inv_Sigma_beta <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho_beta<span class="sc">*</span>W), <span class="fu">solve</span>(Lambda))</span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Draw from beta ~ MCAR(rho_beta, Lambda)</span></span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a><span class="co"># beta array is 3-dim - left to right: p, q, spatial index</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="co"># note: the beta_s vectors are drawn in joint vectorized form.</span></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a><span class="co">#       first, split the joint vector according to spatial index</span></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="co">#       second, collapse the (p*q x 1) vectors into (p x q) matrices</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>beta_temp <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">matrix</span>(<span class="fu">backsolve</span>(<span class="fu">chol</span>(inv_Sigma_eps), <span class="fu">rnorm</span>(n<span class="sc">*</span>p<span class="sc">*</span>q)), <span class="at">byrow=</span>T, <span class="at">ncol=</span>p<span class="sc">*</span>q))</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim =</span> <span class="fu">c</span>(p,q,n))</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>beta[<span class="dv">1</span><span class="sc">:</span>p,<span class="dv">1</span><span class="sc">:</span>q,] <span class="ot">&lt;-</span> beta_temp</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(beta_temp)</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a><span class="co"># sample covariates</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a><span class="co"># For now, sample covariates from a normal distribution.</span></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a><span class="co"># Consider changing in the future.</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a><span class="co"># Z array is 3 dim - left to right: time, covariate vector length, spatial index</span></span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim=</span><span class="fu">c</span>(k,q,n))</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb3-54"><a href="#cb3-54" aria-hidden="true" tabindex="-1"></a>  Z[,,s] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,k),<span class="fu">rnorm</span>(k,<span class="dv">0</span>,<span class="dv">1</span>)), <span class="at">ncol =</span> q)</span>
+<span id="cb3-55"><a href="#cb3-55" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-56"><a href="#cb3-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-57"><a href="#cb3-57" aria-hidden="true" tabindex="-1"></a><span class="co"># Now draw delta (naively via loops)</span></span>
+<span id="cb3-58"><a href="#cb3-58" aria-hidden="true" tabindex="-1"></a><span class="co"># delta array is 3-dim - left to right: response vector length, time, space</span></span>
+<span id="cb3-59"><a href="#cb3-59" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim =</span> <span class="fu">c</span>(p,k,n))</span>
+<span id="cb3-60"><a href="#cb3-60" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb3-61"><a href="#cb3-61" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb3-62"><a href="#cb3-62" aria-hidden="true" tabindex="-1"></a>    delta[,t,s] <span class="ot">&lt;-</span> Z[t,,s]<span class="sc">%*%</span>beta[,,s] <span class="sc">+</span> eps[,t,s]</span>
+<span id="cb3-63"><a href="#cb3-63" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-64"><a href="#cb3-64" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Add the data to the spatial domain data frame.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For now, column by column</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>spat_domain_temp <span class="ot">&lt;-</span> spat_domain</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>spat_domain <span class="ot">&lt;-</span> <span class="fu">cbind</span>(spat_domain_temp, <span class="fu">t</span>(delta[<span class="dv">1</span>,,]), <span class="fu">t</span>(delta[<span class="dv">2</span>,,]))</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(spat_domain)[<span class="dv">4</span><span class="sc">:</span><span class="dv">23</span>] <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">paste0</span>(<span class="st">"delta_1_s_"</span>,<span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)),<span class="fu">paste0</span>(<span class="st">"delta_2_s_"</span>,<span class="fu">seq</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> <span class="fu">pivot_longer</span>(spat_domain, <span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"delta"</span>), <span class="at">names_to =</span> <span class="st">"delta_i_t"</span>, <span class="at">values_to =</span> <span class="st">"response"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s observe some plots:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(test) <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>response)) <span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="fu">vars</span>(delta_i_t))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Okay, we have the data. Now we want to code the MCMC sampler. We’ll begin with <span class="math inline">\(\rho_\epsilon\)</span> and <span class="math inline">\(\rho_beta\)</span> fixed. This way we can focus on the full conditionals for <span class="math inline">\(\beta_s\)</span> and <span class="math inline">\(\Lambda\)</span>.</p>
 
 
 </section>
