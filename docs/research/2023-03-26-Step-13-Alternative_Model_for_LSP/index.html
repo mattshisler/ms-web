@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.2.280">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -295,17 +295,13 @@ X_0(d) &amp;=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &amp;\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}^T_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}^T_{s',t} - \boldsymbol\beta^T_{s'}\boldsymbol{\mathcal{Z}}^T_{s',t}\right) + w_{s+}\widehat{\boldsymbol\delta}^T_{s,t}\right)\widehat{\boldsymbol\Omega}^{-1}_t \boldsymbol{\mathcal{Z}}^T_{s,t}\right] + \rho_{\beta}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta^T_{s'}\boldsymbol\Lambda^{-1}\\
-\\\\
 \mathbf{M}_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
-\\\\
-\mathbf{M}_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} \boldsymbol\beta_{s'}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &amp;= \text{number of pixels}\\
-\mathbf{H} &amp;= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}\\
+\mathbf{H} &amp;= \boldsymbol{\mathcal{B}}^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol{\mathcal{B}}\\
 \end{align*}
-\]</span> Here <span class="math inline">\(\mathbf{B}\)</span> is a matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span> (different than how it was defined <span class="math inline">\(\mathbf{B}\)</span> in previous posts) and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix of the row sums from <span class="math inline">\(\mathbf{W}\)</span>.</p>
+\]</span> Here <span class="math inline">\(\boldsymbol{\mathcal{B}}\)</span> is a <span class="math inline">\(n \times pq\)</span> matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span> and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix of the row sums from <span class="math inline">\(\mathbf{W}\)</span>.</p>
 <p>Further, <span class="math inline">\(n = |S|\)</span>, the number of pixels, and <span class="math inline">\(k = |T|\)</span>, the number of years.</p>
 <p>Though we defined the elements of the neighborhood matrix, <span class="math inline">\(\mathbf{W}\)</span>, to be either <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>, we’ve elected to keep them in the derivation of the full conditional</p>
 <p>We will simulate data from this model, then try to fit the model using MCMC.</p>

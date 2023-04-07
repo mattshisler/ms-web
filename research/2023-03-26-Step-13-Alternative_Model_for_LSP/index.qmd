@@ -114,8 +114,6 @@ $$
 \widehat{\boldsymbol\delta}_{s,t} \,|\, \widehat{\boldsymbol\delta}_{s' \ne s,t}, \, \widehat{\boldsymbol\Omega}_t, \rho_{\epsilon} \sim \text{Normal}\left(\boldsymbol{\mathcal{Z}}_{s,t}\boldsymbol\beta_s +\rho_{\epsilon}\sum_{s' \in \mathcal{N}(s)} \frac{w_{s,s'}}{w_{s+}}\left(\widehat{\boldsymbol{\delta}}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right), \frac{\widehat{\boldsymbol{\Omega}}_t}{w_{s+}} \right)
 $$
 
-
-
 The full conditionals for this model are:
 
 $$
