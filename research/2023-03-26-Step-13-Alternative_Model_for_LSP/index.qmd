@@ -98,8 +98,8 @@ The model is,
 $$
 \begin{align*}
 \widehat{\boldsymbol{\delta}}_{s,t} &= \mathcal{Z}_{s,t}\boldsymbol\beta_{s} + \boldsymbol\epsilon_{s,t}\\
-\boldsymbol\epsilon_{s,t} &\sim \text{MCAR}(\rho_\epsilon, \widehat{\boldsymbol\Omega}_t)\\\\
-
+\boldsymbol\epsilon_{s,t} &\sim \text{MCAR}(\rho_\epsilon, \widehat{\boldsymbol\Omega}_t)\\
+\\
 \boldsymbol\beta_{s} &\sim \text{MCAR}(\rho_\beta, \boldsymbol\Lambda)\\
 \boldsymbol\Lambda &\sim \text{InvWishart}(\nu, \mathbf{G})\\
 \rho_\beta &\sim \text{Unif}(0,1)\\
@@ -164,12 +164,12 @@ q = 2
 k = 10
 
 # propriety parameter for epsilon MCAR
-rho_eps <- 0.95
+rho_eps <- 0.99
 
 # Conditional Covariance Matrix.
 # Assume Omega_t is constant across time for now.
-Omega <- matrix(c(1, 0.5,
-                   0.5, 1), byrow = T, ncol = p)
+Omega <- matrix(c(1, 0.2,
+                   0.2, 1), byrow = T, ncol = p)
 
 # Construct MCAR joint distribution covariance
 inv_Sigma_eps <- kronecker((D-rho_eps*W), solve(Omega))
@@ -182,15 +182,15 @@ for (t in 1:k){
 }
 
 # propriety parameter for beta MCAR
-rho_beta <- 0.95
+rho_beta <- 0.99
 
 # Conditional Covariance Matrix
 # beta_s is regarded as a vector of stacked beta_1, beta_2 vectors
 # Assume beta_1 and beta_2 vectors are independent for now.
-Lambda <- matrix(c(  1, 0.8,   0,   0,
-                   0.8,   1,   0,   0,
-                     0,   0,   1, 0.6,
-                     0,   0, 0.6,   1 ), byrow = T, ncol = p*q)
+Lambda <- matrix(c(  1, 0.9,   0,   0,
+                   0.9,   1,   0,   0,
+                     0,   0,   1, 0.9,
+                     0,   0, 0.9,   1 ), byrow = T, ncol = p*q)
 
 # Construct MCAR joint distribution covariance
 inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))

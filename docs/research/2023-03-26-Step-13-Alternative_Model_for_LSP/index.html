@@ -275,18 +275,21 @@ X_0(d) &amp;=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\
 \]</span> note: but we only assume conditional independence of <span class="math inline">\(\widehat{\boldsymbol\delta}_{s,t}\)</span>, is this still okay to do?</p>
 <p>From here we will consider a Bayesian hierarchical model incorporating climatological covariates, <span class="math inline">\(\boldsymbol{\mathcal{Z}}_{s,t}\)</span> for pixel-year pair <span class="math inline">\((s,t)\)</span>, and the associated spatial effects <span class="math inline">\(\boldsymbol\beta_s\)</span> on which we place a multivariate conditionally autoregressive (MCAR) prior with common propriety parameter <span class="math inline">\(\rho\)</span>.</p>
 <p>We define <span class="math inline">\(\mathbf{W}\)</span> as the first-order neighborhood matrix for the spatial domain <span class="math inline">\(\mathcal{D}\)</span>. The <span class="math inline">\(s,s'\)</span> entry of <span class="math inline">\(\mathbf{W}\)</span>, <span class="math inline">\(w_{s,s'}\)</span> is <span class="math inline">\(1\)</span> if spatial locations <span class="math inline">\(s\)</span> and <span class="math inline">\(s'\)</span> are adjacent to one another and <span class="math inline">\(0\)</span> otherwise. The number of neighbors for location <span class="math inline">\(s\)</span> is the corresponding row sum of <span class="math inline">\(\mathbf{W}\)</span>, <span class="math inline">\(w_{s+}\)</span>.</p>
-<p>The model is, $$ <span class="math display">\[\begin{align*}
+<p>The model is, <span class="math display">\[
+\begin{align*}
 \widehat{\boldsymbol{\delta}}_{s,t} &amp;= \mathcal{Z}_{s,t}\boldsymbol\beta_{s} + \boldsymbol\epsilon_{s,t}\\
-\boldsymbol\epsilon_{s,t} &amp;\sim \text{MCAR}(\rho_\epsilon, \widehat{\boldsymbol\Omega}_t)\\\\
-
+\boldsymbol\epsilon_{s,t} &amp;\sim \text{MCAR}(\rho_\epsilon, \widehat{\boldsymbol\Omega}_t)\\
+\\
 \boldsymbol\beta_{s} &amp;\sim \text{MCAR}(\rho_\beta, \boldsymbol\Lambda)\\
 \boldsymbol\Lambda &amp;\sim \text{InvWishart}(\nu, \mathbf{G})\\
 \rho_\beta &amp;\sim \text{Unif}(0,1)\\
 \rho_\epsilon &amp;\sim \text{Unif}(0,1)
-\end{align*}\]</span> <span class="math display">\[
-where $\text{MCAR}(\rho, \boldsymbol\Lambda)$ represents the typical proper MCAR prior,
-\]</span> <em>s ,|, </em>{s’ s}, , <em>(</em><em>{s’ (s)}</em>{s’}, ) <span class="math display">\[
-\]</span> <em>{s,t} ,|, </em>{s’ s,t}, , <em>t, </em>{} (<em>{s,t}<em>s +</em>{}</em>{s’ (s)} (<em>{s’,t} - </em>{s’,t}_{s’}), ) $$</p>
+\end{align*}
+\]</span> where <span class="math inline">\(\text{MCAR}(\rho, \boldsymbol\Lambda)\)</span> represents the typical proper MCAR prior, <span class="math display">\[
+\boldsymbol\beta_s \,|\, \boldsymbol\beta_{s' \ne s}, \boldsymbol\Lambda, \rho_\beta \sim \text{Normal}\left(\rho_\beta\sum_{s' \in \mathcal{N}(s)}\frac{w_{s,s'}}{w_{s+}}\boldsymbol\beta_{s'}, \frac{\boldsymbol\Lambda}{w_{s+}}\right)
+\]</span> <span class="math display">\[
+\widehat{\boldsymbol\delta}_{s,t} \,|\, \widehat{\boldsymbol\delta}_{s' \ne s,t}, \, \widehat{\boldsymbol\Omega}_t, \rho_{\epsilon} \sim \text{Normal}\left(\boldsymbol{\mathcal{Z}}_{s,t}\boldsymbol\beta_s +\rho_{\epsilon}\sum_{s' \in \mathcal{N}(s)} \frac{w_{s,s'}}{w_{s+}}\left(\widehat{\boldsymbol{\delta}}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right), \frac{\widehat{\boldsymbol{\Omega}}_t}{w_{s+}} \right)
+\]</span></p>
 <p>The full conditionals for this model are:</p>
 <p><span class="math display">\[
 \begin{align*}
@@ -325,12 +328,12 @@ n &amp;= \text{number of pixels}\\
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">10</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># propriety parameter for epsilon MCAR</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rho_eps <span class="ot">&lt;-</span> <span class="fl">0.95</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rho_eps <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional Covariance Matrix.</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume Omega_t is constant across time for now.</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>Omega <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.5</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.5</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>Omega <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="fl">0.2</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.2</span>, <span class="dv">1</span>), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p)</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct MCAR joint distribution covariance</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>inv_Sigma_eps <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho_eps<span class="sc">*</span>W), <span class="fu">solve</span>(Omega))</span>
@@ -343,15 +346,15 @@ n &amp;= \text{number of pixels}\\
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># propriety parameter for beta MCAR</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>rho_beta <span class="ot">&lt;-</span> <span class="fl">0.95</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>rho_beta <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
 <span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional Covariance Matrix</span></span>
 <span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="co"># beta_s is regarded as a vector of stacked beta_1, beta_2 vectors</span></span>
 <span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume beta_1 and beta_2 vectors are independent for now.</span></span>
-<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(  <span class="dv">1</span>, <span class="fl">0.8</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
-<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.8</span>,   <span class="dv">1</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
-<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                     <span class="dv">0</span>,   <span class="dv">0</span>,   <span class="dv">1</span>, <span class="fl">0.6</span>,</span>
-<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                     <span class="dv">0</span>,   <span class="dv">0</span>, <span class="fl">0.6</span>,   <span class="dv">1</span> ), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p<span class="sc">*</span>q)</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>Lambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(  <span class="dv">1</span>, <span class="fl">0.9</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.9</span>,   <span class="dv">1</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                     <span class="dv">0</span>,   <span class="dv">0</span>,   <span class="dv">1</span>, <span class="fl">0.9</span>,</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                     <span class="dv">0</span>,   <span class="dv">0</span>, <span class="fl">0.9</span>,   <span class="dv">1</span> ), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p<span class="sc">*</span>q)</span>
 <span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Construct MCAR joint distribution covariance</span></span>
 <span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>inv_Sigma_beta <span class="ot">&lt;-</span> <span class="fu">kronecker</span>((D<span class="sc">-</span>rho_beta<span class="sc">*</span>W), <span class="fu">solve</span>(Lambda))</span>
