@@ -122,18 +122,14 @@ $$
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}^T_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}^T_{s',t} - \boldsymbol\beta^T_{s'}\boldsymbol{\mathcal{Z}}^T_{s',t}\right) + w_{s+}\widehat{\boldsymbol\delta}^T_{s,t}\right)\widehat{\boldsymbol\Omega}^{-1}_t \boldsymbol{\mathcal{Z}}^T_{s,t}\right] + \rho_{\beta}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta^T_{s'}\boldsymbol\Lambda^{-1}\\
-\\\\
 \mathbf{M}_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
-\\\\
-\mathbf{M}_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} \boldsymbol\beta_{s'}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &= \text{number of pixels}\\
-\mathbf{H} &= \mathbf{B}^T(\mathbf{D}-\rho\mathbf{W})\mathbf{B}\\
+\mathbf{H} &= \boldsymbol{\mathcal{B}}^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol{\mathcal{B}}\\
 \end{align*}
 $$
-Here $\mathbf{B}$ is a matrix with rows eaual to $\boldsymbol\beta^T_s$ (different than how it was defined $\mathbf{B}$ in previous posts) and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$.
+Here $\boldsymbol{\mathcal{B}}$ is a $n \times pq$ matrix with rows eaual to $\boldsymbol\beta^T_s$  and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$.
 
 Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
 
