@@ -12,6 +12,7 @@ format:
   html: 
     code-fold: false
 execute: 
+  eval: false
   cache: false
   freeze: false
 ---
@@ -131,14 +132,18 @@ Here $\boldsymbol{\mathcal{B}}$ is a $n \times pq$ matrix with rows eaual to $\b
 
 Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
 
+
+
 Though we defined the elements of the neighborhood matrix, $\mathbf{W}$, to be either $0$ or $1$, we've elected to keep them in the derivation of the full conditional
+
+First, we will simulate data from this model.
 
 We will simulate data from this model, then try to fit the model using MCMC.
 
 ```{r}
 # specify spatial domain
 
-n <- 50^2
+n <- 25^2
 spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
 spat_domain$label <- 1:n
 
@@ -156,7 +161,7 @@ Should I actually sample these from an MCAR distribution? Not sure.
 #| eval: false
 
 p = 2 
-q = 2  
+q = 3  
 k = 1
 
 # propriety parameter for epsilon MCAR
@@ -164,8 +169,8 @@ rho_eps <- 0.99
 
 # Conditional Covariance Matrix.
 # Assume Omega_t is constant across time for now.
-Omega <- matrix(c(1, 0.2,
-                   0.2, 1), byrow = T, ncol = p)
+Omega <- matrix(c(1, 0.7,
+                  0.7, 1), byrow = T, ncol = p)
 
 # Construct MCAR joint distribution covariance
 inv_Sigma_eps <- kronecker((D-rho_eps*W), solve(Omega))
@@ -176,17 +181,71 @@ eps <- array(NA, dim = c(p,k,n))
 for (t in 1:k){  
   eps[,t,] <- t(matrix(backsolve(chol(inv_Sigma_eps), rnorm(n*p)), byrow=T, ncol=p))
 }
+```
 
+```{r}
+spat_domain$sim_eps1 <- eps[1,,]
+spat_domain$sim_eps2 <- eps[2,,]
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_eps1)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10), 
+                       limits = c(-3.3,3.3)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_eps2)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       limits = c(-3.3,3.3)) +
+  coord_fixed() + 
+  theme_void()
+```
+
+
+
+```{r}
 # propriety parameter for beta MCAR
 rho_beta <- 0.99
 
 # Conditional Covariance Matrix
 # beta_s is regarded as a vector of stacked beta_1, beta_2 vectors
 # Assume beta_1 and beta_2 vectors are independent for now.
-Lambda <- 10*matrix(c(  1, 0.9,   0,   0,
-                   0.9,   1,   0,   0,
-                     0,   0,   1, 0.9,
-                     0,   0, 0.9,   1 ), byrow = T, ncol = p*q)
+
+
+# cLambda <- matrix(c( 1,   0, 0.9,   0, 0.9,   0,
+#                      0,   1,   0,   0,   0,   0,
+#                    0.9,   0,   1,   0, 0.9,   0,
+#                      0,   0,   0,   1,   0,   0,
+#                    0.9,   0, 0.9,   0,   1,   0,
+#                      0,   0,   0,   0,   0,   1), byrow = T, ncol = p*q)
+
+
+cLambda <- matrix(c( 1,   0,   0,   0,   0,   0,
+                     0,   1,   0,   0,   0,   0,
+                     0,   0,   1,   0,   0,   0,
+                     0,   0,   0,   1,   0,   0,
+                     0,   0,   0,   0,   1,   0,
+                     0,   0,   0,   0,   0,   1), byrow = T, ncol = p*q)
+
+stdev_beta <- diag(c(1,1,1,1,1,1))
+
+Lambda <- stdev_beta%*%cLambda%*%stdev_beta
+
+
+#Lambda <- diag(c(1,1,10,10,100,100))
+
+
+
+
+# Lambda <- 10*matrix(c(  1,   0,   0,   0,
+#                         0,   1,   0,   0,
+#                         0,   0,   1,   0,
+#                         0,   0,   0,   1 ), byrow = T, ncol = p*q)
+
+
 
 # Construct MCAR joint distribution covariance
 inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))
@@ -196,19 +255,81 @@ inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))
 # note: the beta_s vectors are drawn in joint vectorized form.
 #       first, split the joint vector according to spatial index
 #       second, collapse the (p*q x 1) vectors into (p x q) matrices
-beta_temp <- t(matrix(backsolve(chol(inv_Sigma_eps), rnorm(n*p*q)), byrow=T, ncol=p*q))
+
+
+beta_temp <- t(matrix(backsolve(chol(inv_Sigma_beta), rnorm(n*p*q)), byrow=T, ncol=p*q))
 beta <- array(NA, dim = c(p,q,n))
 beta[1:p,1:q,] <- beta_temp
-rm(beta_temp)
+#rm(beta_temp)
 
 
+
+spat_domain$sim_beta11 <- beta_temp[1,]
+spat_domain$sim_beta12 <- beta_temp[2,]
+spat_domain$sim_beta21 <- beta_temp[3,]
+spat_domain$sim_beta22 <- beta_temp[4,]
+spat_domain$sim_beta31 <- beta_temp[5,]
+spat_domain$sim_beta32 <- beta_temp[6,]
+
+```
+
+```{r}
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_beta11)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_beta12)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_beta21)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_beta22)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_beta31)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_beta32)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+```
+
+
+Do I want to generate the covariates using an MCAR distribution?
+
+```{r}
 # sample covariates
 # For now, sample covariates from a normal distribution.
 # Consider changing in the future.
 # Z array is 3 dim - left to right: time, covariate vector length, spatial index
 Z <- array(NA, dim=c(k,q,n))
 for (s in 1:n){
-  Z[,,s] <- matrix(c(rep(1,k),rnorm(k,0,1)), ncol = q)
+  Z[,,s] <- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)
 }
 
 # Now draw delta (naively via loops)
@@ -216,10 +337,56 @@ for (s in 1:n){
 delta <- array(NA, dim = c(p,k,n))
 for (s in 1:n){
   for (t in 1:k){
-    delta[,t,s] <- Z[t,,s]%*%beta[,,s] + eps[,t,s]
+    delta[,t,s] <- beta[,,s]%*%Z[t,,s] + eps[,t,s]
   }
 }
 ```
+
+
+
+```{r}
+
+spat_domain$z1 <- Z[1,1,]
+spat_domain$z2 <- Z[1,2,]
+spat_domain$z3 <- Z[1,3,]
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=z2)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=z3)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+```
+
+
+
+```{r}
+spat_domain$sim_delta11 <- delta[1,,]
+spat_domain$sim_delta12 <- delta[2,,]
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_delta11)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=sim_delta12)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+```
+
+
 
 Add the data to the spatial domain data frame.
 
