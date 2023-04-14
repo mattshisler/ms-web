@@ -136,10 +136,10 @@ Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
 
 Though we defined the elements of the neighborhood matrix, $\mathbf{W}$, to be either $0$ or $1$, we've elected to keep them in the derivation of the full conditional
 
-First, we will simulate data from this model.
 
-We will simulate data from this model, then try to fit the model using MCMC.
+Next will simulate data from this model. What follows is some scratch code for the simulation. Here we set $p = 2$, the dimension of the response vectors, $q = 2$, the number of covariates, and $k=20$ years.
 
+We start by constructing the spatial domain. In this case a regular lattice partitioned into $n = 25^2$ areal units. The neighborhood matrix is the simple 1st order neighborhood structure similar to previous posts.
 ```{r}
 # specify spatial domain
 
@@ -153,24 +153,26 @@ D <- diag(rowSums(W))
 ```
 
 
-Sample beta for each site. Here we set $p = 2$, $q = 2$, and assume the elements of $\boldsymbol\beta_s$ to be independent normal with mean $\mu=0$ and constant variance $\sigma^2 = 3$. Finally, we will set $k=10$ years.
-
-Should I actually sample these from an MCAR distribution? Not sure.
-
+We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the $\pho_\epsilon$ parameter equal to 0.
 ```{r}
 #| eval: false
 
 p = 2 
-q = 3  
-k = 1
+q = 2  
+k = 20
 
 # propriety parameter for epsilon MCAR
 rho_eps <- 0.99
 
 # Conditional Covariance Matrix.
 # Assume Omega_t is constant across time for now.
-Omega <- matrix(c(1, 0.7,
-                  0.7, 1), byrow = T, ncol = p)
+
+cOmega <- matrix(c(1, 0,
+                   0, 1), byrow = T, ncol = p)
+
+stddev_eps <- diag(c(1,1))
+
+Omega <- stddev_eps%*%cOmega%*%stddev_eps
 
 # Construct MCAR joint distribution covariance
 inv_Sigma_eps <- kronecker((D-rho_eps*W), solve(Omega))
@@ -183,28 +185,43 @@ for (t in 1:k){
 }
 ```
 
+We can plot a sequence by year of the 1st element in the random noise vector.
 ```{r}
-spat_domain$sim_eps1 <- eps[1,,]
-spat_domain$sim_eps2 <- eps[2,,]
+for (t in 1:k){
+    
+    pl <- ggplot(spat_domain) +
+            geom_tile(aes(x, y, fill=eps[1,t,])) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(eps[1,,]),max(eps[1,,]))) +
+            coord_fixed() + 
+            theme_void()
+    
+    par(mfrow=c(1,2))
+    plot(pl)
+}
+```
+And the second element.
 
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_eps1)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10), 
-                       limits = c(-3.3,3.3)) +
-  coord_fixed() + 
-  theme_void()
+```{r}
 
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_eps2)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10),
-                       limits = c(-3.3,3.3)) +
-  coord_fixed() + 
-  theme_void()
+for (t in 1:k){
+    
+    pl <- ggplot(spat_domain) +
+            geom_tile(aes(x, y, fill=eps[2,t,])) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(eps[2,,]),max(eps[2,,]))) +
+            coord_fixed() + 
+            theme_void()
+    
+    plot(pl)
+
+}
+
 ```
 
-
+Now sample beta for each site, this time with some spatial variation.
 
 ```{r}
 # propriety parameter for beta MCAR
@@ -223,16 +240,23 @@ rho_beta <- 0.99
 #                      0,   0,   0,   0,   0,   1), byrow = T, ncol = p*q)
 
 
-cLambda <- matrix(c( 1,   0,   0,   0,   0,   0,
-                     0,   1,   0,   0,   0,   0,
-                     0,   0,   1,   0,   0,   0,
-                     0,   0,   0,   1,   0,   0,
-                     0,   0,   0,   0,   1,   0,
-                     0,   0,   0,   0,   0,   1), byrow = T, ncol = p*q)
+# cLambda <- matrix(c( 1,   0,   0,   0,   0,   0,
+#                      0,   1,   0,   0,   0,   0,
+#                      0,   0,   1,   0,   0,   0,
+#                      0,   0,   0,   1,   0,   0,
+#                      0,   0,   0,   0,   1,   0,
+#                      0,   0,   0,   0,   0,   1), byrow = T, ncol = p*q)
 
-stdev_beta <- diag(c(1,1,1,1,1,1))
+cLambda <- diag(p*q)
 
-Lambda <- stdev_beta%*%cLambda%*%stdev_beta
+cLambda <- matrix(c(  1,   0,   0,   0,
+                      0,   1,   0,   0,
+                      0,   0,   1, 0.7,
+                      0,   0, 0.7,   1 ), byrow = T, ncol = p*q)
+
+stddev_beta <- diag(c(2,2,2,2))
+
+Lambda <- stddev_beta%*%cLambda%*%stddev_beta
 
 
 #Lambda <- diag(c(1,1,10,10,100,100))
@@ -257,61 +281,29 @@ inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))
 #       second, collapse the (p*q x 1) vectors into (p x q) matrices
 
 
-beta_temp <- t(matrix(backsolve(chol(inv_Sigma_beta), rnorm(n*p*q)), byrow=T, ncol=p*q))
-beta <- array(NA, dim = c(p,q,n))
-beta[1:p,1:q,] <- beta_temp
+beta_mat <- t(matrix(backsolve(chol(inv_Sigma_beta), rnorm(n*p*q)), byrow=T, ncol=p*q))
+beta_arr <- array(NA, dim = c(p,q,n))
+beta_arr[1:p,1:q,] <- beta_temp
 #rm(beta_temp)
 
+# For now assume zero mean.
+beta_mat[1,] <- 0
+beta_mat[2,] <- 0
 
-
-spat_domain$sim_beta11 <- beta_temp[1,]
-spat_domain$sim_beta12 <- beta_temp[2,]
-spat_domain$sim_beta21 <- beta_temp[3,]
-spat_domain$sim_beta22 <- beta_temp[4,]
-spat_domain$sim_beta31 <- beta_temp[5,]
-spat_domain$sim_beta32 <- beta_temp[6,]
 
 ```
 
 ```{r}
 
 ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_beta11)) +
+  geom_tile(aes(x, y, fill=beta_mat[3,])) +
   scale_y_reverse() +
   scale_fill_gradientn(colors = viridis(10)) +
   coord_fixed() + 
   theme_void()
 
 ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_beta12)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_beta21)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_beta22)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_beta31)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_beta32)) +
+  geom_tile(aes(x, y, fill=beta_mat[4,])) +
   scale_y_reverse() +
   scale_fill_gradientn(colors = viridis(10)) +
   coord_fixed() + 
@@ -319,9 +311,7 @@ ggplot(spat_domain) +
 
 ```
 
-
-Do I want to generate the covariates using an MCAR distribution?
-
+Next construct the covariate array and sample the response vectors, $\boldsymbol\delta_{s,t}$.
 ```{r}
 # sample covariates
 # For now, sample covariates from a normal distribution.
@@ -329,8 +319,13 @@ Do I want to generate the covariates using an MCAR distribution?
 # Z array is 3 dim - left to right: time, covariate vector length, spatial index
 Z <- array(NA, dim=c(k,q,n))
 for (s in 1:n){
-  Z[,,s] <- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)
+  #Z[,,s] <- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)
+  Z[,,s] <- matrix(c(rep(1,k), scale(1:k, scale = T)), ncol = q)
 }
+
+# Rather than sampling covariates from a normal distribution, let's
+# let's just focus on an intercept term and centered equally spaced term.
+
 
 # Now draw delta (naively via loops)
 # delta array is 3-dim - left to right: response vector length, time, space
@@ -343,90 +338,48 @@ for (s in 1:n){
 ```
 
 
-
+Plot $\delta_{s,t,1}$ by year.
 ```{r}
+for (t in 1:k){
+    
+    pl <- ggplot(spat_domain) +
+            geom_tile(aes(x, y, fill=delta[1,t,])) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(delta[1,,]),max(delta[1,,]))) +
+            coord_fixed() + 
+            theme_void()
+    
+    plot(pl)
 
-spat_domain$z1 <- Z[1,1,]
-spat_domain$z2 <- Z[1,2,]
-spat_domain$z3 <- Z[1,3,]
+}
+```
 
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=z2)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=z3)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
+Plot $\delta_{s,t,2}$ by year.
+```{r}
+for (t in 1:k){
+    
+    pl <- ggplot(spat_domain) +
+            geom_tile(aes(x, y, fill=delta[2,t,])) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(delta[2,,]),max(delta[2,,]))) +
+            coord_fixed() + 
+            theme_void()
+    
+    plot(pl)
+}
 
 ```
 
+We can go back and simulate more complex data sets at a later time with relative ease. For now, let's move on to the MCMC.
 
-
-```{r}
-spat_domain$sim_delta11 <- delta[1,,]
-spat_domain$sim_delta12 <- delta[2,,]
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_delta11)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=sim_delta12)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-
-```
-
-
-
-Add the data to the spatial domain data frame.
+The MCMC will be a combination of Metropolis and Gibbs steps. The latter correspond to the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ while the former are for the MCAR propreity parameters $\rho_\epsilon$ and $\rho_\beta$.
 
 ```{r}
-#| eval: false
-# For now, column by column
-spat_domain_temp <- spat_domain
-
-spat_domain <- cbind(spat_domain_temp, matrix(t(delta[1,,]),ncol=k), matrix(t(delta[2,,]),ncol=k))
-
-
-colnames(spat_domain)[4:(3+2*k)] <- c(paste0("delta_1_s_",seq(1:k)),paste0("delta_2_s_",seq(1:k)))
-
-test <- pivot_longer(spat_domain, cols = starts_with("delta"), names_to = "delta_i_t", values_to = "response")
-```
-
-Let's observe some plots:
-
-```{r}
-#| eval: false
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=delta_2_s_1)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void()
-
-ggplot(test) +
-  geom_tile(aes(x, y, fill=response)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10)) +
-  coord_fixed() + 
-  theme_void() + 
-  facet_wrap(vars(delta_i_t))
+beta_mat
 
 ```
-
-Okay, we have the data. Now we want to code the MCMC sampler.
-We'll begin with $\rho_\epsilon$ and $\rho_\beta$ fixed. This way we can focus
-on the full conditionals for $\beta_s$ and $\Lambda$.
 
 
 
