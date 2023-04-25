@@ -162,7 +162,7 @@ q = 2
 k = 20
 
 # propriety parameter for epsilon MCAR
-rho_eps <- 0.99
+rho_eps <- 0.0
 
 # Conditional Covariance Matrix.
 # Assume Omega_t is constant across time for now.
@@ -182,7 +182,7 @@ inv_Sigma_eps <- kronecker((D-rho_eps*W), solve(Omega))
 eps <- array(NA, dim = c(p,k,n))
 for (t in 1:k){  
   eps[,t,] <- t(matrix(backsolve(chol(inv_Sigma_eps), rnorm(n*p)), byrow=T, ncol=p))
-}
+} 
 ```
 
 We can plot a sequence by year of the 1st element in the random noise vector.
@@ -282,13 +282,13 @@ inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))
 
 
 beta_mat <- t(matrix(backsolve(chol(inv_Sigma_beta), rnorm(n*p*q)), byrow=T, ncol=p*q))
-beta_arr <- array(NA, dim = c(p,q,n))
-beta_arr[1:p,1:q,] <- beta_temp
-#rm(beta_temp)
-
 # For now assume zero mean.
 beta_mat[1,] <- 0
 beta_mat[2,] <- 0
+
+# construct array version of beta
+beta_arr <- array(NA, dim = c(p,q,n))
+beta_arr[1:p,1:q,] <- beta_mat
 
 
 ```
@@ -332,7 +332,7 @@ for (s in 1:n){
 delta <- array(NA, dim = c(p,k,n))
 for (s in 1:n){
   for (t in 1:k){
-    delta[,t,s] <- beta[,,s]%*%Z[t,,s] + eps[,t,s]
+    delta[,t,s] <- beta_arr[,,s]%*%Z[t,,s] + eps[,t,s]
   }
 }
 ```
@@ -377,7 +377,187 @@ We can go back and simulate more complex data sets at a later time with relative
 The MCMC will be a combination of Metropolis and Gibbs steps. The latter correspond to the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ while the former are for the MCAR propreity parameters $\rho_\epsilon$ and $\rho_\beta$.
 
 ```{r}
-beta_mat
+
+niters <- 10
+burn   <- 0.1*niters
+
+# storage
+keep_beta_mat <- array(NA, dim = c(p*q, n, niters))
+keep_Lambda   <- array(NA, dim = c(p*q, p*q, niters))
+keep_rho_eps  <- rep(NA, niters) 
+keep_rho_beta <- rep(NA, niters)
+
+# initial values
+mc_beta_mat <- beta_mat
+mc_beta_arr <- beta_arr
+mc_beta_arr[1:p,1:q,] <- mc_beta_mat
+mc_Lambda   <- Lambda
+mc_rho_eps  <- 0
+mc_rho_beta <- 0.99
+
+# prior parameters
+nu <- 1
+G  <- diag(p*q)
+
+```
+
+Test some results for the beta full conditional calculation. - computing V.
+
+```{r}
+# re-establish a computationally efficient result from step 3.
+
+
+Z[,,1]
+
+Omega
+
+Z[,,1]
+
+test <- matrix(0, nrow = p*q, ncol = p*q)
+for (t in 1:k){
+  test <- test + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega%*%kronecker(t(Z[t,,1]), diag(2))
+}
+
+# same result!
+test
+kronecker(t(Z[,,1])%*%Z[,,1], Omega)
+
+# what if Omega changes with time? Not sure.
+rep(1:k, each = 4)
+
+
+Omega_arr <- array(rep(1:k, each = 4), dim = c(p,p,k))
+Omega_arr[,,3]
+
+# sum over the third dimension of the array
+rowSums(Omega_arr, dims = 2)
+
+test <- matrix(0, nrow = p*q, ncol = p*q)
+for (t in 1:k){
+  test <- test + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega_arr[,,t]%*%kronecker(t(Z[t,,1]), diag(2))
+}
+
+# these are actually different. . . we'll need to use the naive way for now.
+test
+kronecker(t(Z[,,1])%*%Z[,,1], rowSums(Omega_arr, dims = 2))
+
+
+
+```
+
+Test some more results for the beta full conditional calc - computing M.
+
+```{r}
+w_plus <- rowSums(W)
+
+
+# get index of neightbors of s
+s = 1
+neighbors <- which(W[s,]==1)
+
+# get weights - maybe consider storing these weights in a different way. the matrix is sparse afterall.
+neighbor_weights <- W[s,neighbors]
+
+# sum the neighboring beta_s vectors
+sum_neighbor_beta <- beta_mat[,neighbors]%*%neighbor_weights
+
+# compute the last term.
+rho_beta*solve(Lambda)%*%sum_neighbor_beta
+
+# now try to compute the first neighbor sum, the one in the brackets.
+
+
+
+Bz <- delta
+for (t in 1:k){
+  for (s in 1:n){
+    Bz[,t,s] <- beta_arr[,,s]%*%Z[t,,s]
+  }
+}
+resid <- delta - Bz
+
+s <- 1
+t <- 1
+sum_neighbor_resid <- resid[,1,neighbors]%*%neighbor_weights
+
+kronecker(Z[t,,s], diag(p))
+
+# I think there is an error in the full conditionals. THere should be a transpose on the first Z_s,t in the M_beta_s term.
+test <- matrix(0,nrow=p*q, ncol=1)
+
+for (t in 1:k){
+  test <- test + kronecker(Z[t,,s], diag(p))%*%Omega_arr[,,t]%*%(sum_neighbor_resid + w_plus[s]*delta[,t,s])
+}
+
+
+# Full M_beta_s term
+rho_eps*test + rho_beta*solve(Lambda)%*%sum_neighbor_beta
+
+# delta <- array(NA, dim = c(p,k,n))
+# for (s in 1:n){
+#   for (t in 1:k){
+#     delta[,t,s] <- beta_arr[,,s]%*%Z[t,,s] + eps[,t,s]
+#   }
+# }
+
+beta_arr[,,1]%*%Z[1,,1]
+
+Bz[,1,1]
+
+delta[,1,1]
+ 
+eps[,1,1]
+
+
+
+(delta - Bz)[,1,1:2]
+
+eps[,1,1:2]
+
+delta[,1,1]
+
+beta_arr[,,1]%*%Z[1,,1]
+
+
+
+delta[,1,1:2] - Bz[,1,1:2]
+```
+
+```{r}
+
+# Omega is constant in time for now. Will need to update this
+# so that we have a different Omega for each year.
+Omega_arr <- array(rep(c(Omega), k), dim = c(p,p,k))
+
+
+for (iter in 2:niters){
+  
+  # sample beta_s
+  for (i in 1:n){
+    V <- matrix(0, nrow = p*q, ncol = p*q)
+      for (t in 1:k){
+        V <- V + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega_arr[,,t]%*%kronecker(t(Z[t,,1]), diag(2))
+      }
+    M <- 
+    
+  }
+  
+  
+  # sample Lambda
+  
+  
+  
+  # sample rho_eps
+  
+  
+  
+  # sample rho_beta
+  
+  
+  
+}
+
+
 
 ```
 
