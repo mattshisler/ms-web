@@ -89,11 +89,13 @@ Compare the proportion vectors from questions 3 and 4.
 
 ```{r}
 
-boxplot(visits2/rowSums(visits2))
+boxplot(visits2/rowSums(visits2),
+        xlab = "initial state",
+        ylab = "proportion of visits")
 points(visits1/sum(visits1), col = "red", cex = 8, pch = ".")
 ```
 
-Regardless of the initial state, the proportions are similar.
+The proportions from question 3 are displayed in red. The propoertions from question 4 are collected together and displayed int he boxplots. Regardless of the initial state, the proportions are similar.
 
 ### Step 6
 
