@@ -1,0 +1,35 @@
+---
+title: "Step 14 - Test Post"
+description: "Test Post"
+author:
+  - name: Matthew Shisler
+    affiliation: North Carloina State University - Department of Statistics
+    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+date: "06/07/2023"
+categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
+draft: false 
+format:
+  html: 
+    code-fold: false
+execute: 
+  eval: false
+  cache: false
+  freeze: false
+---
+
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+
+library(tidyverse)
+library(igraph)
+library(viridis)
+library(matrixsampling)
+```
+
+## Intro
+
+
+Test post.
