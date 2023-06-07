@@ -31,7 +31,7 @@ library(matrixsampling)
 
 ## Intro
 
-Test commit w/ new creds.
+Test commit w/ new.
 
 Here we will develop the the full workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.
 
