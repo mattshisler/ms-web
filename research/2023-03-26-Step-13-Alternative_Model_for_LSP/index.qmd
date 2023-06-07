@@ -31,6 +31,8 @@ library(matrixsampling)
 
 ## Intro
 
+Test commit w/ new creds.
+
 Here we will develop the the full workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.
 
 Let $\mathcal{D}$ be a spatial domain partitioned into a regular lattice of $n$ areal units which we will refer to as "locations" or "pixels". Index these units by $s \in S,\, S = \{1,2,\dots,n\}$. 
