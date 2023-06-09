@@ -31,11 +31,11 @@ library(matrixsampling)
 
 ## Intro
 
-Here we will develop the the full workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.
+Here we will develop a workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.
 
-Let $\mathcal{D}$ be a spatial domain partitioned into a regular lattice of $n$ areal units which we will refer to as "locations" or "pixels". Index these units by $s \in S,\, S = \{1,2,\dots,n\}$. 
+Let $\mathcal{D}$ be the spatial domain partitioned into a regular lattice of $n$ areal units which we will refer to as "locations" or "pixels". Index these units by $s \in S,\, S = \{1,2,\dots,n\}$. 
 
-For year $t \in T$, a satellite captures imagery from the earth's surface on a subset of days $\mathbf{d}_t \subset \{1, 2, \dots, m\}$ where $m$ may take on a value of 365 or 366. The choice of either does not appear to be consequential. 
+For year $t \in T$, a satellite captures imagery from the earth's surface on a subset of days $\mathbf{d}_t \subset \{1, 2, \dots, m\}$ where $m$ may take on a value of 365 or 366 - the choice of does not appear to be consequential. 
 
 
 Let $Y_{s,t,j} \in (0,1)$ be the vegetation index observed on day $d_{t,j}$ of year $t$ at pixel $s$. Though the VI is restricted to the interval $(0,1)$, we nevertheless adopt a Gaussian model with mean function $v(d;\boldsymbol\theta)$, parameterized by the $p \times 1$ vector $\boldsymbol\theta$, and variance $\sigma^2$ which corresponds to the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of $0$ and $1$ and the random noise is small so that there is practically no scenario in which we would be required to model values of $0$ or $1$. Notationally,
@@ -82,7 +82,7 @@ $$
 $$
 leaving $\sigma^2$ to be estimated later.
 
-As a parenthetical note, we could go so far as to consider $\sigma^2$ fixed by using the results of research on the measurement noise associated with satellite sensors and atmospheric attenuation.
+As a parenthetical note, we could go so far as to consider $\sigma^2$ fixed by using the results of research on the measurement noise associated with atmospheric attenuation and the optical limitations of the satellite sensors.
 
 We may from time to time use an emperical estimate for the covariance of the deviation vectors. We construct these by collecting $\widehat{\boldsymbol\delta}_{s,t}$ over all spatial locations $s \in \mathcal{D}$ for each year $t \in T$, then computing the sample covariance matrix
 $$
@@ -121,14 +121,14 @@ $$
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
+\mathbf{M}_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &= \text{number of pixels}\\
 \mathbf{H} &= \boldsymbol{\mathcal{B}}^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol{\mathcal{B}}\\
 \end{align*}
 $$
-Here $\boldsymbol{\mathcal{B}}$ is a $n \times pq$ matrix with rows eaual to $\boldsymbol\beta^T_s$  and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$.
+Here $\boldsymbol{\mathcal{B}}$ is a $n \times pq$ matrix with rows equal to $\boldsymbol\beta^T_s$  and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$.
 
 Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
 
@@ -139,7 +139,7 @@ Though we defined the elements of the neighborhood matrix, $\mathbf{W}$, to be e
 
 Next will simulate data from this model. What follows is some scratch code for the simulation. Here we set $p = 2$, the dimension of the response vectors, $q = 2$, the number of covariates, and $k=20$ years.
 
-We start by constructing the spatial domain. In this case a regular lattice partitioned into $n = 25^2$ areal units. The neighborhood matrix is the simple 1st order neighborhood structure similar to previous posts.
+We start by constructing the spatial domain. In this case a regular lattice partitioned into $n = 25^2$ areal units. The neighborhood matrix is the 1st order neighborhood structure.
 ```{r}
 # specify spatial domain
 
@@ -153,7 +153,7 @@ D <- diag(rowSums(W))
 ```
 
 
-We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the $\pho_\epsilon$ parameter equal to 0.
+We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the $\rho_\epsilon$ parameter equal to 0.
 ```{r}
 #| eval: false
 
@@ -314,7 +314,7 @@ ggplot(spat_domain) +
 Next construct the covariate array and sample the response vectors, $\boldsymbol\delta_{s,t}$.
 ```{r}
 # sample covariates
-# For now, sample covariates from a normal distribution.
+# For now, the only covariate is time in years, centered and scaled.
 # Consider changing in the future.
 # Z array is 3 dim - left to right: time, covariate vector length, spatial index
 Z <- array(NA, dim=c(k,q,n))
@@ -372,9 +372,9 @@ for (t in 1:k){
 
 ```
 
-We can go back and simulate more complex data sets at a later time with relative ease. For now, let's move on to the MCMC.
+We can go back and simulate more complex data sets at a later time with relative ease. For now, let's move on to the MCMC. 
 
-The MCMC will be a combination of Metropolis and Gibbs steps. The latter correspond to the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ while the former are for the MCAR propreity parameters $\rho_\epsilon$ and $\rho_\beta$.
+The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ and Metropolis steps for the MCAR propriety parameters $\rho_\epsilon$ and $\rho_\beta$.
 
 ```{r}
 
@@ -382,10 +382,10 @@ niters <- 10
 burn   <- 0.1*niters
 
 # storage
-keep_beta_mat <- array(NA, dim = c(p*q, n, niters))
-keep_Lambda   <- array(NA, dim = c(p*q, p*q, niters))
-keep_rho_eps  <- rep(NA, niters) 
-keep_rho_beta <- rep(NA, niters)
+keep_beta_mat <- array(0, dim = c(p*q, n, niters))
+keep_Lambda   <- array(0, dim = c(p*q, p*q, niters))
+keep_rho_eps  <- rep(0, niters) 
+keep_rho_beta <- rep(0, niters)
 
 # initial values
 mc_beta_mat <- beta_mat
@@ -451,11 +451,11 @@ Test some more results for the beta full conditional calc - computing M.
 w_plus <- rowSums(W)
 
 
-# get index of neightbors of s
+# get index of neighbors of s
 s = 1
 neighbors <- which(W[s,]==1)
 
-# get weights - maybe consider storing these weights in a different way. the matrix is sparse afterall.
+# get weights - maybe consider storing these weights in a different way. the matrix is sparse after all.
 neighbor_weights <- W[s,neighbors]
 
 # sum the neighboring beta_s vectors
@@ -478,15 +478,16 @@ resid <- delta - Bz
 
 s <- 1
 t <- 1
-sum_neighbor_resid <- resid[,1,neighbors]%*%neighbor_weights
+sum_neighbor_resid <- resid[,t,neighbors]%*%neighbor_weights
 
 kronecker(Z[t,,s], diag(p))
 
-# I think there is an error in the full conditionals. THere should be a transpose on the first Z_s,t in the M_beta_s term.
+# I think there is an error in the full conditionals?
+
 test <- matrix(0,nrow=p*q, ncol=1)
 
 for (t in 1:k){
-  test <- test + kronecker(Z[t,,s], diag(p))%*%Omega_arr[,,t]%*%(sum_neighbor_resid + w_plus[s]*delta[,t,s])
+  test <- test + t(kronecker(Z[t,,s], diag(p)))%*%Omega_arr[,,t]%*%(resid[,t,neighbors]%*%neighbor_weights + w_plus[s]*delta[,t,s])
 }
 
 
@@ -525,20 +526,31 @@ delta[,1,1:2] - Bz[,1,1:2]
 
 ```{r}
 
-# Omega is constant in time for now. Will need to update this
-# so that we have a different Omega for each year.
+# Omega is constant in time for now. May need to update this to
+# consider different Omegas for each year.
 Omega_arr <- array(rep(c(Omega), k), dim = c(p,p,k))
+
+# Pre-compute the first summation term for V in the full conditional for beta.
+sumt_ZT_Omega_inv_Z <- array(0, dim = c(p*q, p*q, n))
+for (i in 1:n){
+  for (t in 1:k){
+    sumt_ZT_Omega_inv_Z[,,i] <- sumt_ZT_Omega_inv_Z[,,i] + 
+                                t(kronecker(t(Z[t,,i]),diag(p)))%*%Omega_arr[,,t]%*%kronecker(t(Z[t,,i]), diag(p))
+  }
+}
+
+w_plus <- rowSums(W)
+
 
 
 for (iter in 2:niters){
   
   # sample beta_s
   for (i in 1:n){
-    V <- matrix(0, nrow = p*q, ncol = p*q)
-      for (t in 1:k){
-        V <- V + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega_arr[,,t]%*%kronecker(t(Z[t,,1]), diag(2))
-      }
+    V <- sumt_ZT_Omega_inv_Z[,,i] + w_plus(i)*solve(Lambda)
     M <- 
+      
+      
     
   }
   

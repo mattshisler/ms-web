@@ -215,9 +215,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="intro" class="level2">
 <h2 class="anchored" data-anchor-id="intro">Intro</h2>
-<p>Here we will develop the the full workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.</p>
-<p>Let <span class="math inline">\(\mathcal{D}\)</span> be a spatial domain partitioned into a regular lattice of <span class="math inline">\(n\)</span> areal units which we will refer to as “locations” or “pixels”. Index these units by <span class="math inline">\(s \in S,\, S = \{1,2,\dots,n\}\)</span>.</p>
-<p>For year <span class="math inline">\(t \in T\)</span>, a satellite captures imagery from the earth’s surface on a subset of days <span class="math inline">\(\mathbf{d}_t \subset \{1, 2, \dots, m\}\)</span> where <span class="math inline">\(m\)</span> may take on a value of 365 or 366. The choice of either does not appear to be consequential.</p>
+<p>Here we will develop a workflow for a spatial analysis of land-surface phenology (LSP) using a vegetation index (VI) constructed from remotely-sensed surface reflectance and emmitance.</p>
+<p>Let <span class="math inline">\(\mathcal{D}\)</span> be the spatial domain partitioned into a regular lattice of <span class="math inline">\(n\)</span> areal units which we will refer to as “locations” or “pixels”. Index these units by <span class="math inline">\(s \in S,\, S = \{1,2,\dots,n\}\)</span>.</p>
+<p>For year <span class="math inline">\(t \in T\)</span>, a satellite captures imagery from the earth’s surface on a subset of days <span class="math inline">\(\mathbf{d}_t \subset \{1, 2, \dots, m\}\)</span> where <span class="math inline">\(m\)</span> may take on a value of 365 or 366 - the choice of does not appear to be consequential.</p>
 <p>Let <span class="math inline">\(Y_{s,t,j} \in (0,1)\)</span> be the vegetation index observed on day <span class="math inline">\(d_{t,j}\)</span> of year <span class="math inline">\(t\)</span> at pixel <span class="math inline">\(s\)</span>. Though the VI is restricted to the interval <span class="math inline">\((0,1)\)</span>, we nevertheless adopt a Gaussian model with mean function <span class="math inline">\(v(d;\boldsymbol\theta)\)</span>, parameterized by the <span class="math inline">\(p \times 1\)</span> vector <span class="math inline">\(\boldsymbol\theta\)</span>, and variance <span class="math inline">\(\sigma^2\)</span> which corresponds to the random noise in the satellite measurements. The assumption is that the true mean is bounded sufficiently far from the physical limits of <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span> and the random noise is small so that there is practically no scenario in which we would be required to model values of <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>. Notationally,</p>
 <p><span class="math display">\[
 Y_{s,t,j} \sim \text{Normal}\left(v(d_{t,j};\boldsymbol\theta_{s,t}), \sigma^2\right)
@@ -243,7 +243,7 @@ X_0(d) &amp;=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\
 <p>We can construct the usual estimates for <span class="math inline">\(\boldsymbol\delta_{s,t}\)</span> and their corresponding variance, <span class="math inline">\(\text{Var}(\widehat{\boldsymbol\delta}_{s,t})\)</span>, from our model of the residuals. These are of course, <span class="math display">\[
 \widehat{\boldsymbol\delta}_{s,t} = \left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1}\mathbf{X}^T_{s,t}\mathbf{r}_{s,t} \quad \text{and} \quad \text{Var}(\widehat{\boldsymbol\delta}_{s,t}) = \sigma^2\left(\mathbf{X}^T_{s,t}\mathbf{X}_{s,t}\right)^{-1} = \sigma^2\boldsymbol{\mathcal{X}}^{-1}_{s,t}
 \]</span> leaving <span class="math inline">\(\sigma^2\)</span> to be estimated later.</p>
-<p>As a parenthetical note, we could go so far as to consider <span class="math inline">\(\sigma^2\)</span> fixed by using the results of research on the measurement noise associated with satellite sensors and atmospheric attenuation.</p>
+<p>As a parenthetical note, we could go so far as to consider <span class="math inline">\(\sigma^2\)</span> fixed by using the results of research on the measurement noise associated with atmospheric attenuation and the optical limitations of the satellite sensors.</p>
 <p>We may from time to time use an emperical estimate for the covariance of the deviation vectors. We construct these by collecting <span class="math inline">\(\widehat{\boldsymbol\delta}_{s,t}\)</span> over all spatial locations <span class="math inline">\(s \in \mathcal{D}\)</span> for each year <span class="math inline">\(t \in T\)</span>, then computing the sample covariance matrix <span class="math display">\[
 \widehat{\boldsymbol\Omega}_t = \frac{1}{n-1}\sum_{s=1}^n(\widehat{\boldsymbol\delta}_{s,t} - \bar{\widehat{\boldsymbol\delta}}_{\cdot,t})(\widehat{\boldsymbol\delta}_{s,t} - \bar{\widehat{\boldsymbol\delta}}_{\cdot,t})^T
 \]</span> note: but we only assume conditional independence of <span class="math inline">\(\widehat{\boldsymbol\delta}_{s,t}\)</span>, is this still okay to do?</p>
@@ -269,17 +269,17 @@ X_0(d) &amp;=  \nabla_{\boldsymbol\theta} v(d; \boldsymbol\theta)|_{\boldsymbol\
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &amp;\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &amp;= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
+\mathbf{M}_{\beta_s} &amp;= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &amp;\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &amp;= \text{number of pixels}\\
 \mathbf{H} &amp;= \boldsymbol{\mathcal{B}}^T(\mathbf{D}-\rho\mathbf{W})\boldsymbol{\mathcal{B}}\\
 \end{align*}
-\]</span> Here <span class="math inline">\(\boldsymbol{\mathcal{B}}\)</span> is a <span class="math inline">\(n \times pq\)</span> matrix with rows eaual to <span class="math inline">\(\boldsymbol\beta^T_s\)</span> and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix of the row sums from <span class="math inline">\(\mathbf{W}\)</span>.</p>
+\]</span> Here <span class="math inline">\(\boldsymbol{\mathcal{B}}\)</span> is a <span class="math inline">\(n \times pq\)</span> matrix with rows equal to <span class="math inline">\(\boldsymbol\beta^T_s\)</span> and <span class="math inline">\(\mathbf{D}\)</span> is a diagonal matrix of the row sums from <span class="math inline">\(\mathbf{W}\)</span>.</p>
 <p>Further, <span class="math inline">\(n = |S|\)</span>, the number of pixels, and <span class="math inline">\(k = |T|\)</span>, the number of years.</p>
 <p>Though we defined the elements of the neighborhood matrix, <span class="math inline">\(\mathbf{W}\)</span>, to be either <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span>, we’ve elected to keep them in the derivation of the full conditional</p>
 <p>Next will simulate data from this model. What follows is some scratch code for the simulation. Here we set <span class="math inline">\(p = 2\)</span>, the dimension of the response vectors, <span class="math inline">\(q = 2\)</span>, the number of covariates, and <span class="math inline">\(k=20\)</span> years.</p>
-<p>We start by constructing the spatial domain. In this case a regular lattice partitioned into <span class="math inline">\(n = 25^2\)</span> areal units. The neighborhood matrix is the simple 1st order neighborhood structure similar to previous posts.</p>
+<p>We start by constructing the spatial domain. In this case a regular lattice partitioned into <span class="math inline">\(n = 25^2\)</span> areal units. The neighborhood matrix is the 1st order neighborhood structure.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># specify spatial domain</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -291,7 +291,7 @@ n &amp;= \text{number of pixels}\\
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>W <span class="ot">&lt;-</span> <span class="fu">as_adjacency_matrix</span>(spat_domain_g, <span class="at">sparse=</span><span class="dv">0</span>)</span>
 <span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="fu">rowSums</span>(W))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the <span class="math inline">\(\pho_\epsilon\)</span> parameter equal to 0.</p>
+<p>We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the <span class="math inline">\(\rho_\epsilon\)</span> parameter equal to 0.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>p <span class="ot">=</span> <span class="dv">2</span> </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>q <span class="ot">=</span> <span class="dv">2</span>  </span>
@@ -438,7 +438,7 @@ n &amp;= \text{number of pixels}\\
 <p>Next construct the covariate array and sample the response vectors, <span class="math inline">\(\boldsymbol\delta_{s,t}\)</span>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sample covariates</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For now, sample covariates from a normal distribution.</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For now, the only covariate is time in years, centered and scaled.</span></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Consider changing in the future.</span></span>
 <span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Z array is 3 dim - left to right: time, covariate vector length, spatial index</span></span>
 <span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim=</span><span class="fu">c</span>(k,q,n))</span>
@@ -492,16 +492,16 @@ n &amp;= \text{number of pixels}\\
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can go back and simulate more complex data sets at a later time with relative ease. For now, let’s move on to the MCMC.</p>
-<p>The MCMC will be a combination of Metropolis and Gibbs steps. The latter correspond to the full conditionals for <span class="math inline">\(\boldsymbol\beta_s\)</span> and <span class="math inline">\(\boldsymbol\Lambda\)</span> while the former are for the MCAR propreity parameters <span class="math inline">\(\rho_\epsilon\)</span> and <span class="math inline">\(\rho_\beta\)</span>.</p>
+<p>The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using the full conditionals for <span class="math inline">\(\boldsymbol\beta_s\)</span> and <span class="math inline">\(\boldsymbol\Lambda\)</span> and Metropolis steps for the MCAR propriety parameters <span class="math inline">\(\rho_\epsilon\)</span> and <span class="math inline">\(\rho_\beta\)</span>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>niters <span class="ot">&lt;-</span> <span class="dv">10</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>burn   <span class="ot">&lt;-</span> <span class="fl">0.1</span><span class="sc">*</span>niters</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># storage</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>keep_beta_mat <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, n, niters))</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>keep_Lambda   <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, p<span class="sc">*</span>q, niters))</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>keep_rho_eps  <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, niters) </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>keep_rho_beta <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, niters)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>keep_beta_mat <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, n, niters))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>keep_Lambda   <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, p<span class="sc">*</span>q, niters))</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>keep_rho_eps  <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, niters) </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>keep_rho_beta <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, niters)</span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># initial values</span></span>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>mc_beta_mat <span class="ot">&lt;-</span> beta_mat</span>
@@ -559,11 +559,11 @@ n &amp;= \text{number of pixels}\\
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>w_plus <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(W)</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># get index of neightbors of s</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># get index of neighbors of s</span></span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>s <span class="ot">=</span> <span class="dv">1</span></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>neighbors <span class="ot">&lt;-</span> <span class="fu">which</span>(W[s,]<span class="sc">==</span><span class="dv">1</span>)</span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># get weights - maybe consider storing these weights in a different way. the matrix is sparse afterall.</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="co"># get weights - maybe consider storing these weights in a different way. the matrix is sparse after all.</span></span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>neighbor_weights <span class="ot">&lt;-</span> W[s,neighbors]</span>
 <span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="co"># sum the neighboring beta_s vectors</span></span>
@@ -586,82 +586,94 @@ n &amp;= \text{number of pixels}\\
 <span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="dv">1</span></span>
 <span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>sum_neighbor_resid <span class="ot">&lt;-</span> resid[,<span class="dv">1</span>,neighbors]<span class="sc">%*%</span>neighbor_weights</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>sum_neighbor_resid <span class="ot">&lt;-</span> resid[,t,neighbors]<span class="sc">%*%</span>neighbor_weights</span>
 <span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a><span class="fu">kronecker</span>(Z[t,,s], <span class="fu">diag</span>(p))</span>
 <span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co"># I think there is an error in the full conditionals. THere should be a transpose on the first Z_s,t in the M_beta_s term.</span></span>
-<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>,<span class="at">nrow=</span>p<span class="sc">*</span>q, <span class="at">ncol=</span><span class="dv">1</span>)</span>
-<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
-<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">&lt;-</span> test <span class="sc">+</span> <span class="fu">kronecker</span>(Z[t,,s], <span class="fu">diag</span>(p))<span class="sc">%*%</span>Omega_arr[,,t]<span class="sc">%*%</span>(sum_neighbor_resid <span class="sc">+</span> w_plus[s]<span class="sc">*</span>delta[,t,s])</span>
-<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a><span class="co"># I think there is an error in the full conditionals?</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>test <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>,<span class="at">nrow=</span>p<span class="sc">*</span>q, <span class="at">ncol=</span><span class="dv">1</span>)</span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>  test <span class="ot">&lt;-</span> test <span class="sc">+</span> <span class="fu">t</span>(<span class="fu">kronecker</span>(Z[t,,s], <span class="fu">diag</span>(p)))<span class="sc">%*%</span>Omega_arr[,,t]<span class="sc">%*%</span>(resid[,t,neighbors]<span class="sc">%*%</span>neighbor_weights <span class="sc">+</span> w_plus[s]<span class="sc">*</span>delta[,t,s])</span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a><span class="co"># Full M_beta_s term</span></span>
-<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>rho_eps<span class="sc">*</span>test <span class="sc">+</span> rho_beta<span class="sc">*</span><span class="fu">solve</span>(Lambda)<span class="sc">%*%</span>sum_neighbor_beta</span>
-<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a><span class="co"># delta &lt;- array(NA, dim = c(p,k,n))</span></span>
-<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co"># for (s in 1:n){</span></span>
-<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="co">#   for (t in 1:k){</span></span>
-<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co">#     delta[,t,s] &lt;- beta_arr[,,s]%*%Z[t,,s] + eps[,t,s]</span></span>
-<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a><span class="co">#   }</span></span>
-<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
-<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>beta_arr[,,<span class="dv">1</span>]<span class="sc">%*%</span>Z[<span class="dv">1</span>,,<span class="dv">1</span>]</span>
-<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>Bz[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
-<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>delta[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
-<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a> </span>
-<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>eps[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
-<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a><span class="co"># Full M_beta_s term</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>rho_eps<span class="sc">*</span>test <span class="sc">+</span> rho_beta<span class="sc">*</span><span class="fu">solve</span>(Lambda)<span class="sc">%*%</span>sum_neighbor_beta</span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a><span class="co"># delta &lt;- array(NA, dim = c(p,k,n))</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a><span class="co"># for (s in 1:n){</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a><span class="co">#   for (t in 1:k){</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a><span class="co">#     delta[,t,s] &lt;- beta_arr[,,s]%*%Z[t,,s] + eps[,t,s]</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>beta_arr[,,<span class="dv">1</span>]<span class="sc">%*%</span>Z[<span class="dv">1</span>,,<span class="dv">1</span>]</span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>Bz[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>delta[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a>eps[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
 <span id="cb13-61"><a href="#cb13-61" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-62"><a href="#cb13-62" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a>(delta <span class="sc">-</span> Bz)[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
-<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a>eps[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
-<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a>delta[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
-<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a>beta_arr[,,<span class="dv">1</span>]<span class="sc">%*%</span>Z[<span class="dv">1</span>,,<span class="dv">1</span>]</span>
-<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-63"><a href="#cb13-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-64"><a href="#cb13-64" aria-hidden="true" tabindex="-1"></a>(delta <span class="sc">-</span> Bz)[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb13-65"><a href="#cb13-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-66"><a href="#cb13-66" aria-hidden="true" tabindex="-1"></a>eps[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span>
+<span id="cb13-67"><a href="#cb13-67" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-68"><a href="#cb13-68" aria-hidden="true" tabindex="-1"></a>delta[,<span class="dv">1</span>,<span class="dv">1</span>]</span>
+<span id="cb13-69"><a href="#cb13-69" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-70"><a href="#cb13-70" aria-hidden="true" tabindex="-1"></a>beta_arr[,,<span class="dv">1</span>]<span class="sc">%*%</span>Z[<span class="dv">1</span>,,<span class="dv">1</span>]</span>
 <span id="cb13-71"><a href="#cb13-71" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-72"><a href="#cb13-72" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a>delta[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>] <span class="sc">-</span> Bz[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb13-73"><a href="#cb13-73" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-74"><a href="#cb13-74" aria-hidden="true" tabindex="-1"></a>delta[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>] <span class="sc">-</span> Bz[,<span class="dv">1</span>,<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Omega is constant in time for now. Will need to update this</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># so that we have a different Omega for each year.</span></span>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Omega is constant in time for now. May need to update this to</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="co"># consider different Omegas for each year.</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>Omega_arr <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="fu">rep</span>(<span class="fu">c</span>(Omega), k), <span class="at">dim =</span> <span class="fu">c</span>(p,p,k))</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (iter <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>niters){</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample beta_s</span></span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> p<span class="sc">*</span>q, <span class="at">ncol =</span> p<span class="sc">*</span>q)</span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>        V <span class="ot">&lt;-</span> V <span class="sc">+</span> <span class="fu">t</span>(<span class="fu">kronecker</span>(<span class="fu">t</span>(Z[t,,<span class="dv">1</span>]), <span class="fu">diag</span>(<span class="dv">2</span>)))<span class="sc">%*%</span>Omega_arr[,,t]<span class="sc">%*%</span><span class="fu">kronecker</span>(<span class="fu">t</span>(Z[t,,<span class="dv">1</span>]), <span class="fu">diag</span>(<span class="dv">2</span>))</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>      }</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>    M <span class="ot">&lt;-</span> </span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample Lambda</span></span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_eps</span></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_beta</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-compute the first summation term for V in the full conditional for beta.</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>sumt_ZT_Omega_inv_Z <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, p<span class="sc">*</span>q, n))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    sumt_ZT_Omega_inv_Z[,,i] <span class="ot">&lt;-</span> sumt_ZT_Omega_inv_Z[,,i] <span class="sc">+</span> </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">t</span>(<span class="fu">kronecker</span>(<span class="fu">t</span>(Z[t,,i]),<span class="fu">diag</span>(p)))<span class="sc">%*%</span>Omega_arr[,,t]<span class="sc">%*%</span><span class="fu">kronecker</span>(<span class="fu">t</span>(Z[t,,i]), <span class="fu">diag</span>(p))</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>w_plus <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(W)</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (iter <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>niters){</span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample beta_s</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">&lt;-</span> sumt_ZT_Omega_inv_Z[,,i] <span class="sc">+</span> <span class="fu">w_plus</span>(i)<span class="sc">*</span><span class="fu">solve</span>(Lambda)</span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>    M <span class="ot">&lt;-</span> </span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample Lambda</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_eps</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_beta</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
