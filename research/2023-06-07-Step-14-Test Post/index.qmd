@@ -1,6 +1,6 @@
 ---
-title: "Step 14 - Test Post"
-description: "Test Post"
+title: "Step 14 - Empirical Analysis of the Consequences of a Linearized Double-logistic Mean LSP Function"
+description: "At the pixel level we assess the ability for for the linearized double-logistic function to sufficiently fit data simulated from a model using the non-linear double-logistic function."
 author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
@@ -31,7 +31,145 @@ library(matrixsampling)
 
 ## Intro
 
+When using the non-linear double-logistic function in the hierarchical model for LSP, we must resort to costly sampling techniques (Metropolis-hastings and its variants) to appropriately approximate the posterior distribution of the model parameters. Linearizing the double-logistic functin, the mean function in the data response, allows us to take advantage of conjucacy and reduce to computational cost of model fitting. There is a tradeoff however, because linearizing introduces bias in the parameter estimates. The question we must answer is whether this artificial bias induced by the linearization is worth the reduction in computational cost.
 
-Test post.
+The simulation study we will run to evaluate this trade-off is as follows.
 
-Test commit from PC.
+1) Simulate "true" sets of observations using the underlying non-linear model.
+2) Fit non-linear and linearized models to the simulate data
+  a) The non-linear model will be fit according the the \texttt{BLSP} package
+  b) The linearized model will be fit according to the steps in Step 4.
+3) Compare performance of models 2a and 2b.
+  a) Deviation of parameter estimates from their true value.
+  a) Confidence interval coverage
+  b) Computational speed
+
+## Simulating data.
+
+Should I take a different approach here?
+
+In initial study we will generate simulated data assuming no underlying mean trend in the parameters but experiment with different levels of their year-to-year variation.
+
+```{r}
+# dimensions
+nyear         <- 36
+ndays         <- 366
+npar          <- 7
+min_obs       <- 20
+max_obs       <- 25
+nobs_py       <- 20
+
+
+theta0     <- c(-1.80, 0.40, 120, 8, 270, 8, -7.5)
+theta0_var <- c(0.025, 1e-10,  10, 1,  10, 1,0.02)
+
+theta_sim <- matrix(rnorm(nyear*npar, 
+                          mean = theta0, 
+                          sd = sqrt(theta0_var)),
+                    ncol = npar, 
+                    nrow = nyear,
+                    byrow = TRUE)
+
+double_logis <- function(d, theta) {
+  # double logistic function.
+  # theta1 and theta7 are transformed using the logistic function.
+  # This allows for all parameters to follow a gaussian distribution
+  theta[1] <- plogis(theta[1])
+  theta[7] <- plogis(theta[7])
+  out <- theta[1] + (theta[2] - theta[7] * d) * 
+         ((1 / (1 + exp((theta[3] - d) / theta[4]))) - 
+          (1 / (1 + exp((theta[5] - d) / theta[6]))))
+  return(out)
+}
+
+doy <- seq(1,ndays,by=1)
+
+sim_vi <- matrix(nrow=ndays, ncol=nyear)
+for (i in 1:nyear){
+  sim_vi[,i] <- double_logis(doy, theta_sim[i,])
+}
+
+sim_vi <- as.data.frame(sim_vi)
+# names(sim_vi) <- paste0("y", seq(1,nyear))
+names(sim_vi) <- seq(1,nyear)
+
+sim_vi <- sim_vi %>%
+  mutate(doy = doy) %>%
+  pivot_longer(cols = 1:nyear,names_to = "year", values_to = "VI") %>%
+  mutate(year = as.integer(year))
+
+ggplot() +
+  coord_cartesian(xlim = c(0,366), 
+                  ylim = c(0,1)) +
+  geom_line(data=sim_vi,
+            aes(doy,VI, group=year, color=year), 
+            size=1) +
+  scale_color_gradientn(colors = rev(viridis(10)), 
+                        name="year", 
+                        trans = "reverse") + 
+  theme_bw()
+```
+
+
+```{r}
+sigma <- sqrt(0.0025)
+d     <- NULL
+y     <- NULL
+
+for(i in 1:nyear){
+  d[[i]] <- runif(nobs_py, 1, ndays)
+  y[[i]] <- pmax(rnorm(nobs_py, double_logis(d[[i]], theta_sim[i,]), sigma), 0)
+}
+
+
+ggplot() +
+  coord_cartesian(xlim = c(0,366), 
+                  ylim = c(0,1)) +
+  geom_point(data=sim_vi_noisy,
+             aes(doy, VI, group = year, color = year), 
+             linewidth = 2) +
+  scale_color_gradientn(colors = rev(viridis(10)), 
+                        name="year", 
+                        trans = "reverse") + 
+  theme_bw()
+
+
+
+
+# Design matrices
+gradinput <- function(x,t){
+  return(double_logis(t,x))
+}
+
+# compute numerical gradient
+Xp <- basis_functions(1:366, theta0)
+Z  <- matrix(c(rep(1,N), seq(1:N)), ncol = 2)
+
+# beta parameters
+B0     <- matrix(c(0, 0, -15, 0, 15, 0, 0,
+                   0, 0,   1, 0, -1, 0, 0), nrow=p)
+beta0  <- matrix(c(B0), ncol = 1)
+Omega0 <- diag(c(0.025, 1e-3,  3, 1,  3, 1, 0.0005))
+
+# delta parameters
+delta0  <- matrix(0, nrow = p, ncol = N)
+sigma20 <- 0.0025
+
+# sample data
+Y <- list()
+X <- list()
+t <- list()
+for (i in 1:N){
+  # draw delta
+  delta0[,i]   <- t(Rfast::rmvnorm(1, B0%*%Z[i,], Omega0))
+  
+  # draw rows from parent X
+  t[[i]] <- sample(1:m, n[i])
+  X[[i]] <- Xp[t[[i]],]
+  
+  # draw response
+  Y[[i]] <- matrix(rnorm(n[i], mean = X[[i]]%*%delta0[,i], sd = sqrt(sigma20)), ncol=1)
+}
+```
+
+
