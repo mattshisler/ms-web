@@ -12,8 +12,8 @@ format:
   html: 
     code-fold: false
 execute: 
-  eval: false
-  cache: false
+  eval: true
+  cache: true
   freeze: false
 ---
 
@@ -143,7 +143,7 @@ We start by constructing the spatial domain. In this case a regular lattice part
 ```{r}
 # specify spatial domain
 
-n <- 25^2
+n <- 10^2
 spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
 spat_domain$label <- 1:n
 
@@ -155,7 +155,7 @@ D <- diag(rowSums(W))
 
 We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the $\rho_\epsilon$ parameter equal to 0.
 ```{r}
-#| eval: false
+#| eval: true
 
 p = 2 
 q = 2  
@@ -166,7 +166,7 @@ rho_eps <- 0.0
 
 # Conditional Covariance Matrix.
 # Assume Omega_t is constant across time for now.
-
+# first, specify disired correlation and std deviation, then construct covariance matrix.
 cOmega <- matrix(c(1, 0,
                    0, 1), byrow = T, ncol = p)
 
@@ -254,7 +254,7 @@ cLambda <- matrix(c(  1,   0,   0,   0,
                       0,   0,   1, 0.7,
                       0,   0, 0.7,   1 ), byrow = T, ncol = p*q)
 
-stddev_beta <- diag(c(2,2,2,2))
+stddev_beta <- diag(c(5,5,5,5))
 
 Lambda <- stddev_beta%*%cLambda%*%stddev_beta
 
@@ -320,7 +320,7 @@ Next construct the covariate array and sample the response vectors, $\boldsymbol
 Z <- array(NA, dim=c(k,q,n))
 for (s in 1:n){
   #Z[,,s] <- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)
-  Z[,,s] <- matrix(c(rep(1,k), scale(1:k, scale = T)), ncol = q)
+  Z[,,s] <- matrix(c(rep(1,k), scale(1:k, scale = F)), ncol = q)
 }
 
 # Rather than sampling covariates from a normal distribution, let's
@@ -376,9 +376,11 @@ We can go back and simulate more complex data sets at a later time with relative
 
 The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ and Metropolis steps for the MCAR propriety parameters $\rho_\epsilon$ and $\rho_\beta$.
 
+This code is not very computationally efficient at this point in time. The eventual goal will be to refine it later.
+
 ```{r}
 
-niters <- 10
+niters <- 100
 burn   <- 0.1*niters
 
 # storage
@@ -394,6 +396,11 @@ mc_beta_arr[1:p,1:q,] <- mc_beta_mat
 mc_Lambda   <- Lambda
 mc_rho_eps  <- 0
 mc_rho_beta <- 0.99
+keep_beta_mat[,,1] <- mc_beta_mat
+keep_Lambda[,,1] <- mc_Lambda
+keep_rho_eps[1] <- mc_rho_eps
+keep_rho_beta[1] <- mc_rho_beta
+
 
 # prior parameters
 nu <- 1
@@ -401,11 +408,11 @@ G  <- diag(p*q)
 
 ```
 
-Test some results for the beta full conditional calculation. - computing V.
+Scratch code: Test some results for the beta full conditional calculation. - computing V.
 
 ```{r}
+#| eval: false
 # re-establish a computationally efficient result from step 3.
-
 
 Z[,,1]
 
@@ -445,9 +452,10 @@ kronecker(t(Z[,,1])%*%Z[,,1], rowSums(Omega_arr, dims = 2))
 
 ```
 
-Test some more results for the beta full conditional calc - computing M.
+Scratch code: Test some more results for the beta full conditional calc - computing M.
 
 ```{r}
+#| eval: false
 w_plus <- rowSums(W)
 
 
@@ -455,8 +463,13 @@ w_plus <- rowSums(W)
 s = 1
 neighbors <- which(W[s,]==1)
 
+neighbor_idx <- apply(W, MARGIN = 1, function(x) which(x==1))
+
+
 # get weights - maybe consider storing these weights in a different way. the matrix is sparse after all.
 neighbor_weights <- W[s,neighbors]
+
+
 
 # sum the neighboring beta_s vectors
 sum_neighbor_beta <- beta_mat[,neighbors]%*%neighbor_weights
@@ -469,6 +482,8 @@ rho_beta*solve(Lambda)%*%sum_neighbor_beta
 
 
 Bz <- delta
+
+# computing residuals needed in full conditional for beta - M.
 for (t in 1:k){
   for (s in 1:n){
     Bz[,t,s] <- beta_arr[,,s]%*%Z[t,,s]
@@ -524,33 +539,65 @@ beta_arr[,,1]%*%Z[1,,1]
 delta[,1,1:2] - Bz[,1,1:2]
 ```
 
+Work in progress MCMC loop.
+
 ```{r}
+
 
 # Omega is constant in time for now. May need to update this to
 # consider different Omegas for each year.
-Omega_arr <- array(rep(c(Omega), k), dim = c(p,p,k))
+inv_Omega <- solve(Omega)
+inv_Omega_arr <- array(rep(c(inv_Omega), k), dim = c(p,p,k))
 
 # Pre-compute the first summation term for V in the full conditional for beta.
 sumt_ZT_Omega_inv_Z <- array(0, dim = c(p*q, p*q, n))
-for (i in 1:n){
+for (s in 1:n){
   for (t in 1:k){
-    sumt_ZT_Omega_inv_Z[,,i] <- sumt_ZT_Omega_inv_Z[,,i] + 
-                                t(kronecker(t(Z[t,,i]),diag(p)))%*%Omega_arr[,,t]%*%kronecker(t(Z[t,,i]), diag(p))
+    
+    sumt_ZT_Omega_inv_Z[,,s] <- sumt_ZT_Omega_inv_Z[,,s] + 
+                                t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%kronecker(t(Z[t,,s]), diag(p))
   }
 }
 
+# collect the neighbor indices for use within the sampling loop
+neighbor_idx     <- apply(W, MARGIN = 1, function(x) which(x==1))
+  
+
+
+# Pre-compute the number fo neighbors for each pixel.
 w_plus <- rowSums(W)
-
-
 
 for (iter in 2:niters){
   
+  # computing residuals needed in full conditional for beta - M.
+  # probably a better way to do this.
+  Bz <- delta
+  for (t in 1:k){
+    for (s in 1:n){
+      Bz[,t,s] <- mc_beta_arr[,,s]%*%Z[t,,s]
+    }
+  }
+  resid <- delta - Bz
+  
+  inv_mc_Lambda <- solve(mc_Lambda)
+  
   # sample beta_s
-  for (i in 1:n){
-    V <- sumt_ZT_Omega_inv_Z[,,i] + w_plus(i)*solve(Lambda)
-    M <- 
+  for (s in 1:n){
+    neighbor_weights <- W[s, neighbor_idx[[s]]] # consider compiling these weights in a list of vectors outside of the sampling loop.
+    
+    V <- sumt_ZT_Omega_inv_Z[,,s] + w_plus[s]*inv_mc_Lambda
+    
+    # revisit for efficiencies
+    temp <- 0
+    for (t in 1:k){
+      temp <- temp + t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%(resid[,t,neighbor_idx[[s]]]%*%neighbor_weights + w_plus[s]*delta[,t,s])
+       
+    }
+    M <- mc_rho_eps*temp + mc_rho_beta*(inv_mc_Lambda%*%mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights)
       
-      
+    V_inv <- chol2inv(chol(V))
+    mc_beta_mat[,s]  <- V_inv%*%M+t(chol(V_inv))%*%rnorm(p*q)
+    
     
   }
   
@@ -565,7 +612,7 @@ for (iter in 2:niters){
   
   # sample rho_beta
   
-  
+  keep_beta_mat[,,iter] <- mc_beta_mat 
   
 }
 
