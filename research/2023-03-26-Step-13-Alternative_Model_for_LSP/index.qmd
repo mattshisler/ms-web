@@ -121,7 +121,7 @@ $$
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
 \mathbf{V}_{\beta_s} &= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
-\mathbf{M}_{\beta_s} &= \rho_{\epsilon}\sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
+\mathbf{M}_{\beta_s} &= \sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\rho_{\epsilon}\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
 n &= \text{number of pixels}\\
@@ -380,7 +380,7 @@ This code is not very computationally efficient at this point in time. The event
 
 ```{r}
 
-niters <- 100
+niters <- 1000
 burn   <- 0.1*niters
 
 # storage
@@ -391,6 +391,7 @@ keep_rho_beta <- rep(0, niters)
 
 # initial values
 mc_beta_mat <- beta_mat
+mc_beta_mat <- matrix(10, nrow = p*q, ncol = n)
 mc_beta_arr <- beta_arr
 mc_beta_arr[1:p,1:q,] <- mc_beta_mat
 mc_Lambda   <- Lambda
@@ -545,7 +546,6 @@ Work in progress MCMC loop.
 
 ```{r}
 
-
 # Omega is constant in time for now. May need to update this to
 # consider different Omegas for each year.
 inv_Omega <- solve(Omega)
@@ -555,7 +555,6 @@ inv_Omega_arr <- array(rep(c(inv_Omega), k), dim = c(p,p,k))
 sumt_ZT_Omega_inv_Z <- array(0, dim = c(p*q, p*q, n))
 for (s in 1:n){
   for (t in 1:k){
-    
     sumt_ZT_Omega_inv_Z[,,s] <- sumt_ZT_Omega_inv_Z[,,s] + 
                                 t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%kronecker(t(Z[t,,s]), diag(p))
   }
@@ -566,7 +565,7 @@ neighbor_idx     <- apply(W, MARGIN = 1, function(x) which(x==1))
   
 
 
-# Pre-compute the number fo neighbors for each pixel.
+# Pre-compute the number of neighbors for each pixel.
 w_plus <- rowSums(W)
 
 for (iter in 2:niters){
@@ -589,20 +588,20 @@ for (iter in 2:niters){
     
     V <- sumt_ZT_Omega_inv_Z[,,s] + w_plus[s]*inv_mc_Lambda
     
-    # revisit for efficiencies
+    # revisit for efficiency
     temp <- 0
     for (t in 1:k){
-      temp <- temp + t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%(resid[,t,neighbor_idx[[s]]]%*%neighbor_weights + w_plus[s]*delta[,t,s])
+      temp <- temp + t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%(mc_rho_eps*resid[,t,neighbor_idx[[s]]]%*%neighbor_weights +delta[,t,s])
        
     }
-    M <- mc_rho_eps*temp + mc_rho_beta*(inv_mc_Lambda%*%mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights)
+    M <- temp + mc_rho_beta*(inv_mc_Lambda%*%(mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights))
       
     V_inv <- chol2inv(chol(V))
     mc_beta_mat[,s]  <- V_inv%*%M+t(chol(V_inv))%*%rnorm(p*q)
     
     
   }
-  
+  mc_beta_arr[1:p,1:q,] <- mc_beta_mat
   
   # sample Lambda
   
@@ -624,11 +623,12 @@ for (iter in 2:niters){
 
 Construct a few traceplots of the beta parameter.
 ```{r}
-plot(1:niters, keep_beta_mat[1,1,1:niters], type = "l")
-plot(1:niters, keep_beta_mat[2,1,1:niters], type = "l")
-plot(1:niters, keep_beta_mat[3,1,1:niters], type = "l")
-plot(1:niters, keep_beta_mat[4,1,1:niters], type = "l")
+s <- 1
 
+for (i in 1:(p*q)){
+  plot(1:niters, keep_beta_mat[i,s,1:niters], type = "l")
+  abline(h = beta_mat[i,s], col = "red")
+}
 ```
 
 
