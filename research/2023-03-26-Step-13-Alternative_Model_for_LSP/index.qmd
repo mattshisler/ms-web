@@ -27,6 +27,7 @@ library(tidyverse)
 library(igraph)
 library(viridis)
 library(matrixsampling)
+library(MCMCpack)
 ```
 
 ## Intro
@@ -120,7 +121,7 @@ The full conditionals for this model are:
 $$
 \begin{align*}
 \boldsymbol\beta_s \,|\, \text{rest} &\sim \text{Normal}\left(\mathbf{V}^{-1}_{\beta_s}\mathbf{M}_{\beta_s}, \mathbf{V}^{-1}_{\beta_s}\right)\\
-\mathbf{V}_{\beta_s} &= \sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + w_{s+}\boldsymbol\Lambda^{-1}\\
+\mathbf{V}_{\beta_s} &= w_{s+}\left(\sum_{t\in T}\boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_{t}\boldsymbol{\mathcal{Z}}_{s,t} + \boldsymbol\Lambda^{-1}\right)\\
 \mathbf{M}_{\beta_s} &= \sum_{t\in T} \left[\ \boldsymbol{\mathcal{Z}}^T_{s,t}\widehat{\boldsymbol\Omega}^{-1}_t\left(\rho_{\epsilon}\sum_{s' \in \mathcal{N}(s)}w_{s,s'}\left(\widehat{\boldsymbol\delta}_{s',t} - \boldsymbol{\mathcal{Z}}_{s',t}\boldsymbol\beta_{s'}\right) + w_{s+}\widehat{\boldsymbol\delta}_{s,t}\right)\right] + \rho_{\beta}\boldsymbol\Lambda^{-1}\sum_{s' \in \mathcal{N}(s)} w_{s,s'}\boldsymbol\beta_{s'}\\
 \\\\
 \boldsymbol\Lambda \,|\, \text{rest} &\sim \text{InvWishart}\left(\nu + n, \mathbf{G} + \mathbf{H}\right)\\
@@ -131,8 +132,6 @@ $$
 Here $\boldsymbol{\mathcal{B}}$ is a $n \times pq$ matrix with rows equal to $\boldsymbol\beta^T_s$  and $\mathbf{D}$ is a diagonal matrix of the row sums from $\mathbf{W}$.
 
 Further, $n = |S|$, the number of pixels, and $k = |T|$, the number of years.
-
-
 
 Though we defined the elements of the neighborhood matrix, $\mathbf{W}$, to be either $0$ or $1$, we've elected to keep them in the derivation of the full conditional
 
@@ -185,8 +184,11 @@ for (t in 1:k){
 } 
 ```
 
+
+
 We can plot a sequence by year of the 1st element in the random noise vector.
 ```{r}
+#| eval: false
 for (t in 1:k){
     
     pl <- ggplot(spat_domain) +
@@ -200,7 +202,11 @@ for (t in 1:k){
     par(mfrow=c(1,2))
     plot(pl)
 }
+
+
 ```
+
+
 And the second element.
 
 ```{r}
@@ -218,6 +224,40 @@ for (t in 1:k){
     plot(pl)
 
 }
+
+```
+
+An alternate way to plot.
+```{r}
+display_ls <- vector(mode = "list", length = k)
+
+for (t in 1:k){
+  temp <- spat_domain
+  temp$eps1 <- eps[1,t,]
+  temp$eps2 <- eps[2,t,]
+  temp$year <- rep(t, n)
+  display_ls[[t]] <- temp 
+}
+
+display_df <- do.call(rbind, display_ls)
+
+ggplot(display_df) +
+            geom_tile(aes(x, y, fill=eps1)) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(display_df$eps1),max(display_df$eps1))) +
+            coord_fixed() + 
+            theme_void() + 
+            facet_wrap(~year)
+
+ggplot(display_df) +
+            geom_tile(aes(x, y, fill=eps2)) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(display_df$eps2),max(display_df$eps2))) +
+            coord_fixed() + 
+            theme_void() + 
+            facet_wrap(~year)
 
 ```
 
@@ -254,7 +294,7 @@ cLambda <- matrix(c(  1,   0,   0,   0,
                       0,   0,   1, 0.7,
                       0,   0, 0.7,   1 ), byrow = T, ncol = p*q)
 
-stddev_beta <- diag(c(5,5,5,5))
+stddev_beta <- diag(c(2,2,5,5))
 
 Lambda <- stddev_beta%*%cLambda%*%stddev_beta
 
@@ -283,8 +323,8 @@ inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))
 
 beta_mat <- t(matrix(backsolve(chol(inv_Sigma_beta), rnorm(n*p*q)), byrow=T, ncol=p*q))
 # For now assume zero mean.
-beta_mat[1,] <- 0
-beta_mat[2,] <- 0
+# beta_mat[1,] <- 0
+# beta_mat[2,] <- 0
 
 # construct array version of beta
 beta_arr <- array(NA, dim = c(p,q,n))
@@ -338,8 +378,10 @@ for (s in 1:n){
 ```
 
 
-Plot $\delta_{s,t,1}$ by year.
+Plot $\boldsymbol\delta_{s,t,1}$ by year.
 ```{r}
+#| eval: false
+
 for (t in 1:k){
     
     pl <- ggplot(spat_domain) +
@@ -357,6 +399,8 @@ for (t in 1:k){
 
 Plot $\delta_{s,t,2}$ by year.
 ```{r}
+#| eval: false
+
 for (t in 1:k){
     
     pl <- ggplot(spat_domain) +
@@ -372,6 +416,45 @@ for (t in 1:k){
 
 ```
 
+
+```{r}
+
+display_ls <- vector(mode = "list", length = k)
+
+for (t in 1:k){
+  temp <- spat_domain
+  temp$eps1 <- eps[1,t,]
+  temp$eps2 <- eps[2,t,]
+  temp$delta1 <- delta[1,t,] 
+  temp$delta2 <- delta[2,t,]
+  temp$year <- rep(t, n)
+  display_ls[[t]] <- temp 
+}
+
+display_df <- do.call(rbind, display_ls)
+
+ggplot(display_df) +
+            geom_tile(aes(x, y, fill=delta1)) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(display_df$delta1),max(display_df$delta1))) +
+            coord_fixed() + 
+            theme_void() + 
+            facet_wrap(~year)
+
+ggplot(display_df) +
+            geom_tile(aes(x, y, fill=delta2)) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(min(display_df$delta2),max(display_df$delta2))) +
+            coord_fixed() + 
+            theme_void() + 
+            facet_wrap(~year)
+
+```
+
+
+
 We can go back and simulate more complex data sets at a later time with relative ease. For now, let's move on to the MCMC. 
 
 The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ and Metropolis steps for the MCAR propriety parameters $\rho_\epsilon$ and $\rho_\beta$.
@@ -380,7 +463,7 @@ This code is not very computationally efficient at this point in time. The event
 
 ```{r}
 
-niters <- 1000
+niters <- 100
 burn   <- 0.1*niters
 
 # storage
@@ -404,7 +487,7 @@ keep_rho_beta[1] <- mc_rho_beta
 
 
 # prior parameters
-nu <- 1
+nu <- p*q - 1 + 0.1 # come back to check this
 G  <- diag(p*q)
 
 ```
@@ -542,6 +625,25 @@ beta_arr[,,1]%*%Z[1,,1]
 delta[,1,1:2] - Bz[,1,1:2]
 ```
 
+Scratch code: Test some more results for the Lambda full conditional calc - computing H.
+
+```{r}
+#| eval: false
+
+w_plus <- rowSums(W)
+D <- diag(w_plus)
+
+DmrW <- D-rho_beta*W
+
+
+H <- beta_mat%*%(D - rho_beta*W)%*%t(beta_mat)
+
+
+MCMCpack::riwish(nu + n, G + H)
+
+
+```
+
 Work in progress MCMC loop.
 
 ```{r}
@@ -567,6 +669,8 @@ neighbor_idx     <- apply(W, MARGIN = 1, function(x) which(x==1))
 
 # Pre-compute the number of neighbors for each pixel.
 w_plus <- rowSums(W)
+D <- diag(w_plus)
+
 
 for (iter in 2:niters){
   
@@ -586,12 +690,13 @@ for (iter in 2:niters){
   for (s in 1:n){
     neighbor_weights <- W[s, neighbor_idx[[s]]] # consider compiling these weights in a list of vectors outside of the sampling loop.
     
-    V <- sumt_ZT_Omega_inv_Z[,,s] + w_plus[s]*inv_mc_Lambda
+    V <- w_plus[s]*sumt_ZT_Omega_inv_Z[,,s] + w_plus[s]*inv_mc_Lambda
     
     # revisit for efficiency
+    
     temp <- 0
     for (t in 1:k){
-      temp <- temp + t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%(mc_rho_eps*resid[,t,neighbor_idx[[s]]]%*%neighbor_weights +delta[,t,s])
+      temp <- temp + t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%(mc_rho_eps*resid[,t,neighbor_idx[[s]]]%*%neighbor_weights +w_plus[s]*delta[,t,s])
        
     }
     M <- temp + mc_rho_beta*(inv_mc_Lambda%*%(mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights))
@@ -604,7 +709,8 @@ for (iter in 2:niters){
   mc_beta_arr[1:p,1:q,] <- mc_beta_mat
   
   # sample Lambda
-  
+  H <- beta_mat%*%(D - rho_beta*W)%*%t(beta_mat)
+  mc_Lambda <- MCMCpack::riwish(nu + n, G + H)
   
   
   # sample rho_eps
@@ -613,8 +719,11 @@ for (iter in 2:niters){
   
   # sample rho_beta
   
-  keep_beta_mat[,,iter] <- mc_beta_mat 
   
+  
+  
+  keep_beta_mat[,,iter] <- mc_beta_mat 
+  keep_Lambda[,,iter]   <- mc_Lambda
 }
 
 
@@ -623,15 +732,34 @@ for (iter in 2:niters){
 
 Construct a few traceplots of the beta parameter.
 ```{r}
-s <- 1
+burn <- 2
 
-for (i in 1:(p*q)){
-  plot(1:niters, keep_beta_mat[i,s,1:niters], type = "l")
-  abline(h = beta_mat[i,s], col = "red")
+for (s in 1:10){
+  par(mfrow = c(2,2))
+  for (i in 1:(p*q)){
+    plot(burn:niters, keep_beta_mat[i,s,burn:niters], type = "l")
+    abline(h = beta_mat[i,s], col = "red")
+  }
 }
 ```
 
+Construct a few trace plots of the Lambda matrix
+```{r}
+# diagonal
+# for (i in 1:(p*q)){
+#   plot(burn:niters, keep_Lambda[i,i,burn:niters], type = "l")
+#     abline(h = Lambda[i,i], col = "red")
+# }
 
+# off-diagonal
+for (i in 1:(p*q)){
+  for (j in i:(p*q)){
+    plot(burn:niters, keep_Lambda[i,j,burn:niters], type = "l")
+    abline(h = Lambda[i,j], col = "red") 
+  }
+}
+
+```
 
 
 

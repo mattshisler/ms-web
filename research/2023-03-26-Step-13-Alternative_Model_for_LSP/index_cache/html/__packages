@@ -11,3 +11,6 @@ igraph
 viridisLite
 viridis
 matrixsampling
+coda
+MASS
+MCMCpack
