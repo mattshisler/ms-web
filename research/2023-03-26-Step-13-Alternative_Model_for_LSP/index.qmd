@@ -13,7 +13,7 @@ format:
     code-fold: false
 execute: 
   eval: true
-  cache: true
+  cache: false
   freeze: false
 ---
 
@@ -46,7 +46,7 @@ Y_{s,t,j} \sim \text{Normal}\left(v(d_{t,j};\boldsymbol\theta_{s,t}), \sigma^2\r
 $$
 where $v(d;\boldsymbol{\theta}) : \mathbb{R} \rightarrow \mathbb{R}$ is the so-called double-logistic function,
 $$
-v(d; \boldsymbol{\theta}) = \theta_1 + (\theta_2 - \theta_7d)\left(\frac{1}{1 +\exp\left\{\frac{d - \theta_3}{\theta_5}\right\}} - \frac{1}{1 +\exp\left\{\frac{d - \theta_4}{\theta_6}\right\}}\right)
+v(d; \boldsymbol{\theta}) = \theta_1 + (\theta_2 - \theta_7d)\left(\frac{1}{1 +\exp\left\{\frac{\theta_3 - d}{\theta_5}\right\}} - \frac{1}{1 +\exp\left\{\frac{\theta_4 - d}{\theta_6}\right\}}\right)
 $$
 The parameters of the double-logistic function are readily interpretable in a way that will be explained later.
 
@@ -142,7 +142,7 @@ We start by constructing the spatial domain. In this case a regular lattice part
 ```{r}
 # specify spatial domain
 
-n <- 10^2
+n <- 25^2
 spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
 spat_domain$label <- 1:n
 
@@ -154,7 +154,6 @@ D <- diag(rowSums(W))
 
 We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the $\rho_\epsilon$ parameter equal to 0.
 ```{r}
-#| eval: true
 
 p = 2 
 q = 2  
@@ -186,49 +185,48 @@ for (t in 1:k){
 
 
 
-We can plot a sequence by year of the 1st element in the random noise vector.
+<!-- # ```{r} -->
+<!-- # #| eval: false -->
+<!-- # for (t in 1:k){ -->
+<!-- #      -->
+<!-- #     pl <- ggplot(spat_domain) + -->
+<!-- #             geom_tile(aes(x, y, fill=eps[1,t,])) + -->
+<!-- #             scale_y_reverse() + -->
+<!-- #             scale_fill_gradientn(colors = viridis(10), -->
+<!-- #                                  limits = c(min(eps[1,,]),max(eps[1,,]))) + -->
+<!-- #             coord_fixed() +  -->
+<!-- #             theme_void() -->
+<!-- #      -->
+<!-- #     par(mfrow=c(1,2)) -->
+<!-- #     plot(pl) -->
+<!-- # } -->
+<!-- #  -->
+<!-- #  -->
+<!-- # ``` -->
+
+
+<!-- # ```{r} -->
+<!-- # #| eval: false -->
+<!-- # for (t in 1:k){ -->
+<!-- #      -->
+<!-- #     pl <- ggplot(spat_domain) + -->
+<!-- #             geom_tile(aes(x, y, fill=eps[2,t,])) + -->
+<!-- #             scale_y_reverse() + -->
+<!-- #             scale_fill_gradientn(colors = viridis(10), -->
+<!-- #                                  limits = c(min(eps[2,,]),max(eps[2,,]))) + -->
+<!-- #             coord_fixed() +  -->
+<!-- #             theme_void() -->
+<!-- #      -->
+<!-- #     plot(pl) -->
+<!-- #  -->
+<!-- # } -->
+<!-- #  -->
+<!-- # ``` -->
+
+We can plot a sequence by year of the 1st and 2nd element in the random noise vector, $\boldsymbol\epsilon_{s,t}$
 ```{r}
-#| eval: false
-for (t in 1:k){
-    
-    pl <- ggplot(spat_domain) +
-            geom_tile(aes(x, y, fill=eps[1,t,])) +
-            scale_y_reverse() +
-            scale_fill_gradientn(colors = viridis(10),
-                                 limits = c(min(eps[1,,]),max(eps[1,,]))) +
-            coord_fixed() + 
-            theme_void()
-    
-    par(mfrow=c(1,2))
-    plot(pl)
-}
+#| code-fold: true
 
-
-```
-
-
-And the second element.
-
-```{r}
-
-for (t in 1:k){
-    
-    pl <- ggplot(spat_domain) +
-            geom_tile(aes(x, y, fill=eps[2,t,])) +
-            scale_y_reverse() +
-            scale_fill_gradientn(colors = viridis(10),
-                                 limits = c(min(eps[2,,]),max(eps[2,,]))) +
-            coord_fixed() + 
-            theme_void()
-    
-    plot(pl)
-
-}
-
-```
-
-An alternate way to plot.
-```{r}
 display_ls <- vector(mode = "list", length = k)
 
 for (t in 1:k){
@@ -271,45 +269,16 @@ rho_beta <- 0.99
 # beta_s is regarded as a vector of stacked beta_1, beta_2 vectors
 # Assume beta_1 and beta_2 vectors are independent for now.
 
-
-# cLambda <- matrix(c( 1,   0, 0.9,   0, 0.9,   0,
-#                      0,   1,   0,   0,   0,   0,
-#                    0.9,   0,   1,   0, 0.9,   0,
-#                      0,   0,   0,   1,   0,   0,
-#                    0.9,   0, 0.9,   0,   1,   0,
-#                      0,   0,   0,   0,   0,   1), byrow = T, ncol = p*q)
-
-
-# cLambda <- matrix(c( 1,   0,   0,   0,   0,   0,
-#                      0,   1,   0,   0,   0,   0,
-#                      0,   0,   1,   0,   0,   0,
-#                      0,   0,   0,   1,   0,   0,
-#                      0,   0,   0,   0,   1,   0,
-#                      0,   0,   0,   0,   0,   1), byrow = T, ncol = p*q)
-
 cLambda <- diag(p*q)
 
-cLambda <- matrix(c(  1,   0,   0,   0,
-                      0,   1,   0,   0,
+cLambda <- matrix(c(  1,   0.3,   0,   0,
+                      0.3,   1,   0,   0,
                       0,   0,   1, 0.7,
                       0,   0, 0.7,   1 ), byrow = T, ncol = p*q)
 
-stddev_beta <- diag(c(2,2,5,5))
+stddev_beta <- diag(c(2,2,4,8))
 
 Lambda <- stddev_beta%*%cLambda%*%stddev_beta
-
-
-#Lambda <- diag(c(1,1,10,10,100,100))
-
-
-
-
-# Lambda <- 10*matrix(c(  1,   0,   0,   0,
-#                         0,   1,   0,   0,
-#                         0,   0,   1,   0,
-#                         0,   0,   0,   1 ), byrow = T, ncol = p*q)
-
-
 
 # Construct MCAR joint distribution covariance
 inv_Sigma_beta <- kronecker((D-rho_beta*W), solve(Lambda))
@@ -334,6 +303,21 @@ beta_arr[1:p,1:q,] <- beta_mat
 ```
 
 ```{r}
+#| code-fold: true
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta_mat[1,])) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta_mat[2,])) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
 
 ggplot(spat_domain) +
   geom_tile(aes(x, y, fill=beta_mat[3,])) +
@@ -378,46 +362,46 @@ for (s in 1:n){
 ```
 
 
-Plot $\boldsymbol\delta_{s,t,1}$ by year.
+<!-- # ```{r} -->
+<!-- # #| eval: false -->
+<!-- #  -->
+<!-- # for (t in 1:k){ -->
+<!-- #      -->
+<!-- #     pl <- ggplot(spat_domain) + -->
+<!-- #             geom_tile(aes(x, y, fill=delta[1,t,])) + -->
+<!-- #             scale_y_reverse() + -->
+<!-- #             scale_fill_gradientn(colors = viridis(10), -->
+<!-- #                                  limits = c(min(delta[1,,]),max(delta[1,,]))) + -->
+<!-- #             coord_fixed() +  -->
+<!-- #             theme_void() -->
+<!-- #      -->
+<!-- #     plot(pl) -->
+<!-- #  -->
+<!-- # } -->
+<!-- # ``` -->
+
+<!-- # ```{r} -->
+<!-- # #| eval: false -->
+<!-- #  -->
+<!-- # for (t in 1:k){ -->
+<!-- #      -->
+<!-- #     pl <- ggplot(spat_domain) + -->
+<!-- #             geom_tile(aes(x, y, fill=delta[2,t,])) + -->
+<!-- #             scale_y_reverse() + -->
+<!-- #             scale_fill_gradientn(colors = viridis(10), -->
+<!-- #                                  limits = c(min(delta[2,,]),max(delta[2,,]))) + -->
+<!-- #             coord_fixed() +  -->
+<!-- #             theme_void() -->
+<!-- #      -->
+<!-- #     plot(pl) -->
+<!-- # } -->
+<!-- #  -->
+<!-- # ``` -->
+
+
+Plot first and second elements of $\boldsymbol\delta_{s,t}$ by year.
 ```{r}
-#| eval: false
-
-for (t in 1:k){
-    
-    pl <- ggplot(spat_domain) +
-            geom_tile(aes(x, y, fill=delta[1,t,])) +
-            scale_y_reverse() +
-            scale_fill_gradientn(colors = viridis(10),
-                                 limits = c(min(delta[1,,]),max(delta[1,,]))) +
-            coord_fixed() + 
-            theme_void()
-    
-    plot(pl)
-
-}
-```
-
-Plot $\delta_{s,t,2}$ by year.
-```{r}
-#| eval: false
-
-for (t in 1:k){
-    
-    pl <- ggplot(spat_domain) +
-            geom_tile(aes(x, y, fill=delta[2,t,])) +
-            scale_y_reverse() +
-            scale_fill_gradientn(colors = viridis(10),
-                                 limits = c(min(delta[2,,]),max(delta[2,,]))) +
-            coord_fixed() + 
-            theme_void()
-    
-    plot(pl)
-}
-
-```
-
-
-```{r}
+#| code-fold: true
 
 display_ls <- vector(mode = "list", length = k)
 
@@ -454,7 +438,6 @@ ggplot(display_df) +
 ```
 
 
-
 We can go back and simulate more complex data sets at a later time with relative ease. For now, let's move on to the MCMC. 
 
 The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ and Metropolis steps for the MCAR propriety parameters $\rho_\epsilon$ and $\rho_\beta$.
@@ -463,7 +446,7 @@ This code is not very computationally efficient at this point in time. The event
 
 ```{r}
 
-niters <- 100
+niters <- 500
 burn   <- 0.1*niters
 
 # storage
@@ -492,162 +475,165 @@ G  <- diag(p*q)
 
 ```
 
-Scratch code: Test some results for the beta full conditional calculation. - computing V.
+<!-- Scratch code: Test some results for the beta full conditional calculation. - computing V. -->
 
+<!-- ```{r} -->
+<!-- #| eval: false -->
+<!-- #| code-fold: true -->
+<!-- # re-establish a computationally efficient result from step 3. -->
+
+<!-- Z[,,1] -->
+
+<!-- Omega -->
+
+<!-- Z[,,1] -->
+
+<!-- test <- matrix(0, nrow = p*q, ncol = p*q) -->
+<!-- for (t in 1:k){ -->
+<!--   test <- test + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega%*%kronecker(t(Z[t,,1]), diag(2)) -->
+<!-- } -->
+
+<!-- # same result! -->
+<!-- test -->
+<!-- kronecker(t(Z[,,1])%*%Z[,,1], Omega) -->
+
+<!-- # what if Omega changes with time? Not sure. -->
+<!-- rep(1:k, each = 4) -->
+
+
+<!-- Omega_arr <- array(rep(1:k, each = 4), dim = c(p,p,k)) -->
+<!-- Omega_arr[,,3] -->
+
+<!-- # sum over the third dimension of the array -->
+<!-- rowSums(Omega_arr, dims = 2) -->
+
+<!-- test <- matrix(0, nrow = p*q, ncol = p*q) -->
+<!-- for (t in 1:k){ -->
+<!--   test <- test + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega_arr[,,t]%*%kronecker(t(Z[t,,1]), diag(2)) -->
+<!-- } -->
+
+<!-- # these are actually different. . . we'll need to use the naive way for now. -->
+<!-- test -->
+<!-- kronecker(t(Z[,,1])%*%Z[,,1], rowSums(Omega_arr, dims = 2)) -->
+
+
+
+<!-- ``` -->
+
+<!-- Scratch code: Test some more results for the beta full conditional calc - computing M. -->
+
+<!-- ```{r} -->
+<!-- #| eval: false -->
+<!-- #| code-fold: true -->
+
+<!-- w_plus <- rowSums(W) -->
+
+
+<!-- # get index of neighbors of s -->
+<!-- s = 1 -->
+<!-- neighbors <- which(W[s,]==1) -->
+
+<!-- neighbor_idx <- apply(W, MARGIN = 1, function(x) which(x==1)) -->
+
+
+<!-- # get weights - maybe consider storing these weights in a different way. the matrix is sparse after all. -->
+<!-- neighbor_weights <- W[s,neighbors] -->
+
+
+
+<!-- # sum the neighboring beta_s vectors -->
+<!-- sum_neighbor_beta <- beta_mat[,neighbors]%*%neighbor_weights -->
+
+<!-- # compute the last term. -->
+<!-- rho_beta*solve(Lambda)%*%sum_neighbor_beta -->
+
+<!-- # now try to compute the first neighbor sum, the one in the brackets. -->
+
+
+<!-- Bz <- delta -->
+
+<!-- # computing residuals needed in full conditional for beta - M. -->
+<!-- for (t in 1:k){ -->
+<!--   for (s in 1:n){ -->
+<!--     Bz[,t,s] <- beta_arr[,,s]%*%Z[t,,s] -->
+<!--   } -->
+<!-- } -->
+<!-- resid <- delta - Bz -->
+
+<!-- s <- 1 -->
+<!-- t <- 1 -->
+<!-- sum_neighbor_resid <- resid[,t,neighbors]%*%neighbor_weights -->
+
+<!-- kronecker(Z[t,,s], diag(p)) -->
+
+<!-- # I think there is an error in the full conditionals? -->
+
+<!-- test <- matrix(0,nrow=p*q, ncol=1) -->
+
+<!-- for (t in 1:k){ -->
+<!--   test <- test + t(kronecker(Z[t,,s], diag(p)))%*%Omega_arr[,,t]%*%(resid[,t,neighbors]%*%neighbor_weights + w_plus[s]*delta[,t,s]) -->
+<!-- } -->
+
+
+<!-- # Full M_beta_s term -->
+<!-- rho_eps*test + rho_beta*solve(Lambda)%*%sum_neighbor_beta -->
+
+<!-- # delta <- array(NA, dim = c(p,k,n)) -->
+<!-- # for (s in 1:n){ -->
+<!-- #   for (t in 1:k){ -->
+<!-- #     delta[,t,s] <- beta_arr[,,s]%*%Z[t,,s] + eps[,t,s] -->
+<!-- #   } -->
+<!-- # } -->
+
+<!-- beta_arr[,,1]%*%Z[1,,1] -->
+
+<!-- Bz[,1,1] -->
+
+<!-- delta[,1,1] -->
+
+<!-- eps[,1,1] -->
+
+
+
+<!-- (delta - Bz)[,1,1:2] -->
+
+<!-- eps[,1,1:2] -->
+
+<!-- delta[,1,1] -->
+
+<!-- beta_arr[,,1]%*%Z[1,,1] -->
+
+
+
+<!-- delta[,1,1:2] - Bz[,1,1:2] -->
+<!-- ``` -->
+
+<!-- Scratch code: Test some more results for the Lambda full conditional calc - computing H. -->
+
+<!-- ```{r} -->
+<!-- #| eval: false -->
+
+<!-- w_plus <- rowSums(W) -->
+<!-- D <- diag(w_plus) -->
+
+<!-- DmrW <- D-rho_beta*W -->
+
+
+<!-- H <- beta_mat%*%(D - rho_beta*W)%*%t(beta_mat) -->
+
+
+<!-- MCMCpack::riwish(nu + n, G + H) -->
+
+
+<!-- ``` -->
+
+Work in progress MCMC loop. At the moment both $\boldsymbol\beta_s$ and $\Lambda$ are updated. The MCAR propriety parameters, $\rho_\epsilon$ and $\rho_\beta$ are held fixed.
+
+Some pre-computes.
 ```{r}
-#| eval: false
-#| code-fold: true
-# re-establish a computationally efficient result from step 3.
+#| eval: true
 
-Z[,,1]
-
-Omega
-
-Z[,,1]
-
-test <- matrix(0, nrow = p*q, ncol = p*q)
-for (t in 1:k){
-  test <- test + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega%*%kronecker(t(Z[t,,1]), diag(2))
-}
-
-# same result!
-test
-kronecker(t(Z[,,1])%*%Z[,,1], Omega)
-
-# what if Omega changes with time? Not sure.
-rep(1:k, each = 4)
-
-
-Omega_arr <- array(rep(1:k, each = 4), dim = c(p,p,k))
-Omega_arr[,,3]
-
-# sum over the third dimension of the array
-rowSums(Omega_arr, dims = 2)
-
-test <- matrix(0, nrow = p*q, ncol = p*q)
-for (t in 1:k){
-  test <- test + t(kronecker(t(Z[t,,1]), diag(2)))%*%Omega_arr[,,t]%*%kronecker(t(Z[t,,1]), diag(2))
-}
-
-# these are actually different. . . we'll need to use the naive way for now.
-test
-kronecker(t(Z[,,1])%*%Z[,,1], rowSums(Omega_arr, dims = 2))
-
-
-
-```
-
-Scratch code: Test some more results for the beta full conditional calc - computing M.
-
-```{r}
-#| eval: false
-#| code-fold: true
-
-w_plus <- rowSums(W)
-
-
-# get index of neighbors of s
-s = 1
-neighbors <- which(W[s,]==1)
-
-neighbor_idx <- apply(W, MARGIN = 1, function(x) which(x==1))
-
-
-# get weights - maybe consider storing these weights in a different way. the matrix is sparse after all.
-neighbor_weights <- W[s,neighbors]
-
-
-
-# sum the neighboring beta_s vectors
-sum_neighbor_beta <- beta_mat[,neighbors]%*%neighbor_weights
-
-# compute the last term.
-rho_beta*solve(Lambda)%*%sum_neighbor_beta
-
-# now try to compute the first neighbor sum, the one in the brackets.
-
-
-Bz <- delta
-
-# computing residuals needed in full conditional for beta - M.
-for (t in 1:k){
-  for (s in 1:n){
-    Bz[,t,s] <- beta_arr[,,s]%*%Z[t,,s]
-  }
-}
-resid <- delta - Bz
-
-s <- 1
-t <- 1
-sum_neighbor_resid <- resid[,t,neighbors]%*%neighbor_weights
-
-kronecker(Z[t,,s], diag(p))
-
-# I think there is an error in the full conditionals?
-
-test <- matrix(0,nrow=p*q, ncol=1)
-
-for (t in 1:k){
-  test <- test + t(kronecker(Z[t,,s], diag(p)))%*%Omega_arr[,,t]%*%(resid[,t,neighbors]%*%neighbor_weights + w_plus[s]*delta[,t,s])
-}
-
-
-# Full M_beta_s term
-rho_eps*test + rho_beta*solve(Lambda)%*%sum_neighbor_beta
-
-# delta <- array(NA, dim = c(p,k,n))
-# for (s in 1:n){
-#   for (t in 1:k){
-#     delta[,t,s] <- beta_arr[,,s]%*%Z[t,,s] + eps[,t,s]
-#   }
-# }
-
-beta_arr[,,1]%*%Z[1,,1]
-
-Bz[,1,1]
-
-delta[,1,1]
- 
-eps[,1,1]
-
-
-
-(delta - Bz)[,1,1:2]
-
-eps[,1,1:2]
-
-delta[,1,1]
-
-beta_arr[,,1]%*%Z[1,,1]
-
-
-
-delta[,1,1:2] - Bz[,1,1:2]
-```
-
-Scratch code: Test some more results for the Lambda full conditional calc - computing H.
-
-```{r}
-#| eval: false
-
-w_plus <- rowSums(W)
-D <- diag(w_plus)
-
-DmrW <- D-rho_beta*W
-
-
-H <- beta_mat%*%(D - rho_beta*W)%*%t(beta_mat)
-
-
-MCMCpack::riwish(nu + n, G + H)
-
-
-```
-
-Work in progress MCMC loop.
-
-```{r}
-
+# tic()
 # Omega is constant in time for now. May need to update this to
 # consider different Omegas for each year.
 inv_Omega <- solve(Omega)
@@ -656,9 +642,9 @@ inv_Omega_arr <- array(rep(c(inv_Omega), k), dim = c(p,p,k))
 # Pre-compute the first summation term for V in the full conditional for beta.
 sumt_ZT_Omega_inv_Z <- array(0, dim = c(p*q, p*q, n))
 for (s in 1:n){
-  for (t in 1:k){
-    sumt_ZT_Omega_inv_Z[,,s] <- sumt_ZT_Omega_inv_Z[,,s] + 
-                                t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%kronecker(t(Z[t,,s]), diag(p))
+  for (j in 1:k){
+    sumt_ZT_Omega_inv_Z[,,s] <- sumt_ZT_Omega_inv_Z[,,s] +
+                                t(kronecker(t(Z[j,,s]),diag(p)))%*%inv_Omega_arr[,,j]%*%kronecker(t(Z[j,,s]), diag(p))
   }
 }
 
@@ -670,16 +656,19 @@ neighbor_idx     <- apply(W, MARGIN = 1, function(x) which(x==1))
 # Pre-compute the number of neighbors for each pixel.
 w_plus <- rowSums(W)
 D <- diag(w_plus)
+```
 
+Sampling loop.
+```{r}
 
 for (iter in 2:niters){
   
   # computing residuals needed in full conditional for beta - M.
   # probably a better way to do this.
   Bz <- delta
-  for (t in 1:k){
+  for (j in 1:k){
     for (s in 1:n){
-      Bz[,t,s] <- mc_beta_arr[,,s]%*%Z[t,,s]
+      # Bz[,j,s] <- mc_beta_arr[,,s]%*%Z[j,,s]
     }
   }
   resid <- delta - Bz
@@ -695,8 +684,8 @@ for (iter in 2:niters){
     # revisit for efficiency
     
     temp <- 0
-    for (t in 1:k){
-      temp <- temp + t(kronecker(t(Z[t,,s]),diag(p)))%*%inv_Omega_arr[,,t]%*%(mc_rho_eps*resid[,t,neighbor_idx[[s]]]%*%neighbor_weights +w_plus[s]*delta[,t,s])
+    for (j in 1:k){
+      temp <- temp + t(kronecker(t(Z[j,,s]),diag(p)))%*%inv_Omega_arr[,,j]%*%(mc_rho_eps*resid[,j,neighbor_idx[[s]]]%*%neighbor_weights +w_plus[s]*delta[,j,s])
        
     }
     M <- temp + mc_rho_beta*(inv_mc_Lambda%*%(mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights))
@@ -725,43 +714,84 @@ for (iter in 2:niters){
   keep_beta_mat[,,iter] <- mc_beta_mat 
   keep_Lambda[,,iter]   <- mc_Lambda
 }
-
+# toc()
 
 
 ```
 
-Construct a few traceplots of the beta parameter.
+Sample a handful of locations and constuct traceplots of their beta vectors.
 ```{r}
-burn <- 2
+#| code-fold: true
 
-for (s in 1:10){
-  par(mfrow = c(2,2))
+
+location_sample <- sample(1:n, size = 5)
+
+beta_subscripts <- c("0,1", "0,2", "1,1", "1,2")
+
+for (s in location_sample){
+  par(mfcol = c(2,2))
   for (i in 1:(p*q)){
-    plot(burn:niters, keep_beta_mat[i,s,burn:niters], type = "l")
+    tsub <- beta_subscripts[i]
+    plot(burn:niters, 
+         keep_beta_mat[i,s,burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(beta[.(tsub)]))
     abline(h = beta_mat[i,s], col = "red")
   }
+  mtext(paste("Pixel: ",s), side = 3, line = -3, outer = TRUE)
 }
 ```
 
-Construct a few trace plots of the Lambda matrix
+Construct traceplots of the Lambda matrix (upper triangle).
 ```{r}
-# diagonal
-# for (i in 1:(p*q)){
-#   plot(burn:niters, keep_Lambda[i,i,burn:niters], type = "l")
-#     abline(h = Lambda[i,i], col = "red")
-# }
+#| code-fold: true
+par(mfrow = c(2,2))
 
 # off-diagonal
 for (i in 1:(p*q)){
   for (j in i:(p*q)){
-    plot(burn:niters, keep_Lambda[i,j,burn:niters], type = "l")
-    abline(h = Lambda[i,j], col = "red") 
+    tsub <- paste0(i,j)
+    plot(burn:niters, 
+         keep_Lambda[i,j,burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(Lambda[.(tsub)]))
+    abline(h = Lambda[i,j], col = "red")
   }
+  mtext(bquote(Lambda ~ "Matrix"), side = 3, line = -3, outer = TRUE)
 }
 
 ```
 
+Let's do a quick visual check of the estimates $\widehat{\boldsymbol\beta}_{s}$ vs $\boldsymbol\beta_{s}$. We will plot $\widehat{\boldsymbol\beta}_{s} - \boldsymbol\beta_{s}$ across the spatial domain.
 
+```{r}
+
+hat_beta_mat <- rowMeans(keep_beta_mat[,,burn:niters], dims = 2)
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta_mat[4,])) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=hat_beta_mat[4,])) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10)) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=hat_beta_mat[4,]-beta_mat[4,])) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10), limits = c(min(beta_mat[4,]),max(beta_mat[4,]))) +
+  coord_fixed() + 
+  theme_void()
+
+```
 
 
 
