@@ -238,7 +238,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(igraph)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(viridis)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(matrixsampling)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MCMCpack)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(MCMCpack)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(gridExtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="intro" class="level2">
 <h2 class="anchored" data-anchor-id="intro">Intro</h2>
@@ -325,7 +326,7 @@ n &amp;= \text{number of pixels}\\
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>k <span class="ot">=</span> <span class="dv">20</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># propriety parameter for epsilon MCAR</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rho_eps <span class="ot">&lt;-</span> <span class="fl">0.0</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>rho_eps <span class="ot">&lt;-</span> <span class="dv">0</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Conditional Covariance Matrix.</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Assume Omega_t is constant across time for now.</span></span>
@@ -347,41 +348,6 @@ n &amp;= \text{number of pixels}\\
 <span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  eps[,t,] <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">matrix</span>(<span class="fu">backsolve</span>(<span class="fu">chol</span>(inv_Sigma_eps), <span class="fu">rnorm</span>(n<span class="sc">*</span>p)), <span class="at">byrow=</span>T, <span class="at">ncol=</span>p))</span>
 <span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<!-- # ```{r} -->
-<!-- # #| eval: false -->
-<!-- # for (t in 1:k){ -->
-<!-- #      -->
-<!-- #     pl <- ggplot(spat_domain) + -->
-<!-- #             geom_tile(aes(x, y, fill=eps[1,t,])) + -->
-<!-- #             scale_y_reverse() + -->
-<!-- #             scale_fill_gradientn(colors = viridis(10), -->
-<!-- #                                  limits = c(min(eps[1,,]),max(eps[1,,]))) + -->
-<!-- #             coord_fixed() +  -->
-<!-- #             theme_void() -->
-<!-- #      -->
-<!-- #     par(mfrow=c(1,2)) -->
-<!-- #     plot(pl) -->
-<!-- # } -->
-<!-- #  -->
-<!-- #  -->
-<!-- # ``` -->
-<!-- # ```{r} -->
-<!-- # #| eval: false -->
-<!-- # for (t in 1:k){ -->
-<!-- #      -->
-<!-- #     pl <- ggplot(spat_domain) + -->
-<!-- #             geom_tile(aes(x, y, fill=eps[2,t,])) + -->
-<!-- #             scale_y_reverse() + -->
-<!-- #             scale_fill_gradientn(colors = viridis(10), -->
-<!-- #                                  limits = c(min(eps[2,,]),max(eps[2,,]))) + -->
-<!-- #             coord_fixed() +  -->
-<!-- #             theme_void() -->
-<!-- #      -->
-<!-- #     plot(pl) -->
-<!-- #  -->
-<!-- # } -->
-<!-- #  -->
-<!-- # ``` -->
 <p>We can plot a sequence by year of the 1st and 2nd element in the random noise vector, <span class="math inline">\(\boldsymbol\epsilon_{s,t}\)</span></p>
 <div class="cell">
 <details>
@@ -398,14 +364,17 @@ n &amp;= \text{number of pixels}\\
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>display_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, display_ls)</span>
 <span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(display_df) <span class="sc">+</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>eps1)) <span class="sc">+</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>),</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>eps1),<span class="fu">max</span>(display_df<span class="sc">$</span>eps1))) <span class="sc">+</span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>panel_names <span class="ot">&lt;-</span> <span class="fu">as_labeller</span>(<span class="cf">function</span>(x) <span class="fu">paste</span>(<span class="st">'t ='</span>, x))</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(display_df) <span class="sc">+</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>eps1)) <span class="sc">+</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>),</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>eps1),<span class="fu">max</span>(display_df<span class="sc">$</span>eps1)),</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">name =</span> <span class="fu">bquote</span>(<span class="st">"\u03F5"</span>[<span class="st">"2,t"</span>])) <span class="sc">+</span></span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year, <span class="at">labeller =</span> panel_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
@@ -416,10 +385,11 @@ n &amp;= \text{number of pixels}\\
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>eps2)) <span class="sc">+</span></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>),</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>eps2),<span class="fu">max</span>(display_df<span class="sc">$</span>eps2))) <span class="sc">+</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>eps2),<span class="fu">max</span>(display_df<span class="sc">$</span>eps2)),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">name =</span> <span class="fu">bquote</span>(<span class="st">"\u03F5"</span>[<span class="st">"2,t"</span>])) <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year, <span class="at">labeller =</span> panel_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
@@ -436,8 +406,8 @@ n &amp;= \text{number of pixels}\\
 <span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>cLambda <span class="ot">&lt;-</span> <span class="fu">diag</span>(p<span class="sc">*</span>q)</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>cLambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(  <span class="dv">1</span>,   <span class="fl">0.3</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                      <span class="fl">0.3</span>,   <span class="dv">1</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>cLambda <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(  <span class="dv">1</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>                      <span class="dv">0</span>,   <span class="dv">1</span>,   <span class="dv">0</span>,   <span class="dv">0</span>,</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                      <span class="dv">0</span>,   <span class="dv">0</span>,   <span class="dv">1</span>, <span class="fl">0.7</span>,</span>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                      <span class="dv">0</span>,   <span class="dv">0</span>, <span class="fl">0.7</span>,   <span class="dv">1</span> ), <span class="at">byrow =</span> T, <span class="at">ncol =</span> p<span class="sc">*</span>q)</span>
 <span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
@@ -467,152 +437,112 @@ n &amp;= \text{number of pixels}\\
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>beta_mat[<span class="dv">1</span>,])) <span class="sc">+</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>display_ls <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>, <span class="at">length =</span> (p<span class="sc">*</span>q))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>idx <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>p){</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>q){</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> spat_domain</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    temp<span class="sc">$</span>beta <span class="ot">&lt;-</span> beta_arr[i,j,]</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    temp<span class="sc">$</span>p <span class="ot">&lt;-</span> <span class="fu">rep</span>(i, n)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    temp<span class="sc">$</span>q <span class="ot">&lt;-</span> <span class="fu">rep</span>(j, n)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    display_ls[[idx]] <span class="ot">&lt;-</span> temp</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    idx <span class="ot">&lt;-</span> idx <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>display_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, display_ls)</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>my_plot <span class="ot">&lt;-</span> <span class="cf">function</span>(data) {</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(data) <span class="sc">+</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>beta)) <span class="sc">+</span></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">name =</span> <span class="fu">bquote</span>(beta[.(<span class="fu">unique</span>(data<span class="sc">$</span>q)) <span class="sc">*</span> <span class="st">","</span> <span class="sc">*</span> .(<span class="fu">unique</span>(data<span class="sc">$</span>p))])) <span class="sc">+</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a><span class="fu">do.call</span>(grid.arrange, </span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        <span class="at">args=</span><span class="fu">list</span>(<span class="at">grobs=</span><span class="fu">by</span>(display_df, <span class="fu">list</span>(display_df<span class="sc">$</span>p, display_df<span class="sc">$</span>q), my_plot), </span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>                  <span class="at">ncol=</span>q,</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>                  <span class="at">top=</span><span class="st">""</span>,</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>                  <span class="at">as.table =</span> F))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
 </div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>beta_mat[<span class="dv">2</span>,])) <span class="sc">+</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>beta_mat[<span class="dv">3</span>,])) <span class="sc">+</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-6-3.png" class="img-fluid" width="672"></p>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>beta_mat[<span class="dv">4</span>,])) <span class="sc">+</span></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-6-4.png" class="img-fluid" width="672"></p>
-</div>
 </div>
 <p>Next construct the covariate array and sample the response vectors, <span class="math inline">\(\boldsymbol\delta_{s,t}\)</span>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sample covariates</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For now, the only covariate is time in years, centered and scaled.</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Consider changing in the future.</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Z array is 3 dim - left to right: time, covariate vector length, spatial index</span></span>
-<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim=</span><span class="fu">c</span>(k,q,n))</span>
-<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
-<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Z[,,s] &lt;- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)</span></span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  Z[,,s] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,k), <span class="fu">scale</span>(<span class="dv">1</span><span class="sc">:</span>k, <span class="at">scale =</span> F)), <span class="at">ncol =</span> q)</span>
-<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Rather than sampling covariates from a normal distribution, let's</span></span>
-<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a><span class="co"># let's just focus on an intercept term and centered equally spaced term.</span></span>
-<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Now draw delta (naively via loops)</span></span>
-<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a><span class="co"># delta array is 3-dim - left to right: response vector length, time, space</span></span>
-<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim =</span> <span class="fu">c</span>(p,k,n))</span>
-<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
-<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
-<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>    delta[,t,s] <span class="ot">&lt;-</span> beta_arr[,,s]<span class="sc">%*%</span>Z[t,,s] <span class="sc">+</span> eps[,t,s]</span>
-<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># sample covariates</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># For now, the only covariate is time in years, centered and scaled.</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Consider changing in the future.</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Z array is 3 dim - left to right: time, covariate vector length, spatial index</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim=</span><span class="fu">c</span>(k,q,n))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">#Z[,,s] &lt;- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  Z[,,s] <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span>,k), <span class="fu">scale</span>(<span class="dv">1</span><span class="sc">:</span>k, <span class="at">scale =</span> F)), <span class="at">ncol =</span> q)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Rather than sampling covariates from a normal distribution, let's</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="co"># let's just focus on an intercept term and centered equally spaced term.</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Now draw delta (naively via loops)</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a><span class="co"># delta array is 3-dim - left to right: response vector length, time, space</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="cn">NA</span>, <span class="at">dim =</span> <span class="fu">c</span>(p,k,n))</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    delta[,t,s] <span class="ot">&lt;-</span> beta_arr[,,s]<span class="sc">%*%</span>Z[t,,s] <span class="sc">+</span> eps[,t,s]</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<!-- # ```{r} -->
-<!-- # #| eval: false -->
-<!-- #  -->
-<!-- # for (t in 1:k){ -->
-<!-- #      -->
-<!-- #     pl <- ggplot(spat_domain) + -->
-<!-- #             geom_tile(aes(x, y, fill=delta[1,t,])) + -->
-<!-- #             scale_y_reverse() + -->
-<!-- #             scale_fill_gradientn(colors = viridis(10), -->
-<!-- #                                  limits = c(min(delta[1,,]),max(delta[1,,]))) + -->
-<!-- #             coord_fixed() +  -->
-<!-- #             theme_void() -->
-<!-- #      -->
-<!-- #     plot(pl) -->
-<!-- #  -->
-<!-- # } -->
-<!-- # ``` -->
-<!-- # ```{r} -->
-<!-- # #| eval: false -->
-<!-- #  -->
-<!-- # for (t in 1:k){ -->
-<!-- #      -->
-<!-- #     pl <- ggplot(spat_domain) + -->
-<!-- #             geom_tile(aes(x, y, fill=delta[2,t,])) + -->
-<!-- #             scale_y_reverse() + -->
-<!-- #             scale_fill_gradientn(colors = viridis(10), -->
-<!-- #                                  limits = c(min(delta[2,,]),max(delta[2,,]))) + -->
-<!-- #             coord_fixed() +  -->
-<!-- #             theme_void() -->
-<!-- #      -->
-<!-- #     plot(pl) -->
-<!-- # } -->
-<!-- #  -->
-<!-- # ``` -->
 <p>Plot first and second elements of <span class="math inline">\(\boldsymbol\delta_{s,t}\)</span> by year.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>display_ls <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>, <span class="at">length =</span> k)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  temp <span class="ot">&lt;-</span> spat_domain</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>eps1 <span class="ot">&lt;-</span> eps[<span class="dv">1</span>,t,]</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>eps2 <span class="ot">&lt;-</span> eps[<span class="dv">2</span>,t,]</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>delta1 <span class="ot">&lt;-</span> delta[<span class="dv">1</span>,t,] </span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>delta2 <span class="ot">&lt;-</span> delta[<span class="dv">2</span>,t,]</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">rep</span>(t, n)</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  display_ls[[t]] <span class="ot">&lt;-</span> temp </span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>display_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, display_ls)</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(display_df) <span class="sc">+</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>delta1)) <span class="sc">+</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>),</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>delta1),<span class="fu">max</span>(display_df<span class="sc">$</span>delta1))) <span class="sc">+</span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>display_ls <span class="ot">&lt;-</span> <span class="fu">vector</span>(<span class="at">mode =</span> <span class="st">"list"</span>, <span class="at">length =</span> k)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  temp <span class="ot">&lt;-</span> spat_domain</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>eps1 <span class="ot">&lt;-</span> eps[<span class="dv">1</span>,t,]</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>eps2 <span class="ot">&lt;-</span> eps[<span class="dv">2</span>,t,]</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>delta1 <span class="ot">&lt;-</span> delta[<span class="dv">1</span>,t,] </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>delta2 <span class="ot">&lt;-</span> delta[<span class="dv">2</span>,t,]</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  temp<span class="sc">$</span>year <span class="ot">&lt;-</span> <span class="fu">rep</span>(t, n)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  display_ls[[t]] <span class="ot">&lt;-</span> temp </span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>display_df <span class="ot">&lt;-</span> <span class="fu">do.call</span>(rbind, display_ls)</span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>panel_names <span class="ot">&lt;-</span> <span class="fu">as_labeller</span>(<span class="cf">function</span>(x) <span class="fu">paste</span>(<span class="st">'t ='</span>, x))</span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(display_df) <span class="sc">+</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>delta1)) <span class="sc">+</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>),</span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>delta1),<span class="fu">max</span>(display_df<span class="sc">$</span>delta1)),</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">name =</span> <span class="fu">bquote</span>(delta[<span class="st">"1,t"</span>])) <span class="sc">+</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year, <span class="at">labeller =</span> panel_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
 </div>
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(display_df) <span class="sc">+</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>delta2)) <span class="sc">+</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>),</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>delta2),<span class="fu">max</span>(display_df<span class="sc">$</span>delta2))) <span class="sc">+</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(display_df) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>            <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>delta2)) <span class="sc">+</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>            <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(display_df<span class="sc">$</span>delta2),<span class="fu">max</span>(display_df<span class="sc">$</span>delta2)),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">name =</span> <span class="fu">bquote</span>(delta[<span class="st">"2,t"</span>])) <span class="sc">+</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>            <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">theme_void</span>() <span class="sc">+</span> </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>            <span class="fu">facet_wrap</span>(<span class="sc">~</span>year, <span class="at">labeller =</span> panel_names)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid" width="672"></p>
@@ -622,32 +552,32 @@ n &amp;= \text{number of pixels}\\
 <p>The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using the full conditionals for <span class="math inline">\(\boldsymbol\beta_s\)</span> and <span class="math inline">\(\boldsymbol\Lambda\)</span> and Metropolis steps for the MCAR propriety parameters <span class="math inline">\(\rho_\epsilon\)</span> and <span class="math inline">\(\rho_\beta\)</span>.</p>
 <p>This code is not very computationally efficient at this point in time. The eventual goal will be to refine it later.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>niters <span class="ot">&lt;-</span> <span class="dv">500</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>burn   <span class="ot">&lt;-</span> <span class="fl">0.1</span><span class="sc">*</span>niters</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># storage</span></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>keep_beta_mat <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, n, niters))</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>keep_Lambda   <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, p<span class="sc">*</span>q, niters))</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>keep_rho_eps  <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, niters) </span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>keep_rho_beta <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, niters)</span>
-<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># initial values</span></span>
-<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>mc_beta_mat <span class="ot">&lt;-</span> beta_mat</span>
-<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>mc_beta_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">10</span>, <span class="at">nrow =</span> p<span class="sc">*</span>q, <span class="at">ncol =</span> n)</span>
-<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>mc_beta_arr <span class="ot">&lt;-</span> beta_arr</span>
-<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>mc_beta_arr[<span class="dv">1</span><span class="sc">:</span>p,<span class="dv">1</span><span class="sc">:</span>q,] <span class="ot">&lt;-</span> mc_beta_mat</span>
-<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>mc_Lambda   <span class="ot">&lt;-</span> Lambda</span>
-<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>mc_rho_eps  <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>mc_rho_beta <span class="ot">&lt;-</span> <span class="fl">0.99</span></span>
-<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>keep_beta_mat[,,<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_beta_mat</span>
-<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>keep_Lambda[,,<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_Lambda</span>
-<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>keep_rho_eps[<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_rho_eps</span>
-<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>keep_rho_beta[<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_rho_beta</span>
-<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a><span class="co"># prior parameters</span></span>
-<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>nu <span class="ot">&lt;-</span> p<span class="sc">*</span>q <span class="sc">-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fl">0.1</span> <span class="co"># come back to check this</span></span>
-<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>G  <span class="ot">&lt;-</span> <span class="fu">diag</span>(p<span class="sc">*</span>q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>niters <span class="ot">&lt;-</span> <span class="dv">500</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>burn   <span class="ot">&lt;-</span> <span class="fl">0.1</span><span class="sc">*</span>niters</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="co"># storage</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>keep_beta_mat <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, n, niters))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>keep_Lambda   <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, p<span class="sc">*</span>q, niters))</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>keep_rho_eps  <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, niters) </span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>keep_rho_beta <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, niters)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="co"># initial values</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>mc_beta_mat <span class="ot">&lt;-</span> beta_mat</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>mc_beta_mat <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">10</span>, <span class="at">nrow =</span> p<span class="sc">*</span>q, <span class="at">ncol =</span> n)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>mc_beta_arr <span class="ot">&lt;-</span> beta_arr</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>mc_beta_arr[<span class="dv">1</span><span class="sc">:</span>p,<span class="dv">1</span><span class="sc">:</span>q,] <span class="ot">&lt;-</span> mc_beta_mat</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>mc_Lambda   <span class="ot">&lt;-</span> Lambda</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>mc_rho_eps  <span class="ot">&lt;-</span> rho_eps</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>mc_rho_beta <span class="ot">&lt;-</span> rho_beta</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>keep_beta_mat[,,<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_beta_mat</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>keep_Lambda[,,<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_Lambda</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>keep_rho_eps[<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_rho_eps</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>keep_rho_beta[<span class="dv">1</span>] <span class="ot">&lt;-</span> mc_rho_beta</span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a><span class="co"># prior parameters</span></span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>nu <span class="ot">&lt;-</span> p<span class="sc">*</span>q <span class="sc">-</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fl">0.1</span> <span class="co"># come back to check this</span></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>G  <span class="ot">&lt;-</span> <span class="fu">diag</span>(p<span class="sc">*</span>q)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <!-- Scratch code: Test some results for the beta full conditional calculation. - computing V. -->
 <!-- ```{r} -->
@@ -741,108 +671,115 @@ n &amp;= \text{number of pixels}\\
 <p>Work in progress MCMC loop. At the moment both <span class="math inline">\(\boldsymbol\beta_s\)</span> and <span class="math inline">\(\Lambda\)</span> are updated. The MCAR propriety parameters, <span class="math inline">\(\rho_\epsilon\)</span> and <span class="math inline">\(\rho_\beta\)</span> are held fixed.</p>
 <p>Some pre-computes.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tic()</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Omega is constant in time for now. May need to update this to</span></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># consider different Omegas for each year.</span></span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>inv_Omega <span class="ot">&lt;-</span> <span class="fu">solve</span>(Omega)</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>inv_Omega_arr <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="fu">rep</span>(<span class="fu">c</span>(inv_Omega), k), <span class="at">dim =</span> <span class="fu">c</span>(p,p,k))</span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-compute the first summation term for V in the full conditional for beta.</span></span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>sumt_ZT_Omega_inv_Z <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, p<span class="sc">*</span>q, n))</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>    sumt_ZT_Omega_inv_Z[,,s] <span class="ot">&lt;-</span> sumt_ZT_Omega_inv_Z[,,s] <span class="sc">+</span></span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">t</span>(<span class="fu">kronecker</span>(<span class="fu">t</span>(Z[j,,s]),<span class="fu">diag</span>(p)))<span class="sc">%*%</span>inv_Omega_arr[,,j]<span class="sc">%*%</span><span class="fu">kronecker</span>(<span class="fu">t</span>(Z[j,,s]), <span class="fu">diag</span>(p))</span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a><span class="co"># collect the neighbor indices for use within the sampling loop</span></span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>neighbor_idx     <span class="ot">&lt;-</span> <span class="fu">apply</span>(W, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">which</span>(x<span class="sc">==</span><span class="dv">1</span>))</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-compute the number of neighbors for each pixel.</span></span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>w_plus <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(W)</span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(w_plus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># tic()</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Omega is constant in time for now. May need to update this to</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># consider different Omegas for each year.</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>inv_Omega <span class="ot">&lt;-</span> <span class="fu">solve</span>(Omega)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>inv_Omega_arr <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="fu">rep</span>(<span class="fu">c</span>(inv_Omega), k), <span class="at">dim =</span> <span class="fu">c</span>(p,p,k))</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-compute the first summation term for V in the full conditional for beta.</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>sumt_ZT_Omega_inv_Z <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(p<span class="sc">*</span>q, p<span class="sc">*</span>q, n))</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    sumt_ZT_Omega_inv_Z[,,s] <span class="ot">&lt;-</span> sumt_ZT_Omega_inv_Z[,,s] <span class="sc">+</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>                                <span class="fu">t</span>(<span class="fu">kronecker</span>(<span class="fu">t</span>(Z[j,,s]),<span class="fu">diag</span>(p)))<span class="sc">%*%</span>inv_Omega_arr[,,j]<span class="sc">%*%</span><span class="fu">kronecker</span>(<span class="fu">t</span>(Z[j,,s]), <span class="fu">diag</span>(p))</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="co"># collect the neighbor indices for use within the sampling loop</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>neighbor_idx     <span class="ot">&lt;-</span> <span class="fu">apply</span>(W, <span class="at">MARGIN =</span> <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">which</span>(x<span class="sc">==</span><span class="dv">1</span>))</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Pre-compute the number of neighbors for each pixel.</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>w_plus <span class="ot">&lt;-</span> <span class="fu">rowSums</span>(W)</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>D <span class="ot">&lt;-</span> <span class="fu">diag</span>(w_plus)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Sampling loop.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (iter <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>niters){</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># computing residuals needed in full conditional for beta - M.</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># probably a better way to do this.</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  Bz <span class="ot">&lt;-</span> delta</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Bz[,j,s] &lt;- mc_beta_arr[,,s]%*%Z[j,,s]</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  resid <span class="ot">&lt;-</span> delta <span class="sc">-</span> Bz</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  inv_mc_Lambda <span class="ot">&lt;-</span> <span class="fu">solve</span>(mc_Lambda)</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample beta_s</span></span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>    neighbor_weights <span class="ot">&lt;-</span> W[s, neighbor_idx[[s]]] <span class="co"># consider compiling these weights in a list of vectors outside of the sampling loop.</span></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">&lt;-</span> w_plus[s]<span class="sc">*</span>sumt_ZT_Omega_inv_Z[,,s] <span class="sc">+</span> w_plus[s]<span class="sc">*</span>inv_mc_Lambda</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># revisit for efficiency</span></span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>      temp <span class="ot">&lt;-</span> temp <span class="sc">+</span> <span class="fu">t</span>(<span class="fu">kronecker</span>(<span class="fu">t</span>(Z[j,,s]),<span class="fu">diag</span>(p)))<span class="sc">%*%</span>inv_Omega_arr[,,j]<span class="sc">%*%</span>(mc_rho_eps<span class="sc">*</span>resid[,j,neighbor_idx[[s]]]<span class="sc">%*%</span>neighbor_weights <span class="sc">+</span>w_plus[s]<span class="sc">*</span>delta[,j,s])</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>       </span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>    M <span class="ot">&lt;-</span> temp <span class="sc">+</span> mc_rho_beta<span class="sc">*</span>(inv_mc_Lambda<span class="sc">%*%</span>(mc_beta_mat[,neighbor_idx[[s]]]<span class="sc">%*%</span>neighbor_weights))</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>      </span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>    V_inv <span class="ot">&lt;-</span> <span class="fu">chol2inv</span>(<span class="fu">chol</span>(V))</span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>    mc_beta_mat[,s]  <span class="ot">&lt;-</span> V_inv<span class="sc">%*%</span>M<span class="sc">+</span><span class="fu">t</span>(<span class="fu">chol</span>(V_inv))<span class="sc">%*%</span><span class="fu">rnorm</span>(p<span class="sc">*</span>q)</span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  mc_beta_arr[<span class="dv">1</span><span class="sc">:</span>p,<span class="dv">1</span><span class="sc">:</span>q,] <span class="ot">&lt;-</span> mc_beta_mat</span>
-<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample Lambda</span></span>
-<span id="cb16-38"><a href="#cb16-38" aria-hidden="true" tabindex="-1"></a>  H <span class="ot">&lt;-</span> beta_mat<span class="sc">%*%</span>(D <span class="sc">-</span> rho_beta<span class="sc">*</span>W)<span class="sc">%*%</span><span class="fu">t</span>(beta_mat)</span>
-<span id="cb16-39"><a href="#cb16-39" aria-hidden="true" tabindex="-1"></a>  mc_Lambda <span class="ot">&lt;-</span> MCMCpack<span class="sc">::</span><span class="fu">riwish</span>(nu <span class="sc">+</span> n, G <span class="sc">+</span> H)</span>
-<span id="cb16-40"><a href="#cb16-40" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-41"><a href="#cb16-41" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-42"><a href="#cb16-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_eps</span></span>
-<span id="cb16-43"><a href="#cb16-43" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-44"><a href="#cb16-44" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-45"><a href="#cb16-45" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-46"><a href="#cb16-46" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_beta</span></span>
-<span id="cb16-47"><a href="#cb16-47" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-48"><a href="#cb16-48" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-49"><a href="#cb16-49" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-50"><a href="#cb16-50" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-51"><a href="#cb16-51" aria-hidden="true" tabindex="-1"></a>  keep_beta_mat[,,iter] <span class="ot">&lt;-</span> mc_beta_mat </span>
-<span id="cb16-52"><a href="#cb16-52" aria-hidden="true" tabindex="-1"></a>  keep_Lambda[,,iter]   <span class="ot">&lt;-</span> mc_Lambda</span>
-<span id="cb16-53"><a href="#cb16-53" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb16-54"><a href="#cb16-54" aria-hidden="true" tabindex="-1"></a><span class="co"># toc()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (iter <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>niters){</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># computing residuals needed in full conditional for beta - M.</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># probably a better way to do this.</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  Bz <span class="ot">&lt;-</span> delta</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>      <span class="co"># Bz[,j,s] &lt;- mc_beta_arr[,,s]%*%Z[j,,s]</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  resid <span class="ot">&lt;-</span> delta <span class="sc">-</span> Bz</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  inv_mc_Lambda <span class="ot">&lt;-</span> <span class="fu">solve</span>(mc_Lambda)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample beta_s</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n){</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    neighbor_weights <span class="ot">&lt;-</span> W[s, neighbor_idx[[s]]] <span class="co"># consider compiling these weights in a list of vectors outside of the sampling loop.</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    V <span class="ot">&lt;-</span> w_plus[s]<span class="sc">*</span>sumt_ZT_Omega_inv_Z[,,s] <span class="sc">+</span> w_plus[s]<span class="sc">*</span>inv_mc_Lambda</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>    <span class="co"># revisit for efficiency</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    temp <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>k){</span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>      temp <span class="ot">&lt;-</span> temp <span class="sc">+</span> <span class="fu">t</span>(<span class="fu">kronecker</span>(<span class="fu">t</span>(Z[j,,s]),<span class="fu">diag</span>(p)))<span class="sc">%*%</span>inv_Omega_arr[,,j]<span class="sc">%*%</span>(mc_rho_eps<span class="sc">*</span>resid[,j,neighbor_idx[[s]]]<span class="sc">%*%</span>neighbor_weights <span class="sc">+</span>w_plus[s]<span class="sc">*</span>delta[,j,s])</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>       </span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>    M <span class="ot">&lt;-</span> temp <span class="sc">+</span> mc_rho_beta<span class="sc">*</span>(inv_mc_Lambda<span class="sc">%*%</span>(mc_beta_mat[,neighbor_idx[[s]]]<span class="sc">%*%</span>neighbor_weights))</span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    V_inv <span class="ot">&lt;-</span> <span class="fu">chol2inv</span>(<span class="fu">chol</span>(V))</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    mc_beta_mat[,s]  <span class="ot">&lt;-</span> V_inv<span class="sc">%*%</span>M<span class="sc">+</span><span class="fu">t</span>(<span class="fu">chol</span>(V_inv))<span class="sc">%*%</span><span class="fu">rnorm</span>(p<span class="sc">*</span>q)</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  mc_beta_arr[<span class="dv">1</span><span class="sc">:</span>p,<span class="dv">1</span><span class="sc">:</span>q,] <span class="ot">&lt;-</span> mc_beta_mat</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample Lambda</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>  H <span class="ot">&lt;-</span> beta_mat<span class="sc">%*%</span>(D <span class="sc">-</span> rho_beta<span class="sc">*</span>W)<span class="sc">%*%</span><span class="fu">t</span>(beta_mat)</span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>  mc_Lambda <span class="ot">&lt;-</span> MCMCpack<span class="sc">::</span><span class="fu">riwish</span>(nu <span class="sc">+</span> n, G <span class="sc">+</span> H)</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_eps</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample rho_beta</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a>  keep_beta_mat[,,iter] <span class="ot">&lt;-</span> mc_beta_mat </span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>  keep_Lambda[,,iter]   <span class="ot">&lt;-</span> mc_Lambda</span>
+<span id="cb13-57"><a href="#cb13-57" aria-hidden="true" tabindex="-1"></a>  keep_rho_eps[iter]    <span class="ot">&lt;-</span> mc_rho_eps</span>
+<span id="cb13-58"><a href="#cb13-58" aria-hidden="true" tabindex="-1"></a>  keep_rho_beta[iter]   <span class="ot">&lt;-</span> mc_rho_beta</span>
+<span id="cb13-59"><a href="#cb13-59" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-60"><a href="#cb13-60" aria-hidden="true" tabindex="-1"></a><span class="co"># toc()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Sample a handful of locations and constuct traceplots of their beta vectors.</p>
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>location_sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="at">size =</span> <span class="dv">5</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>beta_subscripts <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"0,1"</span>, <span class="st">"0,2"</span>, <span class="st">"1,1"</span>, <span class="st">"1,2"</span>)</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> location_sample){</span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(p<span class="sc">*</span>q)){</span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>    tsub <span class="ot">&lt;-</span> beta_subscripts[i]</span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(burn<span class="sc">:</span>niters, </span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>         keep_beta_mat[i,s,burn<span class="sc">:</span>niters], </span>
-<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">xlab =</span> <span class="st">"iteration"</span>,</span>
-<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylab =</span> <span class="fu">bquote</span>(beta[.(tsub)]))</span>
-<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abline</span>(<span class="at">h =</span> beta_mat[i,s], <span class="at">col =</span> <span class="st">"red"</span>)</span>
-<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtext</span>(<span class="fu">paste</span>(<span class="st">"Pixel: "</span>,s), <span class="at">side =</span> <span class="dv">3</span>, <span class="at">line =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">outer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>location_sample <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>n, <span class="at">size =</span> <span class="dv">5</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>beta_subscripts <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"1,1"</span>, <span class="st">"1,2"</span>, <span class="st">"2,1"</span>, <span class="st">"2,2"</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (s <span class="cf">in</span> location_sample){</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">par</span>(<span class="at">mfcol =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(p<span class="sc">*</span>q)){</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    tsub <span class="ot">&lt;-</span> beta_subscripts[i]</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(burn<span class="sc">:</span>niters, </span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>         keep_beta_mat[i,s,burn<span class="sc">:</span>niters], </span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">xlab =</span> <span class="st">"iteration"</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylab =</span> <span class="fu">bquote</span>(beta[.(tsub)]),</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fu">min</span>(<span class="fu">min</span>(keep_beta_mat[i,s,burn<span class="sc">:</span>niters]),beta_mat[i,s]), <span class="fu">max</span>(<span class="fu">max</span>(keep_beta_mat[i,s,burn<span class="sc">:</span>niters]),beta_mat[i,s])))</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abline</span>(<span class="at">h =</span> beta_mat[i,s], <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtext</span>(<span class="fu">paste</span>(<span class="st">"Pixel: "</span>,s), <span class="at">side =</span> <span class="dv">3</span>, <span class="at">line =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">outer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
@@ -864,21 +801,21 @@ n &amp;= \text{number of pixels}\\
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="co"># off-diagonal</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(p<span class="sc">*</span>q)){</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> i<span class="sc">:</span>(p<span class="sc">*</span>q)){</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    tsub <span class="ot">&lt;-</span> <span class="fu">paste0</span>(i,j)</span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(burn<span class="sc">:</span>niters, </span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>         keep_Lambda[i,j,burn<span class="sc">:</span>niters], </span>
-<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">type =</span> <span class="st">"l"</span>,</span>
-<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">xlab =</span> <span class="st">"iteration"</span>,</span>
-<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylab =</span> <span class="fu">bquote</span>(Lambda[.(tsub)]))</span>
-<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abline</span>(<span class="at">h =</span> Lambda[i,j], <span class="at">col =</span> <span class="st">"red"</span>)</span>
-<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtext</span>(<span class="fu">bquote</span>(Lambda <span class="sc">~</span> <span class="st">"Matrix"</span>), <span class="at">side =</span> <span class="dv">3</span>, <span class="at">line =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">outer =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># off-diagonal</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>(p<span class="sc">*</span>q)){</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (j <span class="cf">in</span> i<span class="sc">:</span>(p<span class="sc">*</span>q)){</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    tsub <span class="ot">&lt;-</span> <span class="fu">paste0</span>(i,j)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">plot</span>(burn<span class="sc">:</span>niters, </span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>         keep_Lambda[i,j,burn<span class="sc">:</span>niters], </span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">type =</span> <span class="st">"l"</span>,</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">xlab =</span> <span class="st">"iteration"</span>,</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">ylab =</span> <span class="fu">bquote</span>(Lambda[.(tsub)]))</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">abline</span>(<span class="at">h =</span> Lambda[i,j], <span class="at">col =</span> <span class="st">"red"</span>)</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mtext</span>(<span class="fu">bquote</span>(Lambda <span class="sc">~</span> <span class="st">"Matrix"</span>), <span class="at">side =</span> <span class="dv">3</span>, <span class="at">line =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">outer =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
@@ -892,32 +829,34 @@ n &amp;= \text{number of pixels}\\
 </div>
 <p>Let’s do a quick visual check of the estimates <span class="math inline">\(\widehat{\boldsymbol\beta}_{s}\)</span> vs <span class="math inline">\(\boldsymbol\beta_{s}\)</span>. We will plot <span class="math inline">\(\widehat{\boldsymbol\beta}_{s} - \boldsymbol\beta_{s}\)</span> across the spatial domain.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>hat_beta_mat <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(keep_beta_mat[,,burn<span class="sc">:</span>niters], <span class="at">dims =</span> <span class="dv">2</span>)</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>beta_mat[<span class="dv">4</span>,])) <span class="sc">+</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>elem <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>hat_beta_mat <span class="ot">&lt;-</span> <span class="fu">rowMeans</span>(keep_beta_mat[,,burn<span class="sc">:</span>niters], <span class="at">dims =</span> <span class="dv">2</span>)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>beta_mat[elem,])) <span class="sc">+</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>hat_beta_mat[<span class="dv">4</span>,])) <span class="sc">+</span></span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>hat_beta_mat[elem,])) <span class="sc">+</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>)) <span class="sc">+</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>hat_beta_mat[<span class="dv">4</span>,]<span class="sc">-</span>beta_mat[<span class="dv">4</span>,])) <span class="sc">+</span></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(beta_mat[<span class="dv">4</span>,]),<span class="fu">max</span>(beta_mat[<span class="dv">4</span>,]))) <span class="sc">+</span></span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spat_domain) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="fu">aes</span>(x, y, <span class="at">fill=</span>hat_beta_mat[elem,]<span class="sc">-</span>beta_mat[elem,])) <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_reverse</span>() <span class="sc">+</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradientn</span>(<span class="at">colors =</span> <span class="fu">viridis</span>(<span class="dv">10</span>), <span class="at">limits =</span> <span class="fu">c</span>(<span class="fu">min</span>(beta_mat[elem,]),<span class="fu">max</span>(beta_mat[elem,]))) <span class="sc">+</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span> </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-14-3.png" class="img-fluid" width="672"></p>
 </div>
