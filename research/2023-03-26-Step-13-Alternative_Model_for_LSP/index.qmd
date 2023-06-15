@@ -13,7 +13,6 @@ format:
     code-fold: false
 execute: 
   eval: true
-  cache: false
   freeze: false
 ---
 
@@ -503,6 +502,8 @@ rho_eps_loglike <- function(rho, delta, Bz, resid, inv_Omega_arr, neighbor_idx, 
 
 Sampling loop.
 ```{r}
+#| cache: true
+
 tic()
 # profvis({
 for (iter in 2:niters){
@@ -600,10 +601,33 @@ toc()
 
 At this point in the model fit we evaluate some trace plots of the parameters $\boldsymbol\beta_{s}$, $\boldsymbol\Lambda$, $\rho_\beta$, and $\rho_\varepsilon$.
 
-Sample a handful of locations and constuct trace plots of their beta vectors.
+First, we'll look at the entire trace plot a single location without 
+
+```{r}
+s <- 1
+burn <- 1
+beta_subscripts <- c("1,1", "1,2", "2,1", "2,2")
+
+par(mfcol = c(2,2))
+for (i in 1:(p*q)){
+  tsub <- beta_subscripts[i]
+  plot(burn:niters, 
+       keep_beta_mat[i,s,burn:niters], 
+       type = "l",
+       xlab = "iteration",
+       ylab = bquote(beta[.(tsub)]),
+       ylim = c(min(min(keep_beta_mat[i,s,burn:niters]),beta_mat[i,s]), max(max(keep_beta_mat[i,s,burn:niters]),beta_mat[i,s])))
+  abline(h = beta_mat[i,s], col = "red")
+}
+mtext(paste("Pixel: ",s), side = 3, line = -3, outer = TRUE)
+
+```
+
+
+It's clear it takes the model a few iterations to converge. How do the trace plots without the burn-in iterations look? We sample a handful of locations and constuct trace plots of $\boldsymbol\beta_{s}$ without burn-in.
 ```{r}
 #| code-fold: true
-burn <- 1
+burn <- 50
 
 location_sample <- sample(1:n, size = 5)
 
@@ -625,9 +649,11 @@ for (s in location_sample){
 }
 ```
 
-Construct trace plots of the Lambda matrix (upper triangle).
+Construct trace plots for $\boldsymbol\Lambda$ (upper triangle).
 ```{r}
 #| code-fold: true
+
+burn <- 1
 par(mfrow = c(2,2))
 
 # off-diagonal
@@ -645,7 +671,7 @@ for (i in 1:(p*q)){
 }
 
 ```
-Trace plots for $\rho_beta$ and $\rho_\varepsilon$.
+Trace plots for $\rho_\beta$ and $\rho_\varepsilon$.
 ```{r}
 burn <- 1
 par(mfrow=c(1,2))
@@ -664,6 +690,7 @@ plot(burn:niters,
          ylab = bquote(rho["\u03F5"]))
     abline(h = rho_eps, col = "red")
 ```
+
 
 <!-- Let's do a quick visual check of the estimates $\widehat{\boldsymbol\beta}_{s}$ vs $\boldsymbol\beta_{s}$. We will plot $\widehat{\boldsymbol\beta}_{s} - \boldsymbol\beta_{s}$ across the spatial domain. -->
 

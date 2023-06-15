@@ -1,3 +1,10 @@
+base
+methods
+datasets
+utils
+grDevices
+graphics
+stats
 tidyverse
 ggplot2
 tibble
@@ -14,4 +21,6 @@ matrixsampling
 coda
 MASS
 MCMCpack
+gridExtra
+extraDistr
 tictoc
