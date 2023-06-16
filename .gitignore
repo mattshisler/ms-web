@@ -4,5 +4,7 @@
 .Ruserdata
 **/desktop.ini
 .DS_Store
+.nc
+.tif
 
 /.quarto/

@@ -1,0 +1,96 @@
+---
+title: "Step 15 - Exploratory Data Analysis of EVI2 data for Harvard Forest, Indiana (tile), Nashville"
+description: "The three sites correspond to homogeneous, heteraogeneous, and urban/not-urban landcover cases."
+author:
+  - name: Matthew Shisler
+    affiliation: North Carloina State University - Department of Statistics
+    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+date: "06/07/2023"
+categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
+draft: false 
+format:
+  html: 
+    code-fold: false
+execute: 
+  eval: true
+  cache: false
+  freeze: false
+---
+
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+
+library(tidyverse)
+library(terra)
+library(ncdf4)
+```
+
+## Harvard Forest
+
+```{r}
+#| code-fold: true
+
+ReadNcTs <- function(ncfile) {
+    r <- rast(ncfile)
+    # Get time
+    nc_in <- nc_open(ncfile)
+    dates <- ncvar_get(nc_in, "time")
+    nc_close(nc_in)
+    # Assign time to the original image object
+    if (nchar(dates[1]) == 8) {
+        fm <- "%Y%m%d"
+    } else if (nchar(dates[1] == 7)) {
+        fm <- "%Y%j"
+    }
+    time(r) <- as.Date(as.character(dates), tryFormats = fm)
+
+    # Reorder the layers by time
+    r <- r[[order(time(r))]]
+
+    # Get map projection
+    #tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
+    #crs(r) <- crs(tif)
+
+    return(r)
+}
+```
+
+
+```{r}
+hf <- ReadNcTs("data/harvard_forest/harvard_forest_evi2.nc")
+hf
+ncell(hf)
+
+plot(hf[[time(hf) == "2020-06-22"]], range = c(0,1))
+```
+
+## Indiana - Heterogenous Vegetation landcover types
+
+```{r}
+indi <- ReadNcTs("data/indiana/indiana_evi2.nc")
+indi
+ncell(indi)
+
+plot(indi[[100]], range = c(0,1))
+time(indi)[100]
+```
+
+## Nashville - Urban/Not Urban
+
+```{r}
+nash <- ReadNcTs("data/nashville/nashville_evi2.nc")
+nash
+ncell(nash)
+
+plot(nash[[83]], range = c(0,1))
+time(nash)[83]
+```
+
+
+
+
+
+
