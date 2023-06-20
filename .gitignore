@@ -4,6 +4,6 @@
 .Ruserdata
 **/desktop.ini
 .DS_Store
-.nc
+**/*.nc
 
 /.quarto/
