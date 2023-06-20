@@ -24,8 +24,11 @@ execute:
 #| code-summary: "Code: Load the packages"
 
 library(tidyverse)
+library(tmap)
 library(terra)
 library(ncdf4)
+library(lubridate)
+library(viridis)
 ```
 
 ## Harvard Forest
@@ -51,8 +54,8 @@ ReadNcTs <- function(ncfile) {
     r <- r[[order(time(r))]]
 
     # Get map projection
-    #tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
-    #crs(r) <- crs(tif)
+    tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
+    crs(r) <- crs(tif)
 
     return(r)
 }
@@ -60,11 +63,221 @@ ReadNcTs <- function(ncfile) {
 
 
 ```{r}
+# Read in the data and print information
 hf <- ReadNcTs("data/harvard_forest/harvard_forest_evi2.nc")
 hf
 ncell(hf)
 
+# plot a representative cell
 plot(hf[[time(hf) == "2020-06-22"]], range = c(0,1))
+
+# set min max of each layer
+setMinMax(hf)
+```
+
+There are over 3000 layers in the original dataset. I suspect that many of the layers are all NA. 
+I'll compute the minmax of each layer, then filter out all layers with an NaN min. We are left with about 1300 layers.
+```{r}
+# filter out layers with NaN min implying that the entire layer is NaN.
+hf_rmNaNlyrs <- hf[[!is.nan(minmax(hf)[1,])]]
+
+# print info again.
+hf_rmNaNlyrs 
+```
+
+Next I want to see the pixel density of each layer. I suspect many layers have many NaN values. I'll loop over layers and store the pixel density in a data.frame. This is a slow loop - possibly because the data is not being read into RAM, but is instead accessed on the hard drive.
+```{r}
+
+layer_dens <- data.frame(matrix(0, nrow = dim(hf_rmNaNlyrs)[3], ncol = 2))
+colnames(layer_dens) <- c("count_good_pix", "date")
+
+for (layer in 1:dim(hf_rmNaNlyrs)[3]){
+  temp <- values(hf_rmNaNlyrs[[layer]])
+  
+  layer_dens$count_good_pix[layer] <- sum(!is.nan(temp[,1]))
+  layer_dens$date[layer] <- time(hf_rmNaNlyrs)[layer]
+  
+}
+
+as.Date(layer_dens$date)
+
+layer_dens <- layer_dens %>%
+  mutate(ratio_good_pix = count_good_pix/ncell(hf_rmNaNlyrs)) %>%
+  mutate(date = time(hf_rmNaNlyrs)) %>%
+  mutate(year = year(date)) %>%
+  mutate(month = month(date)) %>%
+  mutate(mday = mday(date)) %>%
+  mutate(yday = yday(date)) %>%
+  mutate(tsday = as.numeric(date - min(date)))
+
+as.numeric(layer_dens$date[5]-layer_dens$date[1])
+
+
+
+hist(layer_dens$ratio_good_pix)
+plot(layer_dens$year, layer_dens$ratio_good_pix)
+
+plot(layer_dens$yday, layer_dens$ratio_good_pix)
+
+plot(layer_dens$tsday, layer_dens$ratio_good_pix)
+```
+
+
+```{r}
+boxplot(ratio_good_pix ~ year, data = layer_dens)
+
+plot(table(layer_dens$year))
+```
+
+We can plot the pixel density boxplots by day of year as well, though squeezing this many adjacent boxplots together makes it difficult to see much. One thing that is obvious is that we get better pixel densities between days 110 and 310, most likely because it is summertime.
+
+```{r}
+boxplot(ratio_good_pix ~ yday, data = layer_dens)
+
+plot(table(layer_dens$yday))
+
+```
+
+Next, let us consider the extracting data from the spatraster object into a data frame.
+```{r}
+
+length(unique(names(hf_rmNaNlyrs)))
+length(unique(time(hf_rmNaNlyrs)))
+
+
+test <- as.data.frame(hf_rmNaNlyrs, xy=TRUE, cells=TRUE)
+
+long_hf <- pivot_longer(test, cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+
+
+
+# temp <- extract(hf_rmNaNlyrs, c(1))
+
+
+```
+
+```{r}
+ggplot(subset(long_hf, name %in% c("EVI2_490"))) +
+        geom_tile(aes(x, y, fill=EVI2)) +
+        scale_fill_gradientn(colors = viridis(10, direction = -1),
+                             limits = c(0,1)) +
+
+            coord_fixed() + 
+            theme_void()
+
+```
+
+Perhaps we can plot a sequence of maps to illustrate LSP over the course of a year. This is a little concerning. . . I would not expect 2020 to cycle twice. Are the dates possibly mixed up in the data?
+```{r}
+hf_dates <- time(hf_rmNaNlyrs)
+hf_names <- names(hf_rmNaNlyrs)
+
+
+hf_dates[year(hf_dates) == "2020"]
+
+
+layers_to_plot <- names(hf_rmNaNlyrs)[which(year(hf_dates) == "2020")]
+
+ggplot(subset(long_hf, name %in% layers_to_plot)) +
+        geom_tile(aes(x, y, fill=EVI2)) +
+        scale_fill_gradientn(colors = viridis(10, direction = -1),
+                             limits = c(0,1)) +
+
+            coord_fixed() + 
+            theme_void() +
+            facet_wrap(~name)
+
+```
+
+Let's try to plot the EVI2 for a single pixel and see what that looks like. I'll need to merge in the date and compute the day of year. Any mix-up in the data should be obvious.
+```{r}
+
+hf_info <- data.frame(date = hf_dates, name = hf_names)
+
+
+test <- long_hf %>%
+  inner_join(hf_info, by = "name") %>%
+  mutate(doy = yday(date)) %>%
+  mutate(year = year(date))
+
+
+ggplot(subset(test, cell %in% 7 & year %in% 2020)) +
+  geom_point(aes(doy, EVI2))
+```
+
+This time series actually looks good. Perhaps there is another issue. Let's plot using the merged dataset and facet on the calculated date after subsetting to a specific year.
+
+```{r}
+ggplot(subset(test, year %in% 2020)) +
+        geom_tile(aes(x, y, fill=EVI2)) +
+        scale_fill_gradientn(colors = viridis(10, direction = -1),
+                             limits = c(0,1)) +
+
+            coord_fixed() + 
+            theme_void() +
+            facet_wrap(~date)
+
+
+```
+
+
+It appears that when ggplot 2 facets it will order the graph in alphabetical order when using a string variable as the faceting variable. With the date ordering we get expected behavior. There is some "banding" in the images however. That doesn't seem to be explained at this point. Perhaps it is an artifact of the sensor that is being used?
+
+
+Perhaps a little much, let's plot the data in groups for each year.
+
+```{r}
+hf_years <- unique(year(hf_dates))
+
+panel_names <- as_labeller(function(x) yday(x))
+
+
+for (t in hf_years){
+  g <- ggplot(subset(test, year == t)) +
+        geom_tile(aes(x, y, fill=EVI2)) +
+        scale_fill_gradientn(colors = viridis(10, direction = -1),
+                             limits = c(0,1)) +
+
+            coord_fixed() + 
+            theme_void() +
+            facet_wrap(~date, labeller = panel_names)
+  print(g)
+}
+
+```
+
+
+Next, we need to extract the neigborhood information from the spatraster object.
+
+
+
+
+Next, we need to fit an "average model". There are few ways to do this. One way is to extract pixel-wise time series for the entire region, aggregate over pixels, then fit a non-linear model. Another way is to average over each spatraster layer, then associate that average with the layer's corresponding day of the year and fit a model to these averages. There may be issues in the latter approach becuase some layers have a very low number of valid observations. Maybe the solution is a weighted average?
+
+
+In either case, let's focus on processing the data and plotting.
+
+Let's explore the Nashville data in a seperate post.
+
+
+
+
+```{r}
+boxplot(ratio_good_pix ~ tsday, data = layer_dens)
+
+```
+
+```{r}
+
+
+# extract values fo a single layer
+temp <- values(hf_rmNaNlyrs[[1]])
+
+hf_rmNaNlyrs
+
+cells(hf_rmNaNlyrs, c(1,1))
+
 ```
 
 ## Indiana - Heterogenous Vegetation landcover types
@@ -87,10 +300,100 @@ ncell(nash)
 
 plot(nash[[83]], range = c(0,1))
 time(nash)[83]
+crs(nash) <- "local"
+plot(nash[[83]], range = c(0,1))
 ```
 
+```{r}
+setMinMax(nash)
+
+# filter out layers with NaN min implying that the entire layer is NaN.
+nash_clean <- nash[[!is.nan(minmax(nash)[1,])]]
+
+# print info again.
+nash
+nash_clean
+
+```
+
+```{r}
+
+long_nash1 <- as.data.frame(nash_clean[[1:100]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash2 <- as.data.frame(nash_clean[[101:200]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash3 <- as.data.frame(nash_clean[[201:300]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash4 <- as.data.frame(nash_clean[[301:400]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash5 <- as.data.frame(nash_clean[[401:500]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash6 <- as.data.frame(nash_clean[[501:600]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash7 <- as.data.frame(nash_clean[[601:700]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash8 <- as.data.frame(nash_clean[[755:793]], xy=TRUE, cells=TRUE) %>% 
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+test <-  rbind(long_nash1, long_nash2)
+
+```
+
+```{r}
+nash_dates <- time(nash_clean)
+nash_names <- names(nash_clean)
+nash_info <- data.frame(date = nash_dates, name = nash_names)
 
 
+long_nash8 <- long_nash8 %>%
+  inner_join(nash_info, by = "name") 
 
+
+long_nash8 <- long_nash8 %>%
+  mutate(doy = yday(date))
+
+long_nash8 <- long_nash8 %>% 
+  mutate(year = year(date))
+
+```
+
+```{r}
+
+nash_years <- unique(long_nash8$year)
+
+panel_names <- as_labeller(function(x) yday(x))
+
+
+ggplot(subset(long_nash8, year == 2019)) +
+        geom_tile(aes(x, y, fill=EVI2)) +
+        scale_fill_gradientn(colors = viridis(10, direction = -1),
+                             limits = c(0,1)) +
+
+            coord_fixed() + 
+            theme_void() +
+            facet_wrap(~date, labeller = panel_names)
+
+
+# for (t in 2018){
+#   g <- ggplot(subset(long_nash8, year == t)) +
+#         geom_tile(aes(x, y, fill=EVI2)) +
+#         scale_fill_gradientn(colors = viridis(10, direction = -1),
+#                              limits = c(0,1)) +
+# 
+#             coord_fixed() + 
+#             theme_void() +
+#             facet_wrap(~date, labeller = panel_names)
+#   print(g)
+# }
+```
+
+nashville 2010 seems nice. 2011 is even better. 2012 is meh (clouds). 2013 is meh (clouds). Perhaps 2011 is best!
 
 
