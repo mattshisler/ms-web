@@ -1,0 +1,147 @@
+# ---
+# format:
+#   html: 
+#     code-fold: false
+# execute: 
+#   eval: true
+#   cache: false
+#   freeze: false
+# ---
+# 
+# ```{r}
+# #| label: load-packages
+# #| output: false
+# #| code-summary: "Code: Load the packages"
+# 
+# library(tidyverse)
+# library(tmap)
+# library(terra)
+# library(ncdf4)
+# library(lubridate)
+# library(viridis)
+# ```
+# 
+# ```{r}
+# #| code-fold: true
+# 
+# ReadNcTs <- function(ncfile) {
+#     r <- rast(ncfile)
+#     # Get time
+#     nc_in <- nc_open(ncfile)
+#     dates <- ncvar_get(nc_in, "time")
+#     nc_close(nc_in)
+#     # Assign time to the original image object
+#     if (nchar(dates[1]) == 8) {
+#         fm <- "%Y%m%d"
+#     } else if (nchar(dates[1] == 7)) {
+#         fm <- "%Y%j"
+#     }
+#     time(r) <- as.Date(as.character(dates), tryFormats = fm)
+# 
+#     # Reorder the layers by time
+#     r <- r[[order(time(r))]]
+# 
+#     # Get map projection
+#     tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
+#     crs(r) <- crs(tif)
+# 
+#     return(r)
+# }
+# ```
+# 
+# There are over 3000 layers in the original dataset. I suspect that many of the layers are all NA. 
+# I'll compute the minmax of each layer, then filter out all layers with an NaN min. We are left with about 1300 layers.
+# 
+# ```{r}
+# # Read in the data and print information
+# hf <- ReadNcTs("data/harvard_forest_evi2.nc")
+# hf
+# ncell(hf)
+# 
+# # plot a representative cell
+# plot(hf[[time(hf) == "2020-06-22"]], range = c(0,1))
+# 
+# # set min max of each layer
+# setMinMax(hf)
+# ```
+# 
+# ```{r}
+# # filter out layers with NaN min implying that the entire layer is NaN.
+# hf_clean <- hf[[!is.nan(minmax(hf)[1,])]]
+# 
+# hf
+# 
+# # print info again.
+# hf_clean
+# ```
+# 
+# Next I want to see the pixel density of each layer. I suspect many layers have many NaN values. I'll loop over layers and store the pixel density in a data.frame. This is a slow loop - possibly because the data is not being read into RAM, but is instead accessed on the hard drive.
+# ```{r}
+# 
+# layer_dens <- data.frame(matrix(0, nrow = dim(hf_rmNaNlyrs)[3], ncol = 2))
+# colnames(layer_dens) <- c("count_good_pix", "date")
+# 
+# for (layer in 1:dim(hf_rmNaNlyrs)[3]){
+#   temp <- values(hf_rmNaNlyrs[[layer]])
+#   
+#   layer_dens$count_good_pix[layer] <- sum(!is.nan(temp[,1]))
+#   layer_dens$date[layer] <- time(hf_rmNaNlyrs)[layer]
+#   
+# }
+# 
+# as.Date(layer_dens$date)
+# 
+# layer_dens <- layer_dens %>%
+#   mutate(ratio_good_pix = count_good_pix/ncell(hf_rmNaNlyrs)) %>%
+#   mutate(date = time(hf_rmNaNlyrs)) %>%
+#   mutate(year = year(date)) %>%
+#   mutate(month = month(date)) %>%
+#   mutate(mday = mday(date)) %>%
+#   mutate(yday = yday(date)) %>%
+#   mutate(tsday = as.numeric(date - min(date)))
+# 
+# as.numeric(layer_dens$date[5]-layer_dens$date[1])
+# 
+# 
+# 
+# hist(layer_dens$ratio_good_pix)
+# plot(layer_dens$year, layer_dens$ratio_good_pix)
+# 
+# plot(layer_dens$yday, layer_dens$ratio_good_pix)
+# 
+# plot(layer_dens$tsday, layer_dens$ratio_good_pix)
+# ```
+# 
+# 
+# ```{r}
+# boxplot(ratio_good_pix ~ year, data = layer_dens)
+# 
+# plot(table(layer_dens$year))
+# ```
+# 
+# We can plot the pixel density boxplots by day of year as well, though squeezing this many adjacent boxplots together makes it difficult to see much. One thing that is obvious is that we get better pixel densities between days 110 and 310, most likely because it is summertime.
+# 
+# ```{r}
+# boxplot(ratio_good_pix ~ yday, data = layer_dens)
+# 
+# plot(table(layer_dens$yday))
+# 
+# ```
+
+<!-- Next, let us consider the extracting data from the spatraster object into a data frame. -->
+<!-- ```{r} -->
+
+<!-- # length(unique(names(hf_rmNaNlyrs))) -->
+<!-- # length(unique(time(hf_rmNaNlyrs))) -->
+
+
+<!-- #  -->
+<!-- # test <- as.data.frame(hf_clean, xy=TRUE, cells=TRUE) -->
+
+<!-- long_hf <- hf_clean %>% -->
+<!--   as.data.frame(xy=TRUE, cells=TRUE) %>% -->
+<!--   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T) -->
+
+<!-- write.csv(long_hf, file = "long_hf.csv", row.names = F) -->
+
+<!-- ``` -->
