@@ -5,9 +5,9 @@ author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
     affiliation-url: https://statistics.sciences.ncsu.edu/ 
-date: "06/07/2023"
+date: "06/21/2023"
 categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
-draft: false 
+draft: true 
 format:
   html: 
     code-fold: false
@@ -31,14 +31,16 @@ library(viridis)
 library(data.table)
 ```
 
+The Nashville data is too large to read into memory. We can look at a single year extracted from the netCDF file for some intuition.
+
 ```{r}
-# long_nash <- fread("~/ms-web/research/2023-06-21-Step-16-Nashville/data/long_nash_1984_1991_v2.csv")
+long_nash <- fread("~/ms-web/research/2023-06-21-Step-16-Nashville/data/long_nash_2019.csv")
 ```
 
 ```{r}
 #| code-fold: true
 
-ggplot(subset(long_nash1, name %in% c("EVI2_510"))) +
+ggplot(subset(long_nash, date == "2019-01-26")) +
         geom_tile(aes(x, y, fill=EVI2)) +
         scale_fill_gradientn(colors = viridis(10, direction = -1),
                              limits = c(0,1)) +
@@ -51,28 +53,28 @@ ggplot(subset(long_nash1, name %in% c("EVI2_510"))) +
 ```{r}
 #| code-fold: true
 
-panel_names <- as_labeller(function(x) yday(x))
-
-ggplot(subset(long_nash1, year %in% 1988)) +
-        geom_tile(aes(x, y, fill=EVI2)) +
-        scale_fill_gradientn(colors = viridis(10, direction = -1),
-                             limits = c(0,1)) +
-        coord_fixed() + 
-        theme_void() +
-        facet_wrap(~date, labeller = panel_names) +
-        labs(title = paste0(1988, ": day of year"))  
+# panel_names <- as_labeller(function(x) yday(x))
+# 
+# ggplot(subset(long_nash1, year %in% 1988)) +
+#         geom_tile(aes(x, y, fill=EVI2)) +
+#         scale_fill_gradientn(colors = viridis(10, direction = -1),
+#                              limits = c(0,1)) +
+#         coord_fixed() + 
+#         theme_void() +
+#         facet_wrap(~date, labeller = panel_names) +
+#         labs(title = paste0(1988, ": day of year"))
 
 ```
 
 ```{r}
 
-ggplot(subset(long_nash2, year %in% 2019)) +
-        geom_tile(aes(x, y, fill=EVI2)) +
-        scale_fill_gradientn(colors = viridis(10, direction = -1),
-                             limits = c(0,1)) +
-        coord_fixed() + 
-        theme_void() +
-        facet_wrap(~date, labeller = panel_names) +
-        labs(title = paste0(2019, ": day of year"))  
+# ggplot(subset(long_nash2, year %in% 2019)) +
+#         geom_tile(aes(x, y, fill=EVI2)) +
+#         scale_fill_gradientn(colors = viridis(10, direction = -1),
+#                              limits = c(0,1)) +
+#         coord_fixed() + 
+#         theme_void() +
+#         facet_wrap(~date, labeller = panel_names) +
+#         labs(title = paste0(2019, ": day of year"))  
 
 ```

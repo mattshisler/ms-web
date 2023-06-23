@@ -47,8 +47,13 @@ execute:
 #     return(r)
 # }
 # ```
-#
+
+
+
 # There are over 3000 layers in the original dataset. I suspect that many of the layers are all NA.
+
+
+
 # I'll compute the minmax of each layer, then filter out all layers with an NaN min. We are left with about 1300 layers.
 #
 # ```{r}

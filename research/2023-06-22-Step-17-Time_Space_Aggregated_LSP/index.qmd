@@ -1,0 +1,491 @@
+---
+title: "Step 17 - An LSP model for EVI2 aggregated over space and time"
+description: "[tbd]"
+author:
+  - name: Matthew Shisler
+    affiliation: North Carloina State University - Department of Statistics
+    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+date: "06/23/2023"
+categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
+draft: false 
+format:
+  html: 
+    code-fold: false
+execute: 
+  eval: true
+  cache: false
+  freeze: false
+---
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+
+library(tidyverse)
+library(tmap)
+library(terra)
+library(ncdf4)
+library(lubridate)
+library(viridis)
+library(data.table)
+library(minpack.lm)
+```
+
+TODO: Add some explanation.
+
+Some functions.
+```{r}
+#| code-fold: true
+
+ReadNcTs <- function(ncfile) {
+    r <- rast(ncfile)
+    # Get time
+    nc_in <- nc_open(ncfile)
+    dates <- ncvar_get(nc_in, "time")
+    nc_close(nc_in)
+    # Assign time to the original image object
+    if (nchar(dates[1]) == 8) {
+        fm <- "%Y%m%d"
+    } else if (nchar(dates[1] == 7)) {
+        fm <- "%Y%j"
+    }
+    time(r) <- as.Date(as.character(dates), tryFormats = fm)
+
+    # Reorder the layers by time
+    r <- r[[order(time(r))]]
+
+    # Get map projection
+    tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
+    crs(r) <- crs(tif)
+
+    return(r)
+}
+
+# model_equ <- as.formula("y ~ 1/(1+exp(-theta1)) + 
+#                         (theta2 - 1/(1+exp(-theta7)) * t) * 
+#                         ((1 / (1 + exp((theta3 - t) / theta4))) - 
+#                         (1 / (1 + exp((theta5 - t) / theta6))))")
+
+
+model_equ6 <- as.formula("y ~ theta1 + 
+                        theta2 * 
+                        ((1 / (1 + exp((theta3 - t) / theta4))) - 
+                        (1 / (1 + exp((theta5 - t) / theta6))))")
+
+model_equ7 <- as.formula("y ~ theta1 + 
+                        (theta2 - theta7 * t) * 
+                        ((1 / (1 + exp((theta3 - t) / theta4))) - 
+                        (1 / (1 + exp((theta5 - t) / theta6))))")
+
+# fit using non-linear least squares
+region_agg_fit <- function(doy, vi, 
+                           dl_param = 7, 
+                           init_val = c(0.1, 0.8, 120, 6, 290, 8, -0.002), 
+                           lower_bound = c(0, 0.1, 1, 0, 1, 0, 0), 
+                           upper_bound = c(1, 100, 185, 100, 370, 100, 0.2)){
+  
+  if(dl_param == 7){
+    avg_fit <- nlsLM(model_equ7,
+                     data = list(y = vi, 
+                                 t = doy),
+                     weights = rep(1, length(t)),
+                     start = list(theta1 = init_val[1],
+                                  theta2 = init_val[2],
+                                  theta3 = init_val[3],
+                                  theta4 = init_val[4],
+                                  theta5 = init_val[5],
+                                  theta6 = init_val[6],
+                                  theta7 = init_val[7]),
+                     lower = lower_bound,
+                     upper = upper_bound)
+  } else if (dl_param == 6){
+        avg_fit <- nlsLM(model_equ6,
+                     data = list(y = vi, 
+                                 t = doy),
+                     weights = rep(1, length(t)),
+                     start = list(theta1 = init_val[1],
+                                  theta2 = init_val[2],
+                                  theta3 = init_val[3],
+                                  theta4 = init_val[4],
+                                  theta5 = init_val[5],
+                                  theta6 = init_val[6]),
+                     lower = lower_bound[1:6],
+                     upper = upper_bound[1:6])
+  }
+  
+  return(avg_fit)
+}
+
+
+
+double_logis <- function(t, theta, dl_param = 7){
+    # m[1] <- plogis(m[1])
+    # m[7] <- plogis(m[7])
+  
+  if (dl_param == 7){
+    out <- theta[1] + (theta[2] - theta[7] * t) * 
+       ((1 / (1 + exp((theta[3] - t) / theta[4]))) 
+        - (1 / (1 + exp((theta[5] - t) / theta[6]))))
+  } else if (dl_param == 6) {
+    out <- theta[1] + (theta[2]) * 
+           ((1 / (1 + exp((theta[3] - t) / theta[4]))) 
+            - (1 / (1 + exp((theta[5] - t) / theta[6]))))
+  }
+    
+    
+    return(out)
+}
+
+```
+
+First Harvard Forest. The original pre-procesing steps are in a non-executed chunk below:
+
+```{r}
+#| eval: false
+#| code-fold: true
+
+# Read in the data and print information
+hf <- ReadNcTs("~/ms-web/research/data/harvard_forest/harvard_forest_evi2.nc")
+hf
+ncell(hf)
+
+# plot a representative cell
+# plot(hf[[time(hf) == "2020-06-22"]], range = c(0,1))
+
+# set min max of each layer
+# setMinMax(hf)
+layer_agg <- global(hf, fun = c("mean", "notNA"), na.rm = T)
+
+hf_name_date <- data.frame(name = names(hf), date = time(hf))
+layer_agg$name <- row.names(layer_agg)
+
+layer_agg <- layer_agg %>%
+  inner_join(hf_name_date, by = "name") %>%
+  mutate(doy = yday(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(perc_valid = notNA/8989)
+
+```
+
+
+
+```{r}
+
+layer_agg_hf <- read_csv("~/ms-web/research/data/harvard_forest/layer_agg_hf.csv")
+
+```
+
+Generate some plots.
+```{r}
+#| code-fold: true
+
+region <- "Harvard Forest"
+
+
+ggplot(data = layer_agg_hf) + 
+  geom_point(aes(x = date, y = mean, col = perc_valid)) +
+    scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+
+ggplot(data = subset(layer_agg_hf, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg_hf, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = year)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+```
+
+Fit the non-linear least squares regression to the data using both 7 and 6 parameter double logistics mean functions.
+```{r}
+#| code-fold: true
+
+hf_avg_fit7 <- region_agg_fit(doy = layer_agg_hf$doy, vi = layer_agg_hf$mean)
+hf_avg_fit6 <- region_agg_fit(doy = layer_agg_hf$doy, vi = layer_agg_hf$mean, dl_param = 6)
+
+summary(hf_avg_fit7)
+summary(hf_avg_fit6)
+
+ggplot() + 
+  geom_point(data = subset(layer_agg_hf, perc_valid >= 0), aes(x = doy, y = mean, color = year)) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(hf_avg_fit7))), color = "red", size = 1.5) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(hf_avg_fit6), dl_param = 6)), color = "blue", size = 1.5) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+```
+
+Next Nashville. The original pre-procesing steps are in a non-executed chunk below:
+
+```{r}
+#| eval: false
+#| code-fold: true
+
+# Read in the data and print information
+nash <- ReadNcTs("~/ms-web/research/data/nashville/nashville_evi2.nc")
+nash
+ncell(nash)
+
+# plot a representative cell
+# plot(hf[[time(hf) == "2020-06-22"]], range = c(0,1))
+
+# set min max of each layer
+# setMinMax(hf)
+layer_agg_nash <- global(nash, fun = c("mean", "notNA"), na.rm = T)
+
+nash_name_date <- data.frame(name = names(nash), date = time(nash))
+layer_agg_nash$name <- row.names(layer_agg_nash)
+
+layer_agg_nash <- layer_agg_nash %>%
+  inner_join(nash_name_date, by = "name") %>%
+  mutate(doy = yday(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(perc_valid = notNA/ncell(nash))
+
+```
+
+Load the processed data.
+```{r}
+# | code-fold: true
+
+layer_agg_nash <- read_csv("~/ms-web/research/data/nashville/layer_agg_nash.csv")
+  
+```
+
+Generate the same plots.
+```{r}
+#| code-fold: true
+
+region <- "Nashville"
+
+ggplot(data = layer_agg_nash) + 
+  geom_point(aes(x = date, y = mean, col = perc_valid)) +
+    scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg_nash, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg_nash, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = year)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+```
+
+Fit the non-linear least squares regression to the data using both 7 and 6 parameter double logistics mean functions.
+```{r}
+#| code-fold: true
+
+nash_avg_fit7 <- region_agg_fit(doy = layer_agg_nash$doy, vi = layer_agg_nash$mean)
+nash_avg_fit6 <- region_agg_fit(doy = layer_agg_nash$doy, vi = layer_agg_nash$mean, dl_param = 6)
+
+summary(nash_avg_fit7)
+summary(nash_avg_fit6)
+
+ggplot() + 
+  geom_point(data = subset(layer_agg_nash, perc_valid >= 0), aes(x = doy, y = mean, color = year)) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(nash_avg_fit7))), color = "red", size = 1.5) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(nash_avg_fit6), dl_param = 6)), color = "blue", size = 1.5) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+```
+
+Next Indiana. The original pre-procesing steps are in a non-executed chunk below:
+
+```{r}
+#| eval: false
+#| code-fold: true
+
+# Read in the data and print information
+indi <- ReadNcTs("~/ms-web/research/data/indiana/indiana_evi2.nc")
+indi
+ncell(indi)
+
+# plot a representative cell
+plot(indi[[100]], range = c(0,1), col = viridis(10, direction = -1))
+
+# set min max of each layer
+# setMinMax(hf)
+
+
+layer_agg_indi <- global(indi, fun = c("mean", "notNA"), na.rm = T)
+
+indi_name_date <- data.frame(name = names(indi), date = time(indi))
+layer_agg_indi$name <- row.names(layer_agg_indi)
+
+layer_agg_indi <- layer_agg_indi %>%
+  inner_join(indi_name_date, by = "name") %>%
+  mutate(doy = yday(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(perc_valid = notNA/max(notNA))
+
+```
+
+Load the processed data.
+```{r}
+# code-fold: true
+
+layer_agg_indi <- read_csv("~/ms-web/research/data/indiana/layer_agg_indi.csv")
+
+```
+
+Generate the same plots.
+```{r}
+#| code-fold: true
+region <- "Indiana"
+
+
+ggplot(data = layer_agg_indi) + 
+  geom_point(aes(x = date, y = mean, col = perc_valid)) +
+    scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) + 
+  theme_bw()
+
+ggplot(data = subset(layer_agg_indi, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) + 
+  theme_bw()
+
+ggplot(data = subset(layer_agg_indi, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = year)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) + 
+  theme_bw()
+
+```
+
+Fit the non-linear least squares regression to the data using both 7 and 6 parameter double logistics mean functions.
+```{r}
+#| code-fold: true
+
+indi_avg_fit7 <- region_agg_fit(doy = layer_agg_indi$doy, vi = layer_agg_indi$mean)
+indi_avg_fit6 <- region_agg_fit(doy = layer_agg_indi$doy, vi = layer_agg_indi$mean, dl_param = 6)
+
+summary(indi_avg_fit7)
+summary(indi_avg_fit6)
+
+ggplot() + 
+  geom_point(data = subset(layer_agg_indi, perc_valid >= 0), aes(x = doy, y = mean, color = year)) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(indi_avg_fit7))), color = "red", size = 1.5) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(indi_avg_fit6), dl_param = 6)), color = "blue", size = 1.5) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+```
+
+```{r}
+#| eval: false
+#| code-fold: true
+
+# Read in the data and print information
+mad <- ReadNcTs("~/ms-web/research/data/madison/madison_evi2-001.nc")
+mad
+ncell(mad)
+
+# plot a representative cell
+plot(mad[[150]], range = c(0,1), col = viridis(10, direction = -1))
+
+layer_agg_mad <- global(mad, fun = c("mean", "notNA"), na.rm = T)
+
+mad_name_date <- data.frame(name = names(mad), date = time(mad))
+layer_agg_mad$name <- row.names(layer_agg_mad)
+
+layer_agg_mad <- layer_agg_mad %>%
+  inner_join(mad_name_date, by = "name") %>%
+  mutate(doy = yday(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(perc_valid = notNA/max(notNA))
+```
+
+Load the processed data.
+```{r}
+#| code-fold: true
+layer_agg_mad <- read_csv("~/ms-web/research/data/madison/layer_agg_mad.csv")
+
+```
+
+Generate the same plots.
+```{r}
+#| code-fold: true
+
+region <- "Madison"
+
+ggplot(data = layer_agg_mad) + 
+  geom_point(aes(x = date, y = mean, col = perc_valid)) +
+    scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg_mad, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg_mad, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = year)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+```
+
+Fit a non-linear least squares regression to the data using both 7 and 6 parameter double logistics mean functions.
+```{r}
+#| code-fold: true
+
+mad_avg_fit7 <- region_agg_fit(doy = layer_agg_mad$doy, vi = layer_agg_mad$mean)
+mad_avg_fit6 <- region_agg_fit(doy = layer_agg_mad$doy, vi = layer_agg_mad$mean, dl_param = 6)
+
+summary(mad_avg_fit7)
+summary(mad_avg_fit6)
+
+ggplot() + 
+  geom_point(data = subset(layer_agg_mad, perc_valid >= 0), aes(x = doy, y = mean, color = year)) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(mad_avg_fit7))), color = "red", size = 1.5) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(mad_avg_fit6), dl_param = 6)), color = "blue", size = 1.5) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+```

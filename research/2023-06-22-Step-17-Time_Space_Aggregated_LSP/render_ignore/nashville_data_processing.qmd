@@ -1,0 +1,263 @@
+---
+format:
+  html:
+    code-fold: false
+execute:
+  eval: false
+  freeze: true
+---
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+
+library(tidyverse)
+library(tmap)
+library(terra)
+library(ncdf4)
+library(lubridate)
+library(viridis)
+library(data.table)
+
+```
+
+```{r}
+
+
+ReadNcTs <- function(ncfile) {
+    r <- rast(ncfile)
+    # Get time
+    nc_in <- nc_open(ncfile)
+    dates <- ncvar_get(nc_in, "time")
+    nc_close(nc_in)
+    # Assign time to the original image object
+    if (nchar(dates[1]) == 8) {
+        fm <- "%Y%m%d"
+    } else if (nchar(dates[1] == 7)) {
+        fm <- "%Y%j"
+    }
+    time(r) <- as.Date(as.character(dates), tryFormats = fm)
+
+    # Reorder the layers by time
+    r <- r[[order(time(r))]]
+
+    # Get map projection
+    tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
+    crs(r) <- crs(tif)
+
+    return(r)
+}
+```
+
+```{r}
+# Read in the data and print information
+nash <- ReadNcTs("data/nashville_evi2.nc")
+nash
+ncell(nash)
+
+# plot a representative cell
+plot(nash[[80]], range = c(0,1))
+
+# set min max of each layer
+setMinMax(nash)
+```
+
+
+```{r}
+# filter out layers with NaN min implying that the entire layer is NaN.
+nash_clean <- nash[[!is.nan(minmax(nash)[1,])]]
+
+nash
+
+# print info again.
+nash_clean
+```
+
+
+```{r}
+
+time(nash)
+plot(time(nash),rep(1, length(time(nash))))
+
+
+plot(NULL, xlim=c(min(time(nash)), max(time(nash))), ylim=c(0,1), ylab="y label", xlab="x lablel")
+abline(v = time(nash_clean), col = "red")
+abline(v = time(nash))
+```
+
+Now we want to process
+
+```{r}
+years <- unique(year(time(nash_clean)))
+
+first_layer <- sapply(years, function(x) min(which(year(time(nash_clean)) == x)))
+first_layer
+last_layer <- sapply(years, function(x) max(which(year(time(nash_clean)) == x)))
+last_layer
+```
+
+```{r}
+
+long_nash1 <- as.data.frame(nash_clean[[1:89]], xy=TRUE, cells=TRUE) %>%
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash2 <- as.data.frame(nash_clean[[755:793]], xy=TRUE, cells=TRUE) %>%
+  pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+
+long_nash12 <- rbind(long_nash1, long_nash2)
+```
+
+```{r}
+nash_dates <- time(nash_clean)
+nash_names <- names(nash_clean)
+nash_info <- data.frame(date = nash_dates, name = nash_names)
+
+long_nash2 <- long_nash2 %>%
+  inner_join(nash_info, by = "name")
+
+
+long_nash2 <- long_nash2 %>%
+  mutate(doy = yday(date))
+
+long_nash2 <- long_nash2 %>%
+  mutate(year = year(date))
+
+write.csv(long_nash1, file = "~/ms-web/research/2023-06-21-Step-16-Nashville/data/long_nash_1984_1991.csv", row.names = F)
+
+fwrite(long_nash1, file = "~/ms-web/research/2023-06-21-Step-16-Nashville/data/long_nash_1984_1991_v2.csv")
+
+unique(long_nash1$year)
+
+```
+
+```{r}
+temp <- max(nash_clean[[3]])
+
+```
+
+
+# ```{r}
+# boxplot(ratio_good_pix ~ tsday, data = layer_dens)
+# 
+# ```
+# 
+
+# 
+# ## Indiana - Heterogenous Vegetation landcover types
+# 
+# ```{r}
+# indi <- ReadNcTs("data/indiana/indiana_evi2.nc")
+# indi
+# ncell(indi)
+# 
+# plot(indi[[100]], range = c(0,1))
+# time(indi)[100]
+# ```
+# 
+# ## Nashville - Urban/Not Urban
+# 
+# ```{r}
+# nash <- ReadNcTs("data/nashville/nashville_evi2.nc")
+# nash
+# ncell(nash)
+# 
+# plot(nash[[83]], range = c(0,1))
+# time(nash)[83]
+# crs(nash) <- "local"
+# plot(nash[[83]], range = c(0,1))
+# ```
+# 
+# ```{r}
+# setMinMax(nash)
+# 
+# # filter out layers with NaN min implying that the entire layer is NaN.
+# nash_clean <- nash[[!is.nan(minmax(nash)[1,])]]
+# 
+# # print info again.
+# nash
+# nash_clean
+# 
+# ```
+# 
+# ```{r}
+# 
+# long_nash1 <- as.data.frame(nash_clean[[1:100]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# long_nash2 <- as.data.frame(nash_clean[[101:200]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# long_nash3 <- as.data.frame(nash_clean[[201:300]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# long_nash4 <- as.data.frame(nash_clean[[301:400]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# long_nash5 <- as.data.frame(nash_clean[[401:500]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# long_nash6 <- as.data.frame(nash_clean[[501:600]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# long_nash7 <- as.data.frame(nash_clean[[601:700]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# long_nash8 <- as.data.frame(nash_clean[[755:793]], xy=TRUE, cells=TRUE) %>% 
+#   pivot_longer(cols = starts_with("EVI"), values_to = "EVI2", values_drop_na = T)
+# 
+# test <-  rbind(long_nash1, long_nash2)
+# 
+# ```
+# 
+# ```{r}
+# nash_dates <- time(nash_clean)
+# nash_names <- names(nash_clean)
+# nash_info <- data.frame(date = nash_dates, name = nash_names)
+# 
+# 
+# long_nash8 <- long_nash8 %>%
+#   inner_join(nash_info, by = "name") 
+# 
+# 
+# long_nash8 <- long_nash8 %>%
+#   mutate(doy = yday(date))
+# 
+# long_nash8 <- long_nash8 %>% 
+#   mutate(year = year(date))
+# 
+# ```
+# 
+# ```{r}
+# 
+# nash_years <- unique(long_nash8$year)
+# 
+# panel_names <- as_labeller(function(x) yday(x))
+# 
+# 
+# ggplot(subset(long_nash8, year == 2019)) +
+#         geom_tile(aes(x, y, fill=EVI2)) +
+#         scale_fill_gradientn(colors = viridis(10, direction = -1),
+#                              limits = c(0,1)) +
+# 
+# #             coord_fixed() + 
+# #             theme_void() +
+# #             facet_wrap(~date, labeller = panel_names)
+# # 
+# # 
+# # # for (t in 2018){
+# # #   g <- ggplot(subset(long_nash8, year == t)) +
+# # #         geom_tile(aes(x, y, fill=EVI2)) +
+# # #         scale_fill_gradientn(colors = viridis(10, direction = -1),
+# # #                              limits = c(0,1)) +
+# # # 
+# # #             coord_fixed() + 
+# # #             theme_void() +
+# # #             facet_wrap(~date, labeller = panel_names)
+# # #   print(g)
+# # # }
+# # ```
+# # 
+# # nashville 2010 seems nice. 2011 is even better. 2012 is meh (clouds). 2013 is meh (clouds). Perhaps 2011 is best!
+# 
+# 

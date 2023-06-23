@@ -106,6 +106,7 @@ panel_names <- as_labeller(function(x) paste("pixel:", x))
 for (i in 1:10){
   g <- ggplot(subset(long_hf, cell %in% test_pix[,i])) +
          geom_point(aes(date, EVI2)) +
+         scale_y_continuous(limits = c(0,1)) +
          facet_wrap(~cell, labeller = panel_names) +
          theme_bw()
   print(g)
@@ -121,9 +122,10 @@ Some pixels exhibit interesting behavior. Here are pixels 4803, 6281, 6750, and 
 int_pix <- c(6281, 4803, 6750, 7614)
 
 ggplot(subset(long_hf, cell %in% int_pix)) +
-         geom_point(aes(date, EVI2)) +
-         facet_wrap(~cell, labeller = panel_names) +
-         theme_bw()
+   geom_point(aes(date, EVI2)) +
+   scale_y_continuous(limits = c(0,1)) +
+   facet_wrap(~cell, labeller = panel_names) +
+   theme_bw()
 
 ```
 
@@ -135,6 +137,7 @@ It is easy to see from the complete time series how the maximum or mininum VI mi
 for (i in 1:10){
   g <- ggplot(subset(long_hf, cell %in% test_pix[,i])) +
          geom_point(aes(doy, EVI2, color = year)) +
+         scale_y_continuous(limits = c(0,1)) +
          facet_wrap(~cell, labeller = panel_names) +
          theme_bw()
   print(g)
@@ -150,12 +153,12 @@ Here are the same interesting pixels as before (4803, 6281, 6750, and 7614).
 int_pix <- c(6281, 4803, 6750, 7614)
 
 ggplot(subset(long_hf, cell %in% int_pix)) +
-         geom_point(aes(doy, EVI2, color = year)) +
-         facet_wrap(~cell, labeller = panel_names) +
-         theme_bw()
+   geom_point(aes(doy, EVI2, color = year)) +
+   scale_y_continuous(limits = c(0,1)) +
+   facet_wrap(~cell, labeller = panel_names) +
+   theme_bw()
 
 ```
-
 
 Next we will plot the observed data aggregated over the entire extent by year. We use boxplots instead of points to avoid overplotting individual pixels. From this it may not be wise to use data from 1984. There is also so interesting anomolies that in a few inter-year periods, particularly between 2013-2014 and 2014-2015.
 
