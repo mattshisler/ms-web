@@ -207,6 +207,12 @@ ggplot(data = subset(layer_agg_hf, perc_valid >= 0)) +
   labs(title = region) +
   theme_bw()
 
+ggplot(data = subset(layer_agg_hf, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = year, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_reverse() +
+  labs(title = region) +
+  theme_bw()
 ```
 
 Fit the non-linear least squares regression to the data using both 7 and 6 parameter double logistics mean functions.
@@ -293,6 +299,13 @@ ggplot(data = subset(layer_agg_nash, perc_valid >= 0)) +
   geom_point(aes(x = doy, y = mean, color = year)) +
   scale_color_gradientn(colors = viridis(10)) + 
   scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg_nash, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = year, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_reverse() +
   labs(title = region) +
   theme_bw()
 
@@ -386,6 +399,13 @@ ggplot(data = subset(layer_agg_indi, perc_valid >= 0)) +
   labs(title = region) + 
   theme_bw()
 
+ggplot(data = subset(layer_agg_indi, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = year, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_reverse() +
+  labs(title = region) +
+  theme_bw()
+
 ```
 
 Fit the non-linear least squares regression to the data using both 7 and 6 parameter double logistics mean functions.
@@ -468,6 +488,12 @@ ggplot(data = subset(layer_agg_mad, perc_valid >= 0)) +
   labs(title = region) +
   theme_bw()
 
+ggplot(data = subset(layer_agg_mad, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = year, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_reverse() +
+  labs(title = region) +
+  theme_bw()
 ```
 
 Fit a non-linear least squares regression to the data using both 7 and 6 parameter double logistics mean functions.
