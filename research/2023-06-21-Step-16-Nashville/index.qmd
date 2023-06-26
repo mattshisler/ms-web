@@ -7,7 +7,7 @@ author:
     affiliation-url: https://statistics.sciences.ncsu.edu/ 
 date: "06/21/2023"
 categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
-draft: true 
+draft: false 
 format:
   html: 
     code-fold: false
@@ -68,13 +68,15 @@ ggplot(subset(long_nash, date == "2019-01-26")) +
 
 ```{r}
 
-# ggplot(subset(long_nash2, year %in% 2019)) +
-#         geom_tile(aes(x, y, fill=EVI2)) +
-#         scale_fill_gradientn(colors = viridis(10, direction = -1),
-#                              limits = c(0,1)) +
-#         coord_fixed() + 
-#         theme_void() +
-#         facet_wrap(~date, labeller = panel_names) +
-#         labs(title = paste0(2019, ": day of year"))  
+panel_names <- as_labeller(function(x) yday(x))
+
+ggplot(subset(long_nash, year %in% 2019)) +
+        geom_tile(aes(x, y, fill=EVI2)) +
+        scale_fill_gradientn(colors = viridis(10, direction = -1),
+                             limits = c(0,1)) +
+        coord_fixed() +
+        theme_void() +
+        facet_wrap(~date, labeller = panel_names) +
+        labs(title = paste0(2019, ": day of year"))
 
 ```
