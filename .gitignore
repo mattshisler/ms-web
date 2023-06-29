@@ -6,5 +6,7 @@
 .DS_Store
 **/*.nc
 **/data/*.csv
+**/*.Rdata
+**/*.RDS
 
 /.quarto/
