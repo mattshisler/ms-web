@@ -1,0 +1,84 @@
+---
+title: "Step 18 - Double Logistic Functions"
+description: "[tbd]"
+author:
+  - name: Matthew Shisler
+    affiliation: North Carloina State University - Department of Statistics
+    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+date: "06/26/2023"
+categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
+draft: true 
+format:
+  html: 
+    code-fold: false
+execute: 
+  eval: true
+  cache: false
+  freeze: false
+---
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+
+library(tidyverse)
+library(tmap)
+library(terra)
+library(ncdf4)
+library(lubridate)
+library(viridis)
+library(data.table)
+library(minpack.lm)
+```
+
+# Intro
+
+Here we discuss double logistic functions focusing on the various parameterizations.
+
+
+## Basic 6 Parameter
+
+\begin{equation}
+\tag{2}
+v(t, \, \boldsymbol\theta) = \theta_1 + \theta_2
+\left(\frac{1}{\exp\left\{\frac{\theta_3 - t}{\theta_4}\right\}} - \frac{1}{\exp\left\{\frac{\theta_4 - t}{\theta_6}\right\}}\right)
+\end{equation}
+
+
+## Improved? - 6 parameter
+
+\begin{equation}
+\tag{2}
+v(t, \, \boldsymbol\theta) = \theta_1 + (\theta_2 - \theta_1)
+\left(\frac{1}{\exp\left\{\frac{\theta_3 - t}{\theta_4}\right\}} - \frac{1}{\exp\left\{\frac{\theta_4 - t}{\theta_6}\right\}}\right)
+\end{equation}
+
+Here $\theta_2$ is "independent" of $\theta_2$ or in other words it in most situations it can readily interpreted as the maximum value of the function.
+
+It is tempting add the constraint $\theta_2 \in (0, 1)$. However, for certain situations, particularly when $|\theta_5-\theta_3|$ is small, then the value of $\theta_2$ will need to compensate for the discount that the SOS and EOS parameters apply to the plateau of the function. This happens with the basic 6 parameter function as well.
+
+## Distinct dormancy - 7 parameter
+
+\begin{equation}
+\tag{2}
+v(t, \, \boldsymbol\theta) = \frac{1}{1+\exp\{\theta_1\}} + \left(\theta_2 - \exp\{\theta_7\} t\right)\left(\frac{1}{\exp\left\{\frac{\theta_3 - t}{\theta_4}\right\}} - \frac{1}{\exp\left\{\frac{\theta_4 - t}{\theta_6}\right\}}\right)
+\end{equation}
+
+## Greendown - 7 Parameter
+
+\begin{equation}
+\tag{2}
+v(t, \, \boldsymbol\theta) = \frac{1}{1+\exp\{\theta_1\}} + \left(\theta_2 - \exp\{\theta_7\} t\right)\left(\frac{1}{\exp\left\{\frac{\theta_3 - t}{\theta_4}\right\}} - \frac{1}{\exp\left\{\frac{\theta_4 - t}{\theta_6}\right\}}\right)
+\end{equation}
+
+## Greendown & distinct dormancy - 8 parameter
+
+\begin{equation}
+\tag{2}
+v(t, \, \boldsymbol\theta) = \frac{1}{1+\exp\{\theta_1\}} + \left(\theta_2 - \exp\{\theta_7\} t\right)\left(\frac{1}{\exp\left\{\frac{\theta_3 - t}{\theta_4}\right\}} - \frac{1}{\exp\left\{\frac{\theta_4 - t}{\theta_6}\right\}}\right)
+\end{equation}
+
+
+
+

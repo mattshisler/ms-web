@@ -1,0 +1,1031 @@
+---
+title: "Step 19 - Applying the spatial model to a test region of Harvard Forest"
+description: "TBD"
+author:
+  - name: Matthew Shisler
+    affiliation: North Carloina State University - Department of Statistics
+    affiliation-url: https://statistics.sciences.ncsu.edu/ 
+date: "3/29/2023"
+categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
+draft: false 
+format:
+  html: 
+    code-fold: false
+execute: 
+  eval: true
+  freeze: false
+---
+
+
+```{r}
+#| label: load-packages
+#| output: false
+#| code-summary: "Code: Load the packages"
+#| code-fold: true
+#| message: false
+
+library(tidyverse)
+library(igraph)
+library(viridis)
+library(matrixsampling)
+library(MCMCpack)
+library(gridExtra)
+library(extraDistr)
+library(tictoc)
+library(minpack.lm)
+library(terra)
+library(ncdf4)
+library(numDeriv)
+library(MASS)
+library(lubridate)
+```
+
+## Intro
+
+We will attempt to fit the spatial model to the Harvard Forest data. We will import the layer mean data from our previous processing and refit the average model taking care to exclude some abnormal layers that are identified by visual inspection.
+
+```{r, pre-proc}
+#| code-fold: true
+
+layer_agg_hf <- read_csv("~/ms-web/research/data/harvard_forest/layer_agg_hf.csv", show_col_types = FALSE)
+
+bad_layers_year <- c(1984, 1984,
+                     1986, 
+                     1988, 
+                     1990, 
+                     1992, 
+                     1995, 1995,
+                     1999, 1999,
+                     2001,
+                     2003,
+                     2005, 2005,
+                     2008,
+                     2009, 2009,
+                     2011, 2011,
+                     2013,
+                     2014,
+                     2015, 2015,
+                     2016,
+                     2017, 2017,
+                     2019, 2019
+                     ) 
+bad_layers_doy  <- c(171, 155,
+                     167,
+                     310,
+                     315,
+                     145,
+                       9, 16,
+                       4, 332,
+                     345,
+                     334,
+                     300, 364,
+                     316,
+                      31, 183,
+                      36,  84,
+                     154,
+                     341,
+                      15, 151,
+                     339,
+                      21,  68,
+                     314,  66)
+
+
+bad_layer_year_days <- paste(bad_layers_year, bad_layers_doy, sep="-")
+
+filter_ind <- which(paste(layer_agg_hf$year, layer_agg_hf$doy, sep="-") %in% bad_layer_year_days) 
+NA_ind     <- which(is.na(layer_agg_hf$mean))
+
+layer_agg_hf <- layer_agg_hf[-c(filter_ind, NA_ind),]
+```
+
+
+For now, let's do this for a small 25x25 test region. Let's read-in the hf data, remove bad layers, crop it to a small region, aggregate into a mean value for each layer, fit the average model, linearize the double logistic function around the average model parameter estimates, compute the residuals of the average model, construct the basis function matrix from the gradient of the double logistic function evaluated at the avg model parameter estimates, compute estimates of the delta parameter vectors using the basis function matrix and the avg model residuals, compute estimate of the covariance of the delta parameter vectors using the estimated delta parameter vectors, treat these results as inputs for the spatial Bayesian hierarchical model, estimate the covariate effects at each site.
+
+```{r}
+
+ReadNcTs <- function(ncfile) {
+    r <- rast(ncfile)
+    # Get time
+    nc_in <- nc_open(ncfile)
+    dates <- ncvar_get(nc_in, "time")
+    nc_close(nc_in)
+    # Assign time to the original image object
+    if (nchar(dates[1]) == 8) {
+        fm <- "%Y%m%d"
+    } else if (nchar(dates[1] == 7)) {
+        fm <- "%Y%j"
+    }
+    time(r) <- as.Date(as.character(dates), tryFormats = fm)
+
+    # Reorder the layers by time
+    r <- r[[order(time(r))]]
+
+    # Get map projection
+    tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
+    crs(r) <- crs(tif)
+
+    return(r)
+}
+
+# Complete Data
+hf <- ReadNcTs("~/ms-web/research/data/harvard_forest/harvard_forest_evi2.nc")
+hf
+
+
+# filtered data - no NA layers or layers previously identified to be erroneous.
+hf <- hf[[-c(filter_ind, NA_ind)]]
+hf
+plot(hf[[100]])
+
+
+# there are 12 extra pixels with NA values for everything. Let's crop those from the spatraster.
+hf <- crop(hf, ext(1923375, 1926405, 2412500, 2415165))
+hf
+plot(hf[[100]], range = c(0,1))
+
+lpix <- 25
+# we will crop again to create a small test region.
+hf_test <- crop(hf, ext(1926405 - lpix*30, 1926405, 2412500, 2412500 + lpix*30))
+hf_test
+
+
+plot(hf[[100]], range = c(0,1))
+plot(hf_test[[100]], range = c(0,1))
+
+
+tic()
+result2 <- global(hf_test, "mean", na.rm=T)
+toc()
+
+```
+
+```{r}
+
+layer_agg <- global(hf_test, fun = c("mean", "notNA"), na.rm = T)
+
+hf_name_date <- data.frame(name = names(hf_test), date = time(hf_test))
+layer_agg$name <- row.names(layer_agg)
+
+layer_agg <- layer_agg %>%
+  inner_join(hf_name_date, by = "name") %>%
+  mutate(doy = yday(date)) %>%
+  mutate(year = year(date)) %>%
+  mutate(perc_valid = notNA/ncell(hf_test))
+
+```
+
+
+```{r}
+region <- "Harvard Forest"
+
+
+ggplot(data = layer_agg) + 
+  geom_point(aes(x = date, y = mean, col = perc_valid)) +
+    scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+
+ggplot(data = subset(layer_agg, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10),
+                             limits = c(0,1)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = mean, color = year)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = region) +
+  theme_bw()
+
+ggplot(data = subset(layer_agg, perc_valid >= 0)) + 
+  geom_point(aes(x = doy, y = year, color = perc_valid)) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_reverse() +
+  labs(title = region) +
+  theme_bw()
+```
+
+
+```{r, avg-model-fit}
+# model_equ6_orig <- as.formula("y ~ theta1 + 
+#                          theta2 * 
+#                          ((1 / (1 + exp((theta3 - t) / theta4))) - 
+#                          (1 / (1 + exp((theta5 - t) / theta6))))")
+
+
+model_equ6_alt <- as.formula("y ~ 1/(1 + exp(-theta1)) + 
+                              exp(theta2) * 
+                              ((1 / (1 + exp((theta3 - t) / exp(theta4)))) - 
+                              (1 / (1 + exp((theta5 - t) / exp(theta6)))))")
+
+
+region_agg_fit <- function(doy, vi, 
+                           model_form, 
+                           init_val = c(-1.25, -0.5, 145, 2.5, 270, 2.5), 
+                           lower_bound = c(-10, -5, 1, -5, 1, -5), 
+                           upper_bound = c(10, 5, 370, 5, 370, 5)){
+  
+  avg_fit <- nlsLM(model_form,
+             data = list(y = vi, 
+                         t = doy),
+             weights = rep(1, length(t)),
+             start = list(theta1 = init_val[1],
+                          theta2 = init_val[2],
+                          theta3 = init_val[3],
+                          theta4 = init_val[4],
+                          theta5 = init_val[5],
+                          theta6 = init_val[6]),
+             lower = lower_bound[1:6],
+             upper = upper_bound[1:6],
+             control = list("maxiter" = 1000))
+  
+  return(avg_fit)
+  
+}
+
+double_logis <- function(t, theta){
+  # double logistic function.
+  # theta1 is transformed using the logistic function.
+  # theta2 is transformed using the 
+  # This allows for all parameters to follow a gaussian distribution
+  
+  theta[1] <- plogis(theta[1])
+  theta[2] <- exp(theta[2])
+  theta[4] <- exp(theta[4])
+  theta[6] <- exp(theta[6])
+  
+  n1 <- 1
+  d1 <- 1 + exp((theta[3] - t)/theta[4])
+    
+  n2 <- 1
+  d2 <- 1 + exp((theta[5] - t)/theta[6])
+    
+  out <- theta[1] + (theta[2])*(n1/d1 - n2/d2)
+  
+  return(out)
+}
+
+hf_avg_fit6 <- region_agg_fit(doy = layer_agg$doy, vi = layer_agg_hf$mean, model_form = model_equ6_alt)
+
+
+ggplot() + 
+  geom_point(data = subset(layer_agg, perc_valid >= 0), aes(x = doy, y = mean, color = year)) +
+  geom_line(aes(x = 1:366, y = double_logis(1:366, coef(hf_avg_fit6))), color = "blue", linewidth = 1.5) +
+  scale_color_gradientn(colors = viridis(10)) + 
+  scale_y_continuous(limits = c(0,1)) +
+  labs(title = "Harvard Forest") +
+  theme_bw()
+
+```
+
+
+Now we open a connection to the raster data file and compute the residuals that result from the average model.
+
+```{r, post-proc}
+# avg_model <- data.frame(doy = 1:366, model_val = double_logis(1:366, coef(hf_avg_fit6)))
+# 
+# ReadNcTs <- function(ncfile) {
+#     r <- rast(ncfile)
+#     # Get time
+#     nc_in <- nc_open(ncfile)
+#     dates <- ncvar_get(nc_in, "time")
+#     nc_close(nc_in)
+#     # Assign time to the original image object
+#     if (nchar(dates[1]) == 8) {
+#         fm <- "%Y%m%d"
+#     } else if (nchar(dates[1] == 7)) {
+#         fm <- "%Y%j"
+#     }
+#     time(r) <- as.Date(as.character(dates), tryFormats = fm)
+# 
+#     # Reorder the layers by time
+#     r <- r[[order(time(r))]]
+# 
+#     # Get map projection
+#     tif <- rast(list.files(dirname(ncfile), ".tif$", full.names = TRUE)[1])
+#     crs(r) <- crs(tif)
+# 
+#     return(r)
+# }
+
+# # Complete Data
+# hf <- ReadNcTs("~/ms-web/research/data/harvard_forest/harvard_forest_evi2.nc")
+# hf
+# 
+# 
+# # filtered data - no NA layers or layers previously identified to be erroneous.
+# hf <- hf[[-c(filter_ind, NA_ind)]]
+# hf
+# plot(hf[[100]])
+# 
+# 
+# # there are 12 extra pixels with NA values for everything. Let's crop those from the spatraster.
+# hf <- crop(hf, ext(1923375, 1926405, 2412500, 2415165))
+# hf
+
+# compute residuals
+hf_test_residuals <- sapp(hf_test, function(x) x - double_logis(yday(time(x)), coef(hf_avg_fit6)))
+
+plot(hf_test[[100]])
+plot(hf_test_residuals[[1]])
+
+
+```
+
+Next we use the gradient from the linearization to construct the basis functions.
+
+```{r}
+
+# grad_basis_functions <- function(t, theta, dl_param = 6){
+#   t <- t%%366
+#   
+#   e34 <- exp((theta[3] - t) / theta[4])
+#   e56 <- exp((theta[5] - t) / theta[6])
+#   
+#   B1 <- 1
+#   B2 <- ((1 / (1 + e34)) - (1 / (1 + e56)))
+#   B3 <- -(theta[2]*e34)/(theta[4]*(1+e34)^2)
+#   B4 <- (theta[2]*e34*(theta[3]-t))/((theta[4]*(1+e34))^2)
+#   B5 <- (theta[2]*e56)/(theta[6]*(1+e56)^2)
+#   B6 <- -(theta[2]*e56*(theta[5]-t))/((theta[6]*(1+e56))^2)
+# 
+#   B <- unname(cbind(B1, B2, B3, B4, B5, B6))
+#   
+#   return(B)
+# }
+# 
+# 
+# X <- grad_basis_functions(1:366, coef(hf_avg_fit6), dl_param = 6)
+# 
+# matplot(X, type="l", main = "Analytical Gradient", xlab = "t")
+
+
+gradinput <- function(x,t){
+  return(double_logis(t,x))
+}
+
+X <- matrix(0, nrow = 366, ncol = 6)
+for (i in 1:366){
+  X[i,] <- numDeriv::grad(gradinput, x = coef(hf_avg_fit6), t=i)
+}
+
+# X <- apply(X, MARGIN = 2, scale)
+# X[,1] <- plogis(coef(hf_avg_fit6)[1])
+
+matplot(X, type="l", main = "Numerical Gradient", xlab = "t")
+
+```
+
+Using these basis functions and the residuals we will compute point estimates of the $\boldsymbol\delta_{s,t}$ vectors. Storing this might be interesting.
+
+```{r}
+p <- 6
+k <- length(unique(layer_agg$year))
+n <- ncell(hf_test_residuals)
+
+# XtX_inv_Xt 
+
+years <- unique(layer_agg$year)
+
+layers_for_year <- vector(mode = "list", length = k)
+doy_for_year    <- vector(mode = "list", length = k)
+
+dates <- time(hf_test)
+
+for (t in 1:k){
+  layers_for_year[[t]] <- which(year(dates) == years[t])
+  doy_for_year[[t]]    <- yday(dates[layers_for_year[[t]]])
+}
+names(layers_for_year) <- years
+names(doy_for_year) <- years
+
+
+n <- ncell(hf_test_residuals)
+delta <- array(NA, dim = c(p,k,n))
+
+invert_issue <- rep(0,n)
+
+
+tic()
+for(t in 1:length(years)){
+  
+  save_XtXinvXt <- list()
+  
+  for(s in 1:n){
+    
+    resid_temp <- as.numeric(terra::extract(hf_test_residuals[[layers_for_year[[t]]]], s))
+    good_ind   <- !is.na(resid_temp)
+    
+    if (sum(good_ind) > p){
+      invert_issue[s] <- 1
+      row_temp   <- doy_for_year[[t]][good_ind]
+      day_seq    <- paste(row_temp, collapse = "-")
+      
+      # save calc if not already created.
+      if (day_seq %in% names(save_XtXinvXt)){
+        delta[,t,s] <- save_XtXinvXt[[day_seq]]%*%resid_temp[good_ind]
+      } else {
+        X_temp     <- X[row_temp,]
+        try({
+          save_XtXinvXt[[day_seq]] <- solve(t(X_temp)%*%X_temp)%*%t(X_temp)
+          delta[,t,s] <- save_XtXinvXt[[day_seq]]%*%resid_temp[good_ind]
+        }, silent = T)
+      }
+    }
+  }
+}
+toc()
+
+# delta1 <- hf_residuals[[1]]
+# 
+# for (i in 1:p){
+#   values(delta1) <- delta[i,35,]
+#   plot(delta1)
+# }
+
+
+```
+ran in about 42 min for 89x101 hf full plot.
+ran in about 2.4 min for 25x25 hf test plot.
+
+Using the point estimates of $\widehat{\boldsymbol{\delta}}_{s,t}$ and the region average $\widehat{\boldsymbol{\theta}}_0$, we can recover $\widehat{\boldsymbol{\theta}}_{s,t}$ using $\widehat{\boldsymbol{\theta}}_{s,t} = \widehat{\boldsymbol{\delta}}_{s,t} - \widehat{\boldsymbol{\theta}}_0$.
+
+We can also apply back-transformations to recover values corresponding to the original parameterization of the double-logistic function.
+```{r}
+
+spat_domain <- expand.grid(x = 1:sqrt(n), y = 1:sqrt(n))
+spat_domain$label <- 1:n
+
+display_ls <- vector(mode = "list", length = k)
+
+for (t in 1:k){
+  temp <- spat_domain
+  temp$delta1 <- plogis(delta[1,t,] + coef(hf_avg_fit6)[1])
+  temp$delta2 <- exp(delta[2,t,] + coef(hf_avg_fit6)[2])
+  temp$delta3 <- (delta[3,t,] + coef(hf_avg_fit6)[3])
+  temp$delta4 <- exp(delta[4,t,] + coef(hf_avg_fit6)[4])
+  temp$delta5 <- (delta[5,t,] + coef(hf_avg_fit6)[5])
+  temp$delta6 <- exp(delta[6,t,] + coef(hf_avg_fit6)[6])
+  temp$year <- rep(years[t], n)
+  display_ls[[t]] <- temp 
+}
+
+display_df <- do.call(rbind, display_ls)
+
+panel_names <- as_labeller(function(x) paste('t =', x))
+
+ggplot(display_df) +
+    geom_tile(aes(x, y, fill=delta1)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         limits = c(0,0.5),
+                         name = bquote(theta["s,t,1"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+
+ggplot(display_df) +
+    geom_tile(aes(x, y, fill=delta2)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         limits = c(0,1.25),
+                         name = bquote(theta["s,t,2"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(display_df) +
+    geom_tile(aes(x, y, fill=delta3)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         limits = c(100, 180),
+                         name = bquote(theta["s,t,3"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(display_df) +
+            geom_tile(aes(x, y, fill=delta4)) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(0,30),
+                                 name = bquote(theta["s,t,4"])) +
+            coord_fixed() + 
+            theme_void() + 
+            facet_wrap(~year, labeller = panel_names)
+
+ggplot(display_df) +
+            geom_tile(aes(x, y, fill=delta5)) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(220,365),
+                                 name = bquote(theta["s,t,5"])) +
+            coord_fixed() + 
+            theme_void() + 
+            facet_wrap(~year, labeller = panel_names)
+
+ggplot(display_df) +
+            geom_tile(aes(x, y, fill=delta6)) +
+            scale_y_reverse() +
+            scale_fill_gradientn(colors = viridis(10),
+                                 limits = c(0,40),
+                                 name = bquote(theta["s,t,6"])) +
+            coord_fixed() + 
+            theme_void() + 
+            facet_wrap(~year, labeller = panel_names)
+
+```
+
+1st param - 1984, 1996
+
+2nd param - 1984, 1996 - a note about parameter 2 - does it even make sense to compare the values here? This parameter may need to be higher to compensate for discounting by green-up and green-down curves that are close together. Is it better to evaluate the max of the double logistic function? If so, how do we quantify the uncertainty there? It no longer makes sense to include it in a linear hierarchical model, right?
+
+3rd param - 1984, 1985, 1987 (?), 1989, 1990 (?), 1996, 2012 (?)
+
+4th param - 1984, 1985, 1989, 1996, 2012, 2017 (?)
+
+```{r}
+k <- 37
+
+plot(1:366, double_logis(1:366, coef(hf_avg_fit6)), type = "l", col = "red", ylim = c(0,1))
+for (t in 1:k){
+  lines(1:366, double_logis(1:366, coef(hf_avg_fit6)) + X%*%delta[,t,5], type = "l")
+}
+
+temp_ind <- 1:k
+temp_ind <- temp_ind[-which(years %in% c(1984, 1985, 1987, 1989, 1990, 1996, 2012))]
+
+plot(1:366, double_logis(1:366, coef(hf_avg_fit6)), type = "l", col = "red", ylim = c(0,1))
+for (t in temp_ind){
+  lines(1:366, double_logis(1:366, coef(hf_avg_fit6)) + X%*%delta[,t,5], type = "l")
+}
+
+
+```
+
+
+Perhaps we should consider filtering out certain years. 1984, 1985, 1987, 1989, 1990, 1996, 2012 seem to have issues.
+
+Next we'll want to compute sample covariance matrices for each year from the estimated delta vectors. We'll only do this for "good years".
+```{r}
+k_r <- length(temp_ind)
+delta_r <- delta[,temp_ind,]
+
+#initialize array
+Omega_arr     <- array(rep(c(diag(p)), k_r), dim = c(p,p,k_r))
+inv_Omega_arr <- array(rep(c(diag(p)), k_r), dim = c(p,p,k_r))
+for (t in 1:k_r){
+  Omega_arr[,,t]     <- cov(t(matrix(delta_r[,t,1:n], ncol = n)), use = "complete.obs")
+  inv_Omega_arr[,,t] <- solve(Omega_arr[,,t])
+}
+
+```
+
+
+MCMC set-up. Some considerations:
+  1) Need to subset data for "good" years.
+  2) Need to handle special cases that come with real-world data. They are:
+      a) A pixel with no data across all years - needs to be ignored. Cannot estiamte $\boldsymbol{\beta}_s$
+      b) A pixel that is isolated for all years - all neighbors are NA. Cannot condition on neighbors. Zero mean?
+      c) A pixel at location s has NA value for a year t - skip
+      d) A pixel at location s has neighbors with NA values for year t - filter NA neighbors. Adjust weights and their sum.
+      e) A pixel at location s has all NA neighbors for year t - ??
+```{r}
+p <- 6
+q <- 2
+k <- k_r
+n <- ncell(hf_test)
+
+# For now, the only covariate is time in years, centered and scaled.
+# Consider changing in the future.
+# Z array is 3 dim - left to right: time, covariate vector length, spatial index
+Z <- array(NA, dim=c(k,q,n))
+for (s in 1:n){
+  #Z[,,s] <- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)
+  Z[,,s] <- matrix(c(rep(1,k), temp_ind), ncol = q)
+}
+
+niters <- 1000
+burn   <- 301
+# burn   <- 0.1*niters
+
+# storage
+keep_beta_mat <- array(0, dim = c(p*q, n, niters))
+keep_Lambda   <- array(0, dim = c(p*q, p*q, niters))
+keep_rho_eps  <- rep(0, niters) 
+keep_rho_beta <- rep(0, niters)
+
+# initial values
+mc_beta_mat <- matrix(0, nrow = p*q, ncol = n)
+mc_beta_arr <- array(NA, dim = c(p, q, n))
+mc_beta_arr[1:p,1:q,] <- mc_beta_mat
+mc_Lambda   <- diag(p*q)
+mc_rho_eps  <- 0.8
+mc_rho_beta <- 0.8
+keep_beta_mat[,,1] <- mc_beta_mat
+keep_Lambda[,,1] <- mc_Lambda
+keep_rho_eps[1] <- mc_rho_eps
+keep_rho_beta[1] <- mc_rho_beta
+
+
+# prior parameters
+nu <- p*q - 1 + 0.1 
+G  <- diag(p*q)
+
+# M-H tuning parameters
+MH_beta <- 0.1
+att_beta <- 0
+acc_beta <- 0
+
+MH_eps  <- 0.1
+att_eps <- 0
+acc_eps <- 0
+
+
+```
+
+Some pre-computes for the model. We need to be careful because now there are missing values that need to be handled.
+
+```{r}
+# tic()
+
+# Pre-compute the first summation term for V in the full conditional for beta.
+sumt_ZT_Omega_inv_Z <- array(0, dim = c(p*q, p*q, n))
+for (s in 1:n){
+  for (j in 1:k){
+    sumt_ZT_Omega_inv_Z[,,s] <- sumt_ZT_Omega_inv_Z[,,s] +
+                                t(kronecker(t(Z[j,,s]),diag(p)))%*%inv_Omega_arr[,,j]%*%kronecker(t(Z[j,,s]), diag(p))
+  }
+}
+
+# collect the neighbor indices for use within the sampling loop. 
+# probably a better way to do this withough creating a sparse matrix.
+spat_domain_g <- make_lattice(c(sqrt(n),sqrt(n)), mutual = TRUE)
+W <- as_adjacency_matrix(spat_domain_g, sparse=0)
+neighbor_idx     <- apply(W, MARGIN = 1, function(x) which(x==1))
+neighbor_weights <- lapply(1:n, function(x) W[x, neighbor_idx[[x]]])
+
+
+# Pre-compute the number of neighbors for each pixel.
+w_plus <- rowSums(W)
+D <- diag(w_plus)
+
+# pre-compute residuals for the first iteration.
+Bz <- delta_r
+for (j in 1:k){
+  for (s in 1:n){
+    Bz[,j,s] <- mc_beta_arr[,,s]%*%Z[j,,s]
+  }
+}
+resid_r <- delta_r - Bz
+
+# loglike functions for Metropolis-Hastings steps
+# this assumes that we will be able to estiamte a beta for every pixel. Not always the case. . .
+rho_beta_loglike <- function(rho, beta_mat, neighbor_idx, neighbor_weights, w_plus, inv_Lambda){
+  
+  temp1 <- 0
+  temp2 <- 0
+  for (s in 1:n){
+    beta_tilde <- (beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights[[s]])/w_plus[s]
+    temp1 <- temp1 + w_plus[s]*(t(beta_tilde)%*%inv_Lambda%*%beta_tilde) 
+    temp2 <- temp2 + w_plus[s]*(t(beta_mat[,s])%*%inv_Lambda%*%beta_tilde)
+  }
+  return(-0.5*((rho^2)*temp1 - 2*rho*temp2))
+  
+}
+
+rho_eps_loglike <- function(rho, delta, Bz, resid, inv_Omega_arr, neighbor_idx, neighbor_weights, w_plus){
+
+  # I don't think this is used anywhere.
+  # dbz <- delta + Bz
+  
+  temp1 <- 0
+  temp2 <- 0
+  for (s in 1:n){
+    for (t in 1:k){
+      
+      # skip if value is missing.
+      if (!is.na(delta[1,t,s])){
+  
+        # must be careful to remove NAs and adjust w_plus accordingly,
+        count_NA_neighbors <- sum(is.na(delta[1,t,neighbor_idx[[s]]]))
+        if (count_NA_neighbors == 0){
+          
+          r <- resid[,t,neighbor_idx[[s]]]%*%neighbor_weights[[s]]
+          
+          temp1 <- temp1 + (t(r)%*%inv_Omega_arr[,,t]%*%r)*w_plus[s]
+          temp2 <- temp2 + (t(delta[,t,s]) + t(Bz[,t,s]))%*%inv_Omega_arr[,,t]%*%r
+          
+        } else if (count_NA_neighbors < w_plus[s]) {
+          
+          temp_w_plus <- w_plus[s] - count_NA_neighbors
+          r <-  as.matrix(rowMeans(resid[,1,neighbor_idx[[s]]], na.rm = T), ncol=1)
+          
+          temp1 <- temp1 + (t(r)%*%inv_Omega_arr[,,t]%*%r)*temp_w_plus
+          temp2 <- temp2 + (t(delta[,t,s]) + t(Bz[,t,s]))%*%inv_Omega_arr[,,t]%*%r
+          
+        } else {
+          
+          # do nothing - here's no neighbors we can't compute neighbor residuals.
+          
+        }
+      }
+    }
+  }
+  
+  return(-0.5*((rho^2)*temp1 - 2*rho*temp2))
+}
+```
+
+
+scratch.
+```{r}
+#| code-fold: true
+#| eval: false
+#| code-summary: Scratch.
+
+# we need to know the good neighbors for each pixel in each year. . .
+s <- 1
+
+s <- 248
+delta_r[1,1,neighbor_idx[[s]]]
+!is.na(delta_r[1,1,neighbor_idx[[s]]])
+
+
+good_neighbors <- vector(mode = "list", k)
+for (t in 1:k){
+  
+  good_temp <- vector(mode = "list", n)
+  
+  for (s in 1:n){
+    good_temp[[s]] <- neighbor_idx[[s]][!is.na(delta_r[1,t,neighbor_idx[[s]]])]
+  }
+  names(good_temp) <- 1:n
+  good_neighbors[[t]] <- good_temp
+}
+names(good_neighbors) <- 1:k
+
+s <- 248
+delta_r[,1,neighbor_idx[[s]]]
+
+
+as.matrix(rowMeans(delta_r[,1,neighbor_idx[[s]]], na.rm = T), ncol=1)
+
+
+      neighbor_idx[1]
+neighbor_weights[1]
+
+```
+
+
+```{r}
+tic()
+for (iter in 2:niters){
+
+  # computing residuals needed in full conditional for beta - M.
+  # probably a better way to do this.
+  
+  inv_mc_Lambda <- solve(mc_Lambda)
+  
+  # sample beta_s
+  for (s in 1:n){
+    # s <- 147
+    # if there were a pixel with no data over all years, then this would be the place to skip them.
+    
+    V <- w_plus[s]*sumt_ZT_Omega_inv_Z[,,s] + w_plus[s]*inv_mc_Lambda
+    
+    # revisit for efficiency
+    temp <- 0
+    for (j in 1:k){
+      # skip if the value of delta_r[,t,s] is missing (NA)
+      if(!is.na(delta_r[1,j,s])){
+        
+        # Check if there are neighbors of pixel s,t with missing values. if so, adjust calculation.
+        count_NA_neighbors <- sum(is.na(delta_r[1,j,neighbor_idx[[s]]]))
+        if (count_NA_neighbors == 0){ # all neighbors are good)
+            temp <- temp + 
+                    t(kronecker(t(Z[j, ,s]),diag(p))) %*%
+                    inv_Omega_arr[ , ,j] %*%
+                    (mc_rho_eps * resid_r[ ,j,neighbor_idx[[s]]] %*% neighbor_weights[[s]] + w_plus[s] * delta_r[ ,j,s])
+        
+          } else if (count_NA_neighbors < w_plus[s]){ # some but not all neighbors NA. 
+            
+            temp_w_plus <-  w_plus[s] - count_NA_neighbors
+          
+            # TODO: the last line here uses the rowMeans function and assumes equally weighted neighbors. Will need to change if we decide
+            # to weight neighbors differently.
+            temp <- temp + 
+                    t(kronecker(t(Z[j, ,s]),diag(p))) %*%
+                    inv_Omega_arr[ , ,j] %*%
+                    (mc_rho_eps * as.matrix(rowMeans(delta_r[,1,neighbor_idx[[s]]], na.rm = T), ncol=1) + temp_w_plus * delta_r[ ,j,s])
+        } else { # all neighbors NA
+            temp <- temp + 
+                    t(kronecker(t(Z[j, ,s]),diag(p))) %*%
+                    inv_Omega_arr[ , ,j] %*%
+                    (delta_r[ ,j,s])
+        }
+      }
+    }
+    
+    M <- temp + mc_rho_beta*(inv_mc_Lambda%*%(mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights[[s]]))
+    
+    
+    V_inv <- chol2inv(chol(V))
+    mc_beta_mat[,s]  <- V_inv%*%M+t(chol(V_inv))%*%rnorm(p*q)
+    
+    
+  }
+  mc_beta_arr[1:p,1:q,] <- mc_beta_mat
+  
+  # sample Lambda
+  # change this to add the D diagonal straight to rho_beta*W
+  H <- mc_beta_mat%*%(D - mc_rho_beta*W)%*%t(mc_beta_mat)
+  mc_Lambda <- MCMCpack::riwish(nu + n, G + H)
+  
+  # compute residuals
+  Bz <- delta_r
+  for (j in 1:k){
+    for (s in 1:n){
+      Bz[,j,s] <- mc_beta_arr[,,s]%*%Z[j,,s]
+    }
+  }
+  resid_r <- delta_r - Bz
+  
+  # sample rho_eps
+  att_eps <- att_eps + 1
+  can <- rtnorm(1, mc_rho_eps, MH_eps, a = 0, b = 1)
+  R   <- rho_eps_loglike(can,        delta_r, Bz, resid_r, inv_Omega_arr, neighbor_idx, neighbor_weights, w_plus) - # Likelihood
+         rho_eps_loglike(mc_rho_eps, delta_r, Bz, resid_r, inv_Omega_arr, neighbor_idx, neighbor_weights, w_plus) +
+         dtnorm(mc_rho_eps, mean = can        , sd = MH_eps, a = 0, b = 1, log = T) -      # M-H adjustment
+         dtnorm(can,        mean = mc_rho_eps , sd = MH_eps, a = 0, b = 1, log = T)
+  if(log(runif(1)) < R){
+    acc_eps <- acc_eps + 1
+    mc_rho_eps  <- can
+  }
+  
+  # sample rho_beta
+  att_beta <- att_beta + 1
+  can <- rtnorm(1, mc_rho_beta, MH_beta, a = 0, b = 1)
+  R   <- rho_beta_loglike(can,         mc_beta_mat, neighbor_idx, neighbor_weights, w_plus, inv_mc_Lambda) - # Likelihood
+         rho_beta_loglike(mc_rho_beta, mc_beta_mat, neighbor_idx, neighbor_weights, w_plus, inv_mc_Lambda) +
+         dtnorm(mc_rho_beta, mean = can         , sd = MH_beta, a = 0, b = 1, log = T) -      # M-H adjustment
+         dtnorm(can,         mean = mc_rho_beta , sd = MH_beta, a = 0, b = 1, log = T)
+  if(log(runif(1)) < R){
+    acc_beta <- acc_beta + 1
+    mc_rho_beta  <- can
+  }
+
+  # tuning
+  if(iter < burn){
+    if(att_eps > 25){
+      if(acc_eps/att_eps < 0.3){MH_eps <- MH_eps*0.8}
+      if(acc_eps/att_eps > 0.6){MH_eps <- MH_eps*1.2}
+      acc_eps <- att_eps <- 0
+    }
+  }
+  
+  if(iter < burn){
+    if(att_beta > 50){
+      if(acc_beta/att_beta < 0.3){MH_beta <- MH_beta*0.8}
+      if(acc_beta/att_beta > 0.6){MH_beta <- MH_beta*1.2}
+      acc_beta <- att_beta <- 0
+    }
+  }
+  
+  
+  keep_beta_mat[,,iter] <- mc_beta_mat 
+  keep_Lambda[,,iter]   <- mc_Lambda
+  keep_rho_eps[iter]    <- mc_rho_eps
+  keep_rho_beta[iter]   <- mc_rho_beta
+}
+toc()
+```
+
+
+
+
+```{r}
+s <- 1
+burn <- 1
+beta_subscripts <- c("1,1", "1,2", "1,3","1,4","1,5","1,6", "2,1", "2,2", "2,3", "2,4", "2,5", "2,6")
+
+par(mfcol = c(2,2))
+for (i in 1:(p*q)){
+  tsub <- beta_subscripts[i]
+  plot(burn:niters, 
+       keep_beta_mat[i,s,burn:niters], 
+       type = "l",
+       xlab = "iteration",
+       ylab = bquote(beta[.(tsub)]))
+  # abline(h = beta_mat[i,s], col = "red")
+}
+mtext(paste("Pixel: ",s), side = 3, line = -3, outer = TRUE)
+
+```
+
+
+
+```{r}
+
+
+spat_domain$beta13 <- rowMeans(keep_beta_mat[3, 1:n, 301:niters])
+spat_domain$beta23 <- rowMeans(keep_beta_mat[9, 1:n, 301:niters])
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta13)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,1,3"])) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta23)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,2,3"])) +
+  coord_fixed() + 
+  theme_void()
+
+
+spat_domain$beta15 <- rowMeans(keep_beta_mat[5, 1:n, 301:niters])
+spat_domain$beta25 <- rowMeans(keep_beta_mat[11, 1:n, 301:niters])
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta15)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,1,3"])) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta25)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,2,3"])) +
+  coord_fixed() + 
+  theme_void()
+
+
+```
+
+
+
+
+```{r}
+burn <- 2
+par(mfrow = c(2,2))
+
+# off-diagonal
+for (i in 1:(p*q)){
+  for (j in i:(p*q)){
+    tsub <- paste0(i,j)
+    plot(burn:niters, 
+         keep_Lambda[i,j,burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(Lambda[.(tsub)]))
+  }
+  mtext(bquote(Lambda ~ "Matrix"), side = 3, line = -3, outer = TRUE)
+}
+
+```
+
+```{r}
+burn <- 10
+par(mfrow=c(1,2))
+
+plot(burn:niters, 
+         keep_rho_beta[burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(rho[beta]))
+
+plot(burn:niters, 
+         keep_rho_eps[burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(rho["\u03F5"]))
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
