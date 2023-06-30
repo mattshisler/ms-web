@@ -16,7 +16,6 @@ execute:
   freeze: false
 ---
 
-
 ```{r}
 #| label: load-packages
 #| output: false
@@ -31,6 +30,7 @@ library(gridExtra)
 library(extraDistr)
 library(tictoc)
 ```
+
 
 ## Intro
 
@@ -141,6 +141,7 @@ Though we defined the elements of the neighborhood matrix, $\mathbf{W}$, to be e
 Next will simulate data from this model. What follows is some scratch code for the simulation. Here we set $p = 2$, the dimension of the response vectors, $q = 2$, the number of covariates, and $k=20$ years.
 
 We start by constructing the spatial domain. In this case a regular lattice partitioned into $n = 25^2$ areal units. The neighborhood matrix is the 1st order neighborhood structure.
+
 ```{r}
 # specify spatial domain
 
@@ -154,7 +155,9 @@ D <- diag(rowSums(W))
 ```
 
 
+
 We sample the spatial random noise vectors for each pixel-year pair. At least initially, we specify these errors with no spatial variation by setting the $\rho_\epsilon$ parameter equal to 0.
+
 ```{r}
 
 p = 2 
@@ -187,7 +190,9 @@ for (t in 1:k){
 
 
 
+
 We can plot a sequence by year of the 1st and 2nd element in the random noise vector, $\boldsymbol\epsilon_{s,t}$
+
 ```{r}
 #| code-fold: true
 
@@ -227,7 +232,9 @@ ggplot(display_df) +
 
 ```
 
+
 With $p = q = 2$, we will need to sample $\boldsymbol\beta_{s}$ as a $4 \times 1$ of stacked $2 \times 1$ $\boldsymbol\beta_{s,q}$ vectors for each site from $\text{MCAR}(\rho_\beta, \Lambda)$.
+
 
 ```{r}
 # propriety parameter for beta MCAR
@@ -308,7 +315,9 @@ do.call(grid.arrange,
 
 ```
 
+
 Next construct a covariate matrix, $\boldsymbol{Z}_{s,t}$ for the simulation. In this example we include an intercept column of $1$s and a centered sequence $1$ to $k$ and hold this constant across space. We could experiment with spatially varying covariate data at a later time. Also in this next block we sample the response vectors, $\boldsymbol\delta_{s,t}$.
+
 ```{r}
 # sample covariates
 # For now, the only covariate is time in years, centered and scaled.
@@ -334,7 +343,9 @@ for (s in 1:n){
 }
 ```
 
+
 Plot first and second elements of $\boldsymbol\delta_{s,t}$ across space by year, $t$.
+
 ```{r}
 #| code-fold: true
 
@@ -376,6 +387,7 @@ ggplot(display_df) +
 
 ```
 
+
 We can go back and simulate more complex data sets at a later time with relative ease. For now, let's move on to the MCMC. 
 
 The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using the full conditionals for $\boldsymbol\beta_s$ and $\boldsymbol\Lambda$ and Metropolis steps for the MCAR propriety parameters $\rho_\epsilon$ and $\rho_\beta$.
@@ -383,6 +395,7 @@ The MCMC will be a combination of Metropolis and Gibbs steps. Gibbs steps using 
 The sampler is intialized with values that are much different than the values used to generate the simulated data. 
 
 This naive implementation is not particularly computationally efficient nor have we tested how it scales with the dimension of the response vector, number of covariates, or spatial extent. These will be tackled at a later time. All we are doing here is verifying convergence through some cursory checks of trace plots. Formal diagnostics will be examined later as well.
+
 
 
 ```{r}
@@ -426,9 +439,11 @@ acc_eps <- 0
 
 ```
 
+
 Work in progress MCMC loop. At the moment both $\boldsymbol\beta_s$ and $\Lambda$ are updated. The MCAR propriety parameters, $\rho_\epsilon$ and $\rho_\beta$ are held fixed.
 
 Some pre-computes and function definitions.
+
 ```{r}
 #| eval: true
 
@@ -500,7 +515,9 @@ rho_eps_loglike <- function(rho, delta, Bz, resid, inv_Omega_arr, neighbor_idx, 
 
 ```
 
+
 Sampling loop.
+
 ```{r}
 #| cache: true
 
@@ -599,9 +616,11 @@ toc()
 
 ```
 
+
 At this point in the model fit we evaluate some trace plots of the parameters $\boldsymbol\beta_{s}$, $\boldsymbol\Lambda$, $\rho_\beta$, and $\rho_\varepsilon$.
 
 First, we'll look at the entire trace plot a single location without 
+
 
 ```{r}
 s <- 1
@@ -624,7 +643,9 @@ mtext(paste("Pixel: ",s), side = 3, line = -3, outer = TRUE)
 ```
 
 
+
 It's clear it takes the model a few iterations to converge. How do the trace plots without the burn-in iterations look? We sample a handful of locations and constuct trace plots of $\boldsymbol\beta_{s}$ without burn-in.
+
 ```{r}
 #| code-fold: true
 burn <- 50
@@ -649,7 +670,9 @@ for (s in location_sample){
 }
 ```
 
+
 Construct trace plots for $\boldsymbol\Lambda$ (upper triangle).
+
 ```{r}
 #| code-fold: true
 
@@ -671,7 +694,9 @@ for (i in 1:(p*q)){
 }
 
 ```
+
 Trace plots for $\rho_\beta$ and $\rho_\varepsilon$.
+
 ```{r}
 burn <- 1
 par(mfrow=c(1,2))
@@ -690,6 +715,7 @@ plot(burn:niters,
          ylab = bquote(rho["\u03F5"]))
     abline(h = rho_eps, col = "red")
 ```
+
 
 
 <!-- Let's do a quick visual check of the estimates $\widehat{\boldsymbol\beta}_{s}$ vs $\boldsymbol\beta_{s}$. We will plot $\widehat{\boldsymbol\beta}_{s} - \boldsymbol\beta_{s}$ across the spatial domain. -->
@@ -722,6 +748,7 @@ plot(burn:niters,
 <!--   theme_void() -->
 
 <!-- ``` -->
+
 
 
 
