@@ -1,11 +1,11 @@
 ---
-title: "Step 19 - Applying the spatial model to a test region of Harvard Forest"
-description: "TBD"
+title: "Step 19 - Applying the spatial model to a test region of Harvard Forest - w/ bug fixes"
+description: "Fixed likelihood for MCAR prop parameter. Handle missing data."
 author:
   - name: Matthew Shisler
     affiliation: North Carloina State University - Department of Statistics
     affiliation-url: https://statistics.sciences.ncsu.edu/ 
-date: "3/29/2023"
+date: "7/5/2023"
 categories: [Bayesian, MCMC, Spatial, MCAR] # self-defined categories
 draft: false 
 format:
@@ -43,12 +43,14 @@ library(lubridate)
 
 ## Intro
 
-We will attempt to fit the spatial model to the Harvard Forest data. We will import the layer mean data from our previous processing and refit the average model taking care to exclude some abnormal layers that are identified by visual inspection.
+We will attempt to fit the spatial model to a 50x50 pixel region of the Harvard Forest Region. Here are the steps:
 
-```{r, pre-proc}
+```{r, layer-filt-id}
+#| eval: true
 #| code-fold: true
 #| code-summary: Satellite snapshop filter
 
+# from a previous exploratory analysis. Used to identify the layers to filter out from the Harvard Forest spatraster object.
 layer_agg_hf <- read_csv("~/ms-web/research/data/harvard_forest/layer_agg_hf.csv", show_col_types = FALSE)
 
 bad_layers_year <- c(1984, 1984,
@@ -96,14 +98,12 @@ bad_layer_year_days <- paste(bad_layers_year, bad_layers_doy, sep="-")
 
 filter_ind <- which(paste(layer_agg_hf$year, layer_agg_hf$doy, sep="-") %in% bad_layer_year_days) 
 NA_ind     <- which(is.na(layer_agg_hf$mean))
-
-layer_agg_hf <- layer_agg_hf[-c(filter_ind, NA_ind),]
 ```
 
 
-For now, let's do this for a smaller test region. Let's read-in the hf data, remove bad layers, crop it to a small region, aggregate into a mean value for each layer, fit the average model, linearize the double logistic function around the average model parameter estimates, compute the residuals of the average model, construct the basis function matrix from the gradient of the double logistic function evaluated at the avg model parameter estimates, compute estimates of the delta parameter vectors using the basis function matrix and the avg model residuals, compute estimate of the covariance of the delta parameter vectors using the estimated delta parameter vectors, treat these results as inputs for the spatial Bayesian hierarchical model, estimate the covariate effects at each site.
+<!-- For now, let's do this for a smaller test region. Let's read-in the hf data, remove bad layers, crop it to a small region, aggregate into a mean value for each layer, fit the average model, linearize the double logistic function around the average model parameter estimates, compute the residuals of the average model, construct the basis function matrix from the gradient of the double logistic function evaluated at the avg model parameter estimates, compute estimates of the delta parameter vectors using the basis function matrix and the avg model residuals, compute sample covariance of the delta parameter vectors using the estimated delta parameter vectors, treat these results as inputs for the spatial Bayesian hierarchical model, estimate the covariate effects at each site. -->
 
-```{r}
+```{r, read-and-crop-hf}
 #| eval: true
 #| code-fold: true
 #| code-summary: Read and prep raster data
@@ -140,13 +140,13 @@ hf
 # filtered data - no NA layers or layers previously identified to be erroneous.
 hf <- hf[[-c(filter_ind, NA_ind)]]
 hf
-plot(hf[[100]])
+# plot(hf[[100]])
 
 
 # there are 12 extra pixels with NA values for everything. Let's crop those from the spatraster.
-hf <- crop(hf, ext(1923375, 1926405, 2412500, 2415165))
-hf
-plot(hf[[100]], range = c(0,1))
+# hf <- crop(hf, ext(1923375, 1926405, 2412500, 2415165))
+# hf
+# plot(hf[[100]], range = c(0,1))
 
 lpix <- 50
 # we will crop again to create a small test region.
@@ -159,10 +159,10 @@ plot(hf_test[[100]], range = c(0,1))
 
 ```
 
-```{r}
+```{r, compute-layer-summary-stats}
 #| eval: true
 #| code-fold: true
-#| code-summary: Aggregate raster data for region model
+#| code-summary: Compute raster layer stats for region model
 
 layer_agg <- global(hf_test, fun = c("mean", "notNA"), na.rm = T)
 
@@ -178,10 +178,10 @@ layer_agg <- layer_agg %>%
 ```
 
 
-```{r}
+```{r, plot-layer-summary-stats}
 #| eval: true
 #| code-fold: true
-#| code-summary: Plots of aggregated data
+#| code-summary: Plots of raster summary data
 
 region <- "Harvard Forest"
 
@@ -191,7 +191,7 @@ ggplot(data = layer_agg) +
     scale_color_gradientn(colors = viridis(10),
                              limits = c(0,1)) + 
   scale_y_continuous(limits = c(0,1)) +
-  labs(title = region) +
+  labs(title = region, x = "Date") +
   theme_bw()
 
 snap_filt <- 0.00
@@ -201,24 +201,23 @@ ggplot(data = subset(layer_agg, perc_valid >= snap_filt)) +
   scale_color_gradientn(colors = viridis(10),
                              limits = c(0,1)) + 
   scale_y_continuous(limits = c(0,1)) +
-  labs(title = region) +
+  labs(title = region, x = "Day of Year") +
   theme_bw()
 
 ggplot(data = subset(layer_agg, perc_valid >= snap_filt)) + 
   geom_point(aes(x = doy, y = mean, color = year)) +
   scale_color_gradientn(colors = viridis(10)) + 
   scale_y_continuous(limits = c(0,1)) +
-  labs(title = region) +
+  labs(title = region, x = "Day of Year") +
   theme_bw()
 
 ggplot(data = subset(layer_agg, perc_valid >= snap_filt)) + 
   geom_point(aes(x = doy, y = year, color = perc_valid)) +
   scale_color_gradientn(colors = viridis(10)) + 
   scale_y_reverse() +
-  labs(title = region) +
+  labs(title = region, x = "Day of Year") +
   theme_bw()
 ```
-
 
 ```{r, avg-model-fit}
 #| eval: true
@@ -296,27 +295,21 @@ ggplot() +
 
 ```
 
+Compute the residuals that result from the average model.
 
-Now we open a connection to the raster data file and compute the residuals that result from the average model. We can also plot the residuals for a specific satellite snapshot, but it is not particularly interesting since we just subtracted a constant value from the average model.
-
-```{r, post-proc}
+```{r, avg-model-residuals}
 #| code-fold: true
 #| eval: true
-#| code-summary: Compute residuals and plot example.
-
-
+#| code-summary: Compute residuals from average model.
 
 # compute residuals
 hf_test_residuals <- sapp(hf_test, function(x) x - double_logis(yday(time(x)), coef(hf_avg_fit6)))
 
-plot(hf_test_residuals[[100]])
-
-
 ```
 
-Next we use the gradient from the linearization to construct the basis functions.
+Construct basis function matrix from the gradient of the double-logistic function.
 
-```{r}
+```{r, construct-basis-matrix}
 #| code-fold: true
 #| eval: true
 #| code-summary: Construct basis function matrix
@@ -342,7 +335,7 @@ Next we use the gradient from the linearization to construct the basis functions
 # 
 # X <- grad_basis_functions(1:366, coef(hf_avg_fit6), dl_param = 6)
 # 
-# matplot(X, type="l", main = "Analytical Gradient", xlab = "t")
+# matplot(X, type="l", main = "Analytic Gradient", xlab = "t")
 
 
 gradinput <- function(x,t){
@@ -361,9 +354,9 @@ matplot(X, type="l", main = "Numerical Gradient", xlab = "t")
 
 ```
 
-Using these basis functions and the residuals we will compute point estimates of the $\boldsymbol\delta_{s,t}$ vectors. Storing this might be interesting.
+Using these basis functions and the residuals, compute point estimates of the $\boldsymbol\delta_{s,t}$ vectors.
 
-```{r}
+```{r, least-squares-delta-est-prep}
 #| eval: true
 #| code-fold: true
 #| code-summary: Prep for delta estimates
@@ -395,10 +388,11 @@ delta <- array(NA, dim = c(p,k,n))
 invert_issue <- rep(0,n)
 ```
 
-```{r}
+```{r, least-squares-delta-est}
 #| eval: false
 #| code-fold: true
 #| code-summary: Compute delta estimates
+
 tic()
 for(t in 1:length(years)){
   
@@ -430,14 +424,14 @@ for(t in 1:length(years)){
 toc()
 
 ```
-ran in about 42 min for 89x101 hf full plot.
-ran in about 2.4 min for 25x25 hf test plot.
-ran in about 10.25 min for 50x50 hf test plot.
+<!-- ran in about 42 min for 89x101 hf full plot. -->
+<!-- ran in about 2.4 min for 25x25 hf test plot. -->
+ran in about 10.25 min for 50x50 test plot.
 
 Using the point estimates of $\widehat{\boldsymbol{\delta}}_{s,t}$ and the region average $\widehat{\boldsymbol{\theta}}_0$, we can recover $\widehat{\boldsymbol{\theta}}_{s,t}$ using $\widehat{\boldsymbol{\theta}}_{s,t} = \widehat{\boldsymbol{\delta}}_{s,t} - \widehat{\boldsymbol{\theta}}_0$.
 
 We can also apply back-transformations to recover values corresponding to the original parameterization of the double-logistic function.
-```{r}
+```{r, plot-thetas}
 #| code-fold: true
 #| eval: true
 #| code-summary: Plot theta estimates.
@@ -528,77 +522,70 @@ ggplot(display_df) +
 
 ```
 
-1st param - 1984, 1996
-
-2nd param - 1984, 1996 - a note about parameter 2 - does it even make sense to compare the values here? This parameter may need to be higher to compensate for discounting by green-up and green-down curves that are close together. Is it better to evaluate the max of the double logistic function? If so, how do we quantify the uncertainty there? It no longer makes sense to include it in a linear hierarchical model, right?
-
-3rd param - 1984, 1985, 1987 (?), 1989, 1990 (?), 1996, 2012 (?)
-
-4th param - 1984, 1985, 1989, 1996, 2012, 2017 (?)
-
-```{r}
+Computing the least squares estimate of $\boldsymbol\delta_{s,t}$ sometimes fails due to too few satellite snapshots in a particular year. We need to identify those cases and handle them as missing data in the follow-on spatial hierarchical model.
+```{r, filter-and-id-missing-val}
 #| eval: true
 #| code-fold: true
-#| code-summary: Filter Problematic years
+#| code-summary: Identify missing values
 
-k <- 37
 
-plot(1:366, double_logis(1:366, coef(hf_avg_fit6)), type = "l", col = "red", ylim = c(0,1))
-for (t in 1:k){
-  lines(1:366, double_logis(1:366, coef(hf_avg_fit6)) + X%*%delta[,t,500], type = "l")
+years <- years[-1]
+delta <- delta[,-1,]
+k     <- 36
+
+missing_id <- list()
+
+idx <- 1
+for (s in 1:n){
+  for (t in 1:k){
+    
+    if (is.na(delta[1,t,s])){
+      missing_id[[idx]] <- c(t, s)
+      idx <- idx + 1
+    }
+    
+  }
 }
 
-temp_ind <- 1:k
-temp_ind <- temp_ind[-which(years %in% c(1984, 1985, 1987, 1989, 1990, 1996, 2012))]
+missing_id <- as.data.frame(do.call(rbind, missing_id))
+names(missing_id) <- c("year", "site")
+table(missing_id$year)
 
-
-plot(1:366, double_logis(1:366, coef(hf_avg_fit6)), type = "l", col = "red", ylim = c(0,1))
-for (t in temp_ind){
-  lines(1:366, double_logis(1:366, coef(hf_avg_fit6)) + X%*%delta[,t,500], type = "l")
-}
-
-
+# missing_id <- missing_id[missing_id$year != 1,]
 ```
 
-
-Perhaps we should consider filtering out certain years. 1984, 1985, 1987, 1989, 1990, 1996, 2012 seem to have issues.
-
-Next we'll want to compute sample covariance matrices for each year from the estimated delta vectors. We'll only do this for "good years".
-```{r}
+Compute the sample covariance $\widehat{\boldsymbol\Omega}_t$ for each year using the least squares estimates of $\boldsymbol\delta_{s,t}$.
+```{r, compute-sample-covar}
 #| eval: true
 #| code-fold: true
-#| code-summary: Compute Sample Covariances
-
-k_r <- length(temp_ind)
-delta_r <- delta[,temp_ind,]
+#| code-summary: Compute Sample Covariances for each year
 
 #initialize array
-Omega_arr     <- array(rep(c(diag(p)), k_r), dim = c(p,p,k_r))
-inv_Omega_arr <- array(rep(c(diag(p)), k_r), dim = c(p,p,k_r))
-for (t in 1:k_r){
-  Omega_arr[,,t]     <- cov(t(matrix(delta_r[,t,1:n], ncol = n)), use = "complete.obs")
+Omega_arr     <- array(rep(c(diag(p)), k), dim = c(p,p,k))
+inv_Omega_arr <- array(rep(c(diag(p)), k), dim = c(p,p,k))
+for (t in 1:k){
+  Omega_arr[,,t]     <- cov(t(matrix(delta[,t,1:n], ncol = n)), use = "complete.obs")
   inv_Omega_arr[,,t] <- solve(Omega_arr[,,t])
 }
 
 ```
 
+Now to set-up the MCMC for the spatial hierachical model.
 
-MCMC set-up. Some considerations:
-  1) Need to subset data for "good" years.
-  2) Need to handle special cases that come with real-world data. They are:
-      a) A pixel with no data across all years - needs to be ignored. Cannot estiamte $\boldsymbol{\beta}_s$
-      b) A pixel that is isolated for all years - all neighbors are NA. Cannot condition on neighbors. Zero mean?
-      c) A pixel at location s has NA value for a year t - skip
-      d) A pixel at location s has neighbors with NA values for year t - filter NA neighbors. Adjust weights and their sum.
-      e) A pixel at location s has all NA neighbors for year t - ??
-```{r}
+Number of spatial locations  - 2500
+Number of covariates         - 2
+Dimension of response vector - 6x1
+Number of MCMC iterations    - 2000
+
+Runtime: A little over 3 hours.
+
+```{r, mcmc-set-up}
 #| code-fold: true
 #| eval: true
 #| code-summary: MCMC set-up
 
 p <- 6
 q <- 2
-k <- k_r
 n <- ncell(hf_test)
 
 # For now, the only covariate is time in years, centered and scaled.
@@ -607,11 +594,11 @@ n <- ncell(hf_test)
 Z <- array(NA, dim=c(k,q,n))
 for (s in 1:n){
   #Z[,,s] <- matrix(c(rep(1,k),rnorm((q-1)*k,0,1)), ncol = q)
-  Z[,,s] <- matrix(c(rep(1,k), temp_ind), ncol = q)
+  Z[,,s] <- matrix(c(rep(1,k), 1:k), ncol = q)
 }
 
-niters <- 600
-burn   <- 500
+niters <- 2000
+burn   <- 2000
 # burn   <- 0.1*niters
 
 # storage
@@ -625,33 +612,36 @@ mc_beta_mat <- matrix(0, nrow = p*q, ncol = n)
 mc_beta_arr <- array(NA, dim = c(p, q, n))
 mc_beta_arr[1:p,1:q,] <- mc_beta_mat
 mc_Lambda   <- diag(p*q)
-mc_rho_eps  <- 0.8
-mc_rho_beta <- 0.8
+mc_rho_eps  <- 0.95
+mc_rho_beta <- 0.95
 keep_beta_mat[,,1] <- mc_beta_mat
 keep_Lambda[,,1] <- mc_Lambda
 keep_rho_eps[1] <- mc_rho_eps
 keep_rho_beta[1] <- mc_rho_beta
-
 
 # prior parameters
 nu <- p*q - 1 + 0.1 
 G  <- diag(p*q)
 
 # M-H tuning parameters
-MH_beta <- 0.1
+MH_beta <- 0.05
 att_beta <- 0
 acc_beta <- 0
 
-MH_eps  <- 0.1
+MH_eps  <- 0.05
 att_eps <- 0
 acc_eps <- 0
 
+# initialize missing values to 0 (no difference from region average model)
+n_miss <- nrow(missing_id)
+for (i in 1:n_miss){
+  delta[ , missing_id$year[i],  missing_id$site[i]] <- 0
+}
 
 ```
 
-Some pre-computes for the model. We need to be careful because now there are missing values that need to be handled.
-
-```{r}
+Some pre-computes for the MCMC.
+```{r, mcmc-pre-computes}
 #| code-fold: true
 #| eval: true
 #| code-summary: MCMC pre-computes
@@ -680,121 +670,26 @@ w_plus <- rowSums(W)
 D <- diag(w_plus)
 
 # pre-compute residuals for the first iteration.
-Bz <- delta_r
+Bz <- delta
 for (j in 1:k){
   for (s in 1:n){
     Bz[,j,s] <- mc_beta_arr[,,s]%*%Z[j,,s]
   }
 }
-resid_r <- delta_r - Bz
-
-# loglike functions for Metropolis-Hastings steps
-# this assumes that we will be able to estiamte a beta for every pixel. Not always the case. . .
-rho_beta_loglike <- function(rho, beta_mat, neighbor_idx, neighbor_weights, w_plus, inv_Lambda){
-  
-  temp1 <- 0
-  temp2 <- 0
-  for (s in 1:n){
-    beta_tilde <- (beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights[[s]])/w_plus[s]
-    temp1 <- temp1 + w_plus[s]*(t(beta_tilde)%*%inv_Lambda%*%beta_tilde) 
-    temp2 <- temp2 + w_plus[s]*(t(beta_mat[,s])%*%inv_Lambda%*%beta_tilde)
-  }
-  return(-0.5*((rho^2)*temp1 - 2*rho*temp2))
-  
-}
-
-rho_eps_loglike <- function(rho, delta, Bz, resid, inv_Omega_arr, neighbor_idx, neighbor_weights, w_plus){
-
-  # I don't think this is used anywhere.
-  # dbz <- delta + Bz
-  
-  temp1 <- 0
-  temp2 <- 0
-  for (s in 1:n){
-    for (t in 1:k){
-      
-      # skip if value is missing.
-      if (!is.na(delta[1,t,s])){
-  
-        # must be careful to remove NAs and adjust w_plus accordingly,
-        count_NA_neighbors <- sum(is.na(delta[1,t,neighbor_idx[[s]]]))
-        if (count_NA_neighbors == 0){
-          
-          r <- resid[,t,neighbor_idx[[s]]]%*%neighbor_weights[[s]]
-          
-          temp1 <- temp1 + (t(r)%*%inv_Omega_arr[,,t]%*%r)*w_plus[s]
-          temp2 <- temp2 + (t(delta[,t,s]) + t(Bz[,t,s]))%*%inv_Omega_arr[,,t]%*%r
-          
-        } else if (count_NA_neighbors < w_plus[s]) {
-          
-          temp_w_plus <- w_plus[s] - count_NA_neighbors
-          r <-  as.matrix(rowMeans(resid[,1,neighbor_idx[[s]]], na.rm = T), ncol=1)
-          
-          temp1 <- temp1 + (t(r)%*%inv_Omega_arr[,,t]%*%r)*temp_w_plus
-          temp2 <- temp2 + (t(delta[,t,s]) + t(Bz[,t,s]))%*%inv_Omega_arr[,,t]%*%r
-          
-        } else {
-          
-          # do nothing - here's no neighbors we can't compute neighbor residuals.
-          
-        }
-      }
-    }
-  }
-  
-  return(-0.5*((rho^2)*temp1 - 2*rho*temp2))
-}
-```
-
-
-scratch.
-```{r}
-#| code-fold: true
-#| eval: false
-#| code-summary: Scratch.
-
-# we need to know the good neighbors for each pixel in each year. . .
-s <- 1
-
-s <- 248
-delta_r[1,1,neighbor_idx[[s]]]
-!is.na(delta_r[1,1,neighbor_idx[[s]]])
-
-
-good_neighbors <- vector(mode = "list", k)
-for (t in 1:k){
-  
-  good_temp <- vector(mode = "list", n)
-  
-  for (s in 1:n){
-    good_temp[[s]] <- neighbor_idx[[s]][!is.na(delta_r[1,t,neighbor_idx[[s]]])]
-  }
-  names(good_temp) <- 1:n
-  good_neighbors[[t]] <- good_temp
-}
-names(good_neighbors) <- 1:k
-
-s <- 248
-delta_r[,1,neighbor_idx[[s]]]
-
-
-as.matrix(rowMeans(delta_r[,1,neighbor_idx[[s]]], na.rm = T), ncol=1)
-
-
-      neighbor_idx[1]
-neighbor_weights[1]
+resid <- delta - Bz
 
 ```
 
-Now for the sampling loop.
-```{r}
+Now for the sampling loop. Not executed here. Results loaded next.
+```{r, mcmc-sampling-loop}
 #| eval: false
 #| code-fold: true
 #| code-summary: MCMC sampling loop
 
 tic()
+# profvis({
 for (iter in 2:niters){
-
+  
   # computing residuals needed in full conditional for beta - M.
   # probably a better way to do this.
   
@@ -802,95 +697,87 @@ for (iter in 2:niters){
   
   # sample beta_s
   for (s in 1:n){
-    # s <- 147
-    # if there were a pixel with no data over all years, then this would be the place to skip them.
     
     V <- w_plus[s]*sumt_ZT_Omega_inv_Z[,,s] + w_plus[s]*inv_mc_Lambda
     
     # revisit for efficiency
     temp <- 0
     for (j in 1:k){
-      # skip if the value of delta_r[,t,s] is missing (NA)
-      if(!is.na(delta_r[1,j,s])){
-        
-        # Check if there are neighbors of pixel s,t with missing values. if so, adjust calculation.
-        count_NA_neighbors <- sum(is.na(delta_r[1,j,neighbor_idx[[s]]]))
-        if (count_NA_neighbors == 0){ # all neighbors are good)
-            temp <- temp + 
-                    t(kronecker(t(Z[j, ,s]),diag(p))) %*%
-                    inv_Omega_arr[ , ,j] %*%
-                    (mc_rho_eps * resid_r[ ,j,neighbor_idx[[s]]] %*% neighbor_weights[[s]] + w_plus[s] * delta_r[ ,j,s])
-        
-          } else if (count_NA_neighbors < w_plus[s]){ # some but not all neighbors NA. 
-            
-            temp_w_plus <-  w_plus[s] - count_NA_neighbors
-          
-            # TODO: the last line here uses the rowMeans function and assumes equally weighted neighbors. Will need to change if we decide
-            # to weight neighbors differently.
-            temp <- temp + 
-                    t(kronecker(t(Z[j, ,s]),diag(p))) %*%
-                    inv_Omega_arr[ , ,j] %*%
-                    (mc_rho_eps * as.matrix(rowMeans(delta_r[,1,neighbor_idx[[s]]], na.rm = T), ncol=1) + temp_w_plus * delta_r[ ,j,s])
-        } else { # all neighbors NA
-            temp <- temp + 
-                    t(kronecker(t(Z[j, ,s]),diag(p))) %*%
-                    inv_Omega_arr[ , ,j] %*%
-                    (delta_r[ ,j,s])
-        }
-      }
+      temp <- temp + t(kronecker(t(Z[j,,s]),diag(p)))%*%inv_Omega_arr[,,j]%*%(mc_rho_eps*resid[,j,neighbor_idx[[s]]]%*%neighbor_weights[[s]] +w_plus[s]*delta[,j,s])
     }
-    
     M <- temp + mc_rho_beta*(inv_mc_Lambda%*%(mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights[[s]]))
-    
-    
+      
     V_inv <- chol2inv(chol(V))
     mc_beta_mat[,s]  <- V_inv%*%M+t(chol(V_inv))%*%rnorm(p*q)
-    
+    # mc_beta_mat[,s]  <- beta_mat[,s]
     
   }
   mc_beta_arr[1:p,1:q,] <- mc_beta_mat
   
   # sample Lambda
-  # change this to add the D diagonal straight to rho_beta*W
   H <- mc_beta_mat%*%(D - mc_rho_beta*W)%*%t(mc_beta_mat)
   mc_Lambda <- MCMCpack::riwish(nu + n, G + H)
+  # mc_Lambda <- Lambda
   
   # compute residuals
-  Bz <- delta_r
+  Bz <- delta
   for (j in 1:k){
     for (s in 1:n){
       Bz[,j,s] <- mc_beta_arr[,,s]%*%Z[j,,s]
     }
   }
-  resid_r <- delta_r - Bz
+  resid <- delta - Bz
+  
+  # compute sums for rho_beta & rho_eps likelihood in one loop.
+  sum1_rho_beta <- 0
+  sum2_rho_beta <- 0
+  sum1_rho_eps  <- 0
+  sum2_rho_eps  <- 0
+  
+  for (s in 1:n){
+    
+    beta_tilde    <- (mc_beta_mat[,neighbor_idx[[s]]]%*%neighbor_weights[[s]])/w_plus[s]
+    sum1_rho_beta <- sum1_rho_beta + w_plus[s]*(t(beta_tilde)%*%inv_mc_Lambda%*%beta_tilde) 
+    sum2_rho_beta <- sum2_rho_beta + w_plus[s]*(t(mc_beta_mat[,s])%*%inv_mc_Lambda%*%beta_tilde)
+    
+    for (t in 1:k){
+    
+      r <- resid[,t,neighbor_idx[[s]]]%*%neighbor_weights[[s]]
+      sum1_rho_eps <- sum1_rho_eps + (t(r)%*%inv_Omega_arr[,,t]%*%r)/w_plus[s]
+      sum2_rho_eps <- sum2_rho_eps + (t(delta[,t,s]) - t(Bz[,t,s]))%*%inv_Omega_arr[,,t]%*%r
+      
+    }
+  }
   
   # sample rho_eps
   att_eps <- att_eps + 1
   can <- rtnorm(1, mc_rho_eps, MH_eps, a = 0, b = 1)
-  R   <- rho_eps_loglike(can,        delta_r, Bz, resid_r, inv_Omega_arr, neighbor_idx, neighbor_weights, w_plus) - # Likelihood
-         rho_eps_loglike(mc_rho_eps, delta_r, Bz, resid_r, inv_Omega_arr, neighbor_idx, neighbor_weights, w_plus) +
+  R   <- (-0.5*((can^2)*sum1_rho_eps - 2*can*sum2_rho_eps)) -
+         (-0.5*((mc_rho_eps^2)*sum1_rho_eps - 2*mc_rho_eps*sum2_rho_eps)) + 
          dtnorm(mc_rho_eps, mean = can        , sd = MH_eps, a = 0, b = 1, log = T) -      # M-H adjustment
          dtnorm(can,        mean = mc_rho_eps , sd = MH_eps, a = 0, b = 1, log = T)
   if(log(runif(1)) < R){
     acc_eps <- acc_eps + 1
     mc_rho_eps  <- can
   }
+  # mc_rho_eps <- rho_eps
   
   # sample rho_beta
   att_beta <- att_beta + 1
   can <- rtnorm(1, mc_rho_beta, MH_beta, a = 0, b = 1)
-  R   <- rho_beta_loglike(can,         mc_beta_mat, neighbor_idx, neighbor_weights, w_plus, inv_mc_Lambda) - # Likelihood
-         rho_beta_loglike(mc_rho_beta, mc_beta_mat, neighbor_idx, neighbor_weights, w_plus, inv_mc_Lambda) +
+  R   <- (-0.5*((can^2)*sum1_rho_beta - 2*can*sum2_rho_beta)) -
+         (-0.5*((mc_rho_beta^2)*sum1_rho_beta - 2*mc_rho_beta*sum2_rho_beta)) + 
          dtnorm(mc_rho_beta, mean = can         , sd = MH_beta, a = 0, b = 1, log = T) -      # M-H adjustment
          dtnorm(can,         mean = mc_rho_beta , sd = MH_beta, a = 0, b = 1, log = T)
   if(log(runif(1)) < R){
     acc_beta <- acc_beta + 1
     mc_rho_beta  <- can
   }
-
+  # mc_rho_beta <- rho_beta
+  
   # tuning
   if(iter < burn){
-    if(att_eps > 30){
+    if(att_eps > 100){
       if(acc_eps/att_eps < 0.3){MH_eps <- MH_eps*0.8}
       if(acc_eps/att_eps > 0.5){MH_eps <- MH_eps*1.2}
       acc_eps <- att_eps <- 0
@@ -898,30 +785,44 @@ for (iter in 2:niters){
   }
   
   if(iter < burn){
-    if(att_beta > 30){
+    if(att_beta > 100){
       if(acc_beta/att_beta < 0.3){MH_beta <- MH_beta*0.8}
       if(acc_beta/att_beta > 0.5){MH_beta <- MH_beta*1.2}
       acc_beta <- att_beta <- 0
-      print(iter)
     }
   }
-  
   
   keep_beta_mat[,,iter] <- mc_beta_mat 
   keep_Lambda[,,iter]   <- mc_Lambda
   keep_rho_eps[iter]    <- mc_rho_eps
   keep_rho_beta[iter]   <- mc_rho_beta
+  
+  # sample missing values
+  n_miss <- nrow(missing_id)
+  for (i in 1:n_miss){
+      
+      s <- missing_id$site[i]
+      t <- missing_id$year[i]
+    
+          V <- Omega_arr[,,t]/w_plus[s]
+          M <- Bz[,t,s] + mc_rho_eps*resid[,t,neighbor_idx[[s]]]%*%neighbor_weights[[s]]/w_plus[s]
+    
+      delta[ , t, s] <- M+t(chol(V))%*%rnorm(p)
+      
+  }
+  
 }
+# })
 toc()
 ```
 
-
-```{r}
+Load the MCMC results from a previous code execution.
+```{r, read-mcmc-results}
 #| eval: true
 #| code-fold: true
 #| code-summary: Read MCMC result from pre-ran code.
 
-mcmc_result <- readRDS("~/ms-web/research/2023-06-26-Step-19-Spatial_Model_for_Harvard_forest/mcmc_result_hf_50x50pix.RDS")
+mcmc_result <- readRDS("~/ms-web/research/2023-06-26-Step-19-Spatial_Model_for_Harvard_forest/mcmc_result_hf_50x50_2000iter.RDS")
 
 keep_beta_mat <- mcmc_result$keep_beta_mat
 keep_Lambda <- mcmc_result$keep_Lambda
@@ -931,93 +832,47 @@ keep_rho_beta <- mcmc_result$keep_rho_beta
 ```
 
 
-```{r}
+Now time for a lot of trace plots. First for $\boldsymbol\beta_s$. In most cases convergence appears to occur almost immediately. Sometimes it can take up to 1000 iterations where the chain is slowly moving towards a stable mean value.
+```{r, traceplots-beta}
 #| eval: true
 #| code-fold: true
-#| code-summary: Trace plots
+#| code-summary: Trace plots for beta parameters
 
-s <- 1
 burn <- 1
-beta_subscripts <- c("1,1", "1,2", "1,3","1,4","1,5","1,6", "2,1", "2,2", "2,3", "2,4", "2,5", "2,6")
 
-par(mfcol = c(2,2))
-for (i in 1:(p*q)){
-  tsub <- beta_subscripts[i]
-  plot(burn:niters, 
-       keep_beta_mat[i,s,burn:niters], 
-       type = "l",
-       xlab = "iteration",
-       ylab = bquote(beta[.(tsub)]))
-  # abline(h = beta_mat[i,s], col = "red")
+location_sample <- sample(1:n, size = 5)
+
+beta_subscripts <- paste(rep(1:q, each = p), rep(1:p, times = q), sep = ",")
+
+for (s in location_sample){
+  par(mfcol = c(3,2))
+  for (i in 1:(p*q)){
+    tsub <- beta_subscripts[i]
+    plot(burn:niters, 
+         keep_beta_mat[i,s,burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(beta[.(tsub)]))
+    mtext(paste("Pixel: ",s), side = 3, line = -3, outer = TRUE)
+  }
+  # mtext(paste("Pixel: ",s), side = 3, line = -3, outer = TRUE)
 }
-mtext(paste("Pixel: ",s), side = 3, line = -3, outer = TRUE)
 
 ```
 
 
-
-```{r}
+```{r, traceplots-lambda}
 #| eval: true
 #| code-fold: true
-#| code-summary: Map of beta elements 3 and 5 (SOS and EOS)
+#| code-summary: Trace plots for Lambda matrix
 
-spat_domain$beta13 <- rowMeans(keep_beta_mat[3, 1:n, 301:niters])
-spat_domain$beta23 <- rowMeans(keep_beta_mat[9, 1:n, 301:niters])
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=beta13)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10),
-                       name = bquote(beta["s,1,3"])) +
-  coord_fixed() + 
-  theme_void()
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=beta23)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10),
-                       name = bquote(beta["s,2,3"])) +
-  coord_fixed() + 
-  theme_void()
-
-
-spat_domain$beta15 <- rowMeans(keep_beta_mat[5, 1:n, 301:niters])
-spat_domain$beta25 <- rowMeans(keep_beta_mat[11, 1:n, 301:niters])
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=beta15)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10),
-                       name = bquote(beta["s,1,3"])) +
-  coord_fixed() + 
-  theme_void()
-
-ggplot(spat_domain) +
-  geom_tile(aes(x, y, fill=beta25)) +
-  scale_y_reverse() +
-  scale_fill_gradientn(colors = viridis(10),
-                       name = bquote(beta["s,2,3"])) +
-  coord_fixed() + 
-  theme_void()
-
-
-```
-
-
-
-
-```{r}
-#| eval: true
-#| code-fold: true
-#| code-summary: Traceplots for Lambda (broken labels)
-
-burn <- 2
-par(mfrow = c(2,2))
+burn <- 100
+par(mfrow = c(3,2))
 
 # off-diagonal
 for (i in 1:(p*q)){
   for (j in i:(p*q)){
-    tsub <- paste0(i,j)
+    tsub <- paste(i,j, sep = ", ")
     plot(burn:niters, 
          keep_Lambda[i,j,burn:niters], 
          type = "l",
@@ -1028,8 +883,61 @@ for (i in 1:(p*q)){
 }
 
 ```
+Focusing on just the diagonal of $\boldsymbol\Lambda$.
+```{r, traceplots-lambda-diag}
+#| eval: true
+#| code-fold: true
+#| code-summary: Trace plots for Lambda matrix diagonal.
 
-```{r}
+burn <- 100
+par(mfrow = c(3,2))
+
+# off-diagonal
+for (i in 1:(p*q)){
+    tsub <- paste(i,i, sep = ", ")
+    plot(burn:niters, 
+         keep_Lambda[i,i,burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(Lambda[.(tsub)]))
+    mtext(bquote(Lambda ~ "Matrix"), side = 3, line = -3, outer = TRUE)
+}
+
+
+```
+
+Traceplots of $\boldsymbol\Lambda$ transformed to correlations.
+```{r, traceplots-lambda-corr}
+#| eval: true
+#| code-fold: true
+#| code-summary: Trace plots for Lambda transformed to correlations.
+
+keep_Lambda_corr <- keep_Lambda
+
+for (iter in 1:niters){
+  keep_Lambda_corr[,,iter] <- cov2cor(keep_Lambda[,,iter])
+}
+
+burn <- 100
+par(mfrow = c(3,2))
+
+# off-diagonal
+for (i in 1:(p*q)){
+  for (j in i:(p*q)){
+    tsub <- paste(i,j, sep = ", ")
+    plot(burn:niters, 
+         keep_Lambda_corr[i,j,burn:niters], 
+         type = "l",
+         xlab = "iteration",
+         ylab = bquote(Lambda[.(tsub)]))
+  }
+  mtext(bquote(Lambda ~ "Matrix"), side = 3, line = -3, outer = TRUE)
+}
+
+```
+
+Traceplots for $\rho_{\beta}$ and $\rho_{\epsilon}$ appear less than ideal. These values were initialized at 0.8 - swiftly moved to an $\varepsilon > 0$ below 1.
+```{r, traceplots-rho}
 #| eval: true
 #| code-fold: true
 #| code-summary: Traceplots for CAR propriety params
@@ -1051,22 +959,283 @@ plot(burn:niters,
 
 ```
 
+Mapping the estimates of the intercept and time effect on $\boldsymbol\delta$.
+```{r, plot-beta-est}
+#| eval: true
+#| code-fold: true
+#| code-summary: Map of beta elements 3 and 5 (effects for SOS and EOS)
+
+spat_domain$beta13 <- rowMeans(keep_beta_mat[3, 1:n, 1001:niters])
+spat_domain$beta23 <- rowMeans(keep_beta_mat[9, 1:n, 1001:niters])
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta13)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,1,3"])) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta23)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,2,3"])) +
+  coord_fixed() + 
+  theme_void()
+
+
+spat_domain$beta15 <- rowMeans(keep_beta_mat[5, 1:n, 501:niters])
+spat_domain$beta25 <- rowMeans(keep_beta_mat[11, 1:n, 501:niters])
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta15)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,1,5"])) +
+  coord_fixed() + 
+  theme_void()
+
+ggplot(spat_domain) +
+  geom_tile(aes(x, y, fill=beta25)) +
+  scale_y_reverse() +
+  scale_fill_gradientn(colors = viridis(10),
+                       name = bquote(beta["s,2,5"])) +
+  coord_fixed() + 
+  theme_void()
+
+
+```
+
+Compute the fitted values and residuals.
+```{r, fitted-values-and-residuals}
+#| eval: true
+#| code-fold: true
+#| code-summary: Compute the fitted values and residuals
+
+delta_fitted <- delta
+
+burn  <- 1001
+beta1 <- matrix(0, nrow = 6, ncol = n)
+beta2 <- beta1
+
+for (i in 1:p){
+  beta1[i,] <- rowMeans(keep_beta_mat[i, 1:n, burn:niters])
+  beta2[i,] <- rowMeans(keep_beta_mat[(i+p), 1:n, burn:niters])
+}
+
+
+
+for (s in 1:n){
+  for (t in 1:k){
+    delta_fitted[,t,s] <- beta1[,s] + beta2[,s]*Z[t,2,s]
+  }
+}
+
+delta_resid <- delta_fitted - delta
+```
+
+Mapping the residuals.
+```{r, plot-residuals-map}
+#| eval: true
+#| code-fold: true
+#| code-summary: Plot delta residuals by year for each component of delta
+
+resid_display_ls <- vector(mode = "list", length = k)
+
+for (t in 1:k){
+  temp <- spat_domain
+  temp$resid1 <- delta_resid[1,t,]
+  temp$resid2 <- delta_resid[2,t,]
+  temp$resid3 <- delta_resid[3,t,]
+  temp$resid4 <- delta_resid[4,t,]
+  temp$resid5 <- delta_resid[5,t,]
+  temp$resid6 <- delta_resid[6,t,]
+  temp$year <- rep(years[t], n)
+  resid_display_ls[[t]] <- temp 
+}
+
+resid_display_df <- do.call(rbind, resid_display_ls)
+
+panel_names <- as_labeller(function(x) paste('t =', x))
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid1)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         name = bquote(delta_resid["s,t,1"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid2)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         name = bquote(delta_resid["s,t,2"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid3)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         limits = c(-100,200),
+                         name = bquote(delta_resid["s,t,3"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid4)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         name = bquote(delta_resid["s,t,4"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid5)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         name = bquote(delta_resid["s,t,5"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid6)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         name = bquote(delta_resid["s,t,6"])) +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+```
+
+There are some extreme residuals which affect the gradient scale of the plots above. We will set limits using the 2.5 and 97.5 quantiles as limits. Any pixel residual falling outside these limits are highlighted in red.
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: Residual quantiles
+
+resid_quantiles <- apply(resid_display_df[,8:13],2,quantile,probs=c(0.025,0.975))
+resid_quantiles
+
+```
+
+```{r}
+#| eval: true
+#| code-fold: true
+#| code-summary: Plot residuals again with limits from quantiles.
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid1)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         # limits = c(-1,1),
+                         limits = resid_quantiles[,1],
+                         name = bquote(delta_resid["s,t,1"]),
+                         na.value = "red") +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid2)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         # limits = c(-0.5,0.5),
+                         limits = resid_quantiles[,2],
+                         name = bquote(delta_resid["s,t,2"]),
+                         na.value = "red") +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid3)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         # limits = c(-20,20),
+                         limits = resid_quantiles[,3],
+                         name = bquote(delta_resid["s,t,3"]),
+                         na.value = "red") +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid4)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         # limits = c(-2,2),
+                         limits = resid_quantiles[,4],
+                         name = bquote(delta_resid["s,t,4"]),
+                         na.value = "red") +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid5)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         # limits = c(-20,20),
+                         limits = resid_quantiles[,5],
+                         name = bquote(delta_resid["s,t,5"]),
+                         na.value = "red") +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+ggplot(resid_display_df) +
+    geom_tile(aes(x, y, fill=resid6)) +
+    scale_y_reverse() +
+    scale_fill_gradientn(colors = viridis(10),
+                         # limits = c(-1.5,1.5),
+                         limits = resid_quantiles[,6],
+                         name = bquote(delta_resid["s,t,6"]),
+                         na.value = "red") +
+    coord_fixed() + 
+    theme_void() + 
+    facet_wrap(~year, labeller = panel_names)
+
+```
+
+Plot histograms of residuals for each component of $\delta_{+,t}$. Some residuals are clearly not centered on 0. Perhaps this is due to a mean model misspecification?
+```{r, plot-residuals-histogram}
+#| eval: true
+#| code-fold: true
+#| code-summary: Histograms of residuals for each year
+
+par(mfrow = c(2,3))   
+for (t in 1:k){
+  for (i in 1:p){
+    subscript <- paste(c("+",years[t],i), collapse = ",")
+    hist(delta_fitted[i,t,] - delta[i,t,], main = bquote(delta_resid[.(subscript)]))
+  }     
+}
+```
+
+
 Store MCMC results for publishing.
 ```{r}
 #| eval: false
 
 #| code-fold: true
 #| code-summary: Store MCMC results for publishing.
-
-# mcmc_result <- list("keep_beta_mat" = keep_beta_mat, 
-#                     "keep_Lambda" = keep_Lambda, 
+# 
+# mcmc_result <- list("keep_beta_mat" = keep_beta_mat,
+#                     "keep_Lambda" = keep_Lambda,
 #                     "keep_rho_eps" = keep_rho_eps,
 #                     "keep_rho_beta" = keep_rho_beta)
 # 
-# saveRDS(mcmc_result, "~/ms-web/research/2023-06-26-Step-19-Spatial_Model_for_Harvard_forest/mcmc_result_hf_50x50pix.RDS")
-# 
-# test_read <- readRDS("~/ms-web/research/2023-06-26-Step-19-Spatial_Model_for_Harvard_forest/mcmc_result_hf_50x50pix.RDS")
-  
+# saveRDS(mcmc_result, "~/ms-web/research/2023-06-26-Step-19-Spatial_Model_for_Harvard_forest/mcmc_result_hf_50x50_2000iter.RDS")
 
 
 ```

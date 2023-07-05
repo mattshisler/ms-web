@@ -661,7 +661,7 @@ n &amp;= \text{number of pixels}\\
 <span id="cb12-64"><a href="#cb12-64" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Sampling loop.</p>
-<div class="cell" data-hash="index_cache/html/unnamed-chunk-11_565b78819c8f8137bbe5eef08ad6c691">
+<div class="cell" data-hash="index_cache/html/unnamed-chunk-11_d6d48bba81250a2582c3b698989a285b">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tic</span>()</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="co"># profvis({</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (iter <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>niters){</span>
@@ -692,7 +692,7 @@ n &amp;= \text{number of pixels}\\
 <span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  mc_beta_arr[<span class="dv">1</span><span class="sc">:</span>p,<span class="dv">1</span><span class="sc">:</span>q,] <span class="ot">&lt;-</span> mc_beta_mat</span>
 <span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>  <span class="co"># sample Lambda</span></span>
-<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>  H <span class="ot">&lt;-</span> beta_mat<span class="sc">%*%</span>(D <span class="sc">-</span> rho_beta<span class="sc">*</span>W)<span class="sc">%*%</span><span class="fu">t</span>(beta_mat)</span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>  H <span class="ot">&lt;-</span> mc_beta_mat<span class="sc">%*%</span>(D <span class="sc">-</span> mc_rho_beta<span class="sc">*</span>W)<span class="sc">%*%</span><span class="fu">t</span>(mc_beta_mat)</span>
 <span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  mc_Lambda <span class="ot">&lt;-</span> MCMCpack<span class="sc">::</span><span class="fu">riwish</span>(nu <span class="sc">+</span> n, G <span class="sc">+</span> H)</span>
 <span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  <span class="co"># compute residuals</span></span>
@@ -755,7 +755,7 @@ n &amp;= \text{number of pixels}\\
 <span id="cb13-91"><a href="#cb13-91" aria-hidden="true" tabindex="-1"></a><span class="co"># })</span></span>
 <span id="cb13-92"><a href="#cb13-92" aria-hidden="true" tabindex="-1"></a><span class="fu">toc</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>534.267 sec elapsed</code></pre>
+<pre><code>536.505 sec elapsed</code></pre>
 </div>
 </div>
 <p>At this point in the model fit we evaluate some trace plots of the parameters <span class="math inline">\(\boldsymbol\beta_{s}\)</span>, <span class="math inline">\(\boldsymbol\Lambda\)</span>, <span class="math inline">\(\rho_\beta\)</span>, and <span class="math inline">\(\rho_\varepsilon\)</span>.</p>
@@ -826,7 +826,7 @@ n &amp;= \text{number of pixels}\\
 <div class="cell">
 <details>
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>burn <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>burn <span class="ot">&lt;-</span> <span class="dv">100</span></span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>,<span class="dv">2</span>))</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># off-diagonal</span></span>
