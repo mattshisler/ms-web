@@ -43,7 +43,31 @@ library(lubridate)
 
 ## Intro
 
-We will attempt to fit the spatial model to a 50x50 pixel region of the Harvard Forest Region. Here are the steps:
+An attempt to fit the spatial model to a 50x50 pixel region of the Harvard Forest Region. This new post fixes two previous errors. 
+
+1. A methodological error in handling missing values in the Bayesian spatial model. Missing values are now treated as parameters in the MCMC.
+2. A typo in the likelihood of one of the MCAR propeity parameters, $\rho_\epsilon$. Previous model fits claimed that this parameter was near 0 indicating spatial independence in the errors which was not expected and disagreed with maps of the residuals. After fixing the typo, we now detect spatial dependence in errors as expected.
+
+
+Here are the steps:
+
+* Read-in the Harvard Forest data
+* Remove bad layers - previously identified by visual inspection
+* Crop to a smaller region - 50 x 50 pixels
+* Aggregate data to a mean value for each satellite snapshot (raster layer)
+* Fit a region average model using the aggregated data and the double-logistic function
+* Compute the residuals from the average model
+* Linearize the double-logistic function with respect to its parameters, center on the average model parameter estiamtes.
+* Define the basis function matrix and new parameter vector, $\boldsymbol\delta{s,t}$, representing the difference between the region average and a site-year double logistic parameter vector.
+* Model the residuals as normal with a mean function that is a linear combination of gradient basis functions.
+* Compute the least-squares estimate for the coefficients of this linear combination, $\widehat{\boldsymbol\delta}_{s,t}$
+* Compute sample covariance matrices for $\widehat{\boldsymbol\delta}_{s,t}$ for each year of data.
+* Treat these results as inputs to the spatial Bayesian hierarchical model.
+* Set-up and run the MCMC for the spatial Bayesian hierarchical model.
+* Generate trace plots for some model parameters.
+* Plot spatial Bayes model residuals.
+
+
 
 ```{r, layer-filt-id}
 #| eval: true
@@ -101,7 +125,7 @@ NA_ind     <- which(is.na(layer_agg_hf$mean))
 ```
 
 
-<!-- For now, let's do this for a smaller test region. Let's read-in the hf data, remove bad layers, crop it to a small region, aggregate into a mean value for each layer, fit the average model, linearize the double logistic function around the average model parameter estimates, compute the residuals of the average model, construct the basis function matrix from the gradient of the double logistic function evaluated at the avg model parameter estimates, compute estimates of the delta parameter vectors using the basis function matrix and the avg model residuals, compute sample covariance of the delta parameter vectors using the estimated delta parameter vectors, treat these results as inputs for the spatial Bayesian hierarchical model, estimate the covariate effects at each site. -->
+
 
 ```{r, read-and-crop-hf}
 #| eval: true
@@ -134,13 +158,10 @@ ReadNcTs <- function(ncfile) {
 
 # Complete Data
 hf <- ReadNcTs("~/ms-web/research/data/harvard_forest/harvard_forest_evi2.nc")
-hf
 
 
 # filtered data - no NA layers or layers previously identified to be erroneous.
 hf <- hf[[-c(filter_ind, NA_ind)]]
-hf
-# plot(hf[[100]])
 
 
 # there are 12 extra pixels with NA values for everything. Let's crop those from the spatraster.
@@ -282,7 +303,7 @@ double_logis <- function(t, theta){
   return(out)
 }
 
-hf_avg_fit6 <- region_agg_fit(doy = layer_agg$doy, vi = layer_agg_hf$mean, model_form = model_equ6_alt)
+hf_avg_fit6 <- region_agg_fit(doy = layer_agg$doy, vi = layer_agg$mean, model_form = model_equ6_alt)
 
 
 ggplot() + 
@@ -572,10 +593,11 @@ for (t in 1:k){
 
 Now to set-up the MCMC for the spatial hierachical model.
 
-Number of spatial locations  - 2500
-Number of covariates         - 2
-Dimension of response vector - 6x1
-Number of MCMC iterations    - 2000
+* Number of spatial locations  - 2500
+* Number of covariates         - 2
+* Dimension of response vector - 6x1
+* Number of MCMC iterations    - 2000
+* Frequency of Metropolis Hastings adjustment - every 100 iterations. Adjusted throughout.
 
 Runtime: A little over 3 hours.
 
@@ -1226,17 +1248,16 @@ for (t in 1:k){
 Store MCMC results for publishing.
 ```{r}
 #| eval: false
-
 #| code-fold: true
 #| code-summary: Store MCMC results for publishing.
-# 
+
+
 # mcmc_result <- list("keep_beta_mat" = keep_beta_mat,
 #                     "keep_Lambda" = keep_Lambda,
 #                     "keep_rho_eps" = keep_rho_eps,
 #                     "keep_rho_beta" = keep_rho_beta)
 # 
 # saveRDS(mcmc_result, "~/ms-web/research/2023-06-26-Step-19-Spatial_Model_for_Harvard_forest/mcmc_result_hf_50x50_2000iter.RDS")
-
 
 ```
 
